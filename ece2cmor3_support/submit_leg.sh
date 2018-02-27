@@ -26,21 +26,22 @@
 ################################################################################
 
 
-set -u
+#set -u
 set -e
 
 
 # Required arguments
 
-EXP=${EXP:-qsh0}
+EXP=${EXP:-qctr}
 LEG=${LEG:-000}
 STARTYEAR=${STARTYEAR:-1950}
 MON=${MON:-0}
-ATM=${ATM:-0}
-OCE=${OCE:-1}
+ATM=${ATM:-1}
+OCE=${OCE:-0}
 USERNAME=${USERNAME:-pdavini0}
 USEREXP=imavilia  #extra by P. davini: allows analysis of experiment owned by different user
-VERBOSE=${VERBOSE:-0}
+VERBOSE=${VERBOSE:-1}
+NCORES=32
 
 
 OPTIND=1
@@ -109,7 +110,7 @@ fi
 
 
 SUBMIT="sbatch"
-SLURMOPT_ATM="EXP=$EXP,LEG=$LEG,STARTYEAR=$STARTYEAR,ATM=$ATM,OCE=0,VERBOSE=$VERBOSE,USERNAME=$USERNAME,USEREXP=$USEREXP"
+SLURMOPT_ATM="EXP=$EXP,LEG=$LEG,STARTYEAR=$STARTYEAR,ATM=$ATM,OCE=0,VERBOSE=$VERBOSE,USERNAME=$USERNAME,USEREXP=$USEREXP,NCORES=$NCORES"
 echo SLURMOPT_ATM=${SLURMOPT_ATM}
 
 echo "Submitting jobs via Slurm..."
@@ -120,7 +121,7 @@ if [ "$ATM" -eq 1 ] ; then
 #for MON in $(seq $MONMIN $MONMAX); do
 for MON in 1 ; do
     SUBOPT="$SLURMOPT_ATM,MON=$MON"
-    JOBID=$($SUBMIT --job-name=proc_ifs-${YEAR}-${MON} --output=$LOGFILE/cmor_${EXP}_${YEAR}_${MON}_ifs_%j.out --error=$LOGFILE/cmor_${EXP}_${YEAR}_${MON}_ifs_%j.err --export=$SUBOPT ./cmor_mon.sh)
+    JOBID=$($SUBMIT --job-name=proc_ifs-${YEAR}-${MON} --output=$LOGFILE/cmor_${EXP}_${YEAR}_${MON}_ifs_%j.out --error=$LOGFILE/cmor_${EXP}_${YEAR}_${MON}_ifs_%j.err --export=$SUBOPT ./cmor_mon_base.sh)
 done
 
 fi
@@ -129,9 +130,9 @@ fi
 # Because NEMO output files corresponding to same leg are all in one big file, we don't
 # need to submit a job for each month, only one for each leg
 if [ "$OCE" -eq 1 ]; then
-    SLURMOPT_OCE="EXP=$EXP,LEG=$LEG,STARTYEAR=$STARTYEAR,ATM=0,OCE=$OCE,VERBOSE=$VERBOSE,USERNAME=$USERNAME,USEREXP=$USEREXP"
+    SLURMOPT_OCE="EXP=$EXP,LEG=$LEG,STARTYEAR=$STARTYEAR,ATM=0,OCE=$OCE,VERBOSE=$VERBOSE,USERNAME=$USERNAME,USEREXP=$USEREXP,NCORES=$NCORES"
     echo SLURMOPT_OCE=${SLURMOPT_OCE}
-    JOBID=$($SUBMIT --job-name=proc_nemo-${YEAR}-${MON} --output=$LOGFILE/cmor_${EXP}_${YEAR}_${MON}_nemo_%j.out --error=$LOGFILE/cmor_${EXP}_${YEAR}_${MON}_nemo_%j.err --export=$SLURMOPT_OCE ./cmor_mon.sh)
+    JOBID=$($SUBMIT --job-name=proc_nemo-${YEAR}-${MON} --output=$LOGFILE/cmor_${EXP}_${YEAR}_${MON}_nemo_%j.out --error=$LOGFILE/cmor_${EXP}_${YEAR}_${MON}_nemo_%j.err --export=$SLURMOPT_OCE ./cmor_mon_base.sh)
 fi
 
 

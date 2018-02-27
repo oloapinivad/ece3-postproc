@@ -20,30 +20,30 @@
 #
 #SBATCH -A Pra13_3311
 #SBATCH -N1 -n36
-#SBATCH --partition=bdw_usr_dbg
-#SBATCH --mem=50GB
-#SBATCH --time 00:30:00
+#SBATCH --partition=bdw_usr_prod
+#SBATCH --mem=110GB
+#SBATCH --time 03:00:00
 #SBATCH --job-name=cmor_mon
 #SBATCH --error=outfile_cmor.o%a
 #SBATCH --output=outfile_cmor.o%a
 #SBATCH --mail-type=ALL
 
 
-set -e
+#set -e
 
 
 # Required arguments
 
-EXP=${EXP:-tcw0}
-LEG=${LEG:-001}
-STARTYEAR=${STARTYEAR:-1990}
+EXP=${EXP:-qsh0}
+LEG=${LEG:-000}
+STARTYEAR=${STARTYEAR:-2002}
 MON=${MON:-1}
 ATM=${ATM:-1}
 OCE=${OCE:-1}
-VERBOSE=${VERBOSE:-0}
+VERBOSE=${VERBOSE:-1}
 USERNAME=${USERNAME:-pdavini0}
-USEREXP=${USEREXP:-pdavini0}
-
+USEREXP=${USEREXP:-imavilia}
+NCORES=${NCORES:-32}
 
 YEAR=$(( STARTYEAR + $((10#$LEG + 1)) - 1))
 
@@ -73,6 +73,7 @@ fi
 
 # Location of ece2cmor.py
 SRCDIR=/marconi_work/Pra13_3311/ecearth3/post/ece2cmor3/ece2cmor3/ece2cmor3
+#SRCDIR=/marconi_work/Pra13_3311/ecearth3/PRIMAVERA/cmorize/ece2cmor3/ece2cmor3
 
 #locaton of the ece2cmor3_support
 SCRIPTDIR=$(pwd) 
@@ -82,20 +83,23 @@ SCRIPTDIR=$(pwd)
 # It is assumed that IFS output is in $WORKDIR/IFS, and that NEMO output is in $WORKDIR/NEMO (if it exists)
 #WORKDIR=$SCRATCH/ece3/${EXP}/output/Output_${YEAR}
 if [[ $USEREXP != $USERNAME ]] ; then 
-   WORKDIR=/marconi_scratch/userexternal/$USEREXP/ece3/${EXP}/output/Output_${YEAR}
+   #WORKDIR=/marconi_scratch/userexternal/$USEREXP/ece3/${EXP}/output/Output_${YEAR}
+   WORKDIR=/marconi_scratch/userexternal/$USEREXP/ece3/${EXP}/output
 else
-   WORKDIR=/marconi_scratch/userexternal/$USERNAME/ece3/${EXP}/output/Output_${YEAR}
+   #WORKDIR=/marconi_scratch/userexternal/$USERNAME/ece3/${EXP}/output/Output_${YEAR}
+   WORKDIR=/marconi_scratch/userexternal/$USERNAME/ece3/${EXP}/output
 fi
 
 
-# Temporary directory
+# Temporary direc=tory
 BASETMPDIR=$SCRATCH/tmp_cmor/${EXP}_${RANDOM}
 TMPDIR=$BASETMPDIR/tmp_${YEAR}_${MON}/cmorized
 # Where to put filtered data (temporary folder)
 FILTDATA=$BASETMPDIR/tmp_${YEAR}_${MON}/filtered
 
 # Output directory for the cmorized data
-CMORDIR=$SCRATCH/ece3/${EXP}/cmorized/Year_${YEAR}/Month_${MON}
+#CMORDIR=$SCRATCH/ece3/${EXP}/cmorized/Year_${YEAR}/Month_${MON}
+CMORDIR=$SCRATCH/ece3/${EXP}/cmorized/Year_${YEAR}
 #CMORDIR=$SCRATCH/newtest
 
 
@@ -112,13 +116,14 @@ TABDIR_ROOT=$SRCDIR/resources/tables
 
 
 # Variable list directory
-VARLISTDIR=$SRCDIR/resources
+#VARLISTDIR=$SRCDIR/resources
+VARLISTDIR=$SCRIPTDIR/varlist
 
 
 
 
 
-# Some preliminary setup
+# Some prelimina1ry setup
 
 module unload hdf5 netcdf
 module load hdf5/1.8.17--intel--pe-xe-2017--binary
@@ -132,6 +137,7 @@ export HDF5_DISABLE_VERSION_CHECK=1
 
 ece2cmor=$SRCDIR/ece2cmor.py
 filter=$SRCDIR/filterscripts/filter6h.py
+#filter=/marconi_work/Pra13_3311/ecearth3/post/ece2cmor3/ece2cmor3/ece2cmor3/filterscripts/filter6h.py
 
 
 mkdir -p $CMORDIR
@@ -144,13 +150,23 @@ mkdir -p $TMPDIR
 
 function filteroutput {
    
-    GGFILE=$WORKDIR/IFS/ICMGG${EXP}+${YEAR}$(printf %02g ${MON})
-    SHFILE=$WORKDIR/IFS/ICMSH${EXP}+${YEAR}$(printf %02g ${MON})
+    GGFILE=$WORKDIR/Output_${YEAR}/IFS/ICMGG${EXP}+${YEAR}$(printf %02g ${MON})
+    SHFILE=$WORKDIR/Output_${YEAR}/IFS/ICMSH${EXP}+${YEAR}$(printf %02g ${MON})
+    
+    if [[ $MON -eq 1 ]] ; then 
+       	YEAR_M1=$((YEAR-1))
+       	GGFILE_M1=$WORKDIR/Output_${YEAR_M1}/IFS/ICMGG${EXP}+${YEAR_M1}12
+        SHFILE_M1=$WORKDIR/Output_${YEAR_M1}/IFS/ICMSH${EXP}+${YEAR_M1}12
+    else
+	MON_M1=$((MON-1))
+	GGFILE_M1=$WORKDIR/Output_${YEAR}/IFS/ICMGG${EXP}+${YEAR}$(printf %02g ${MON_M1})
+    	SHFILE_M1=$WORKDIR/Output_${YEAR}/IFS/ICMSH${EXP}+${YEAR}$(printf %02g ${MON_M1})
+    fi
 
     echo "Filtering output files ICMGG${EXP}+${YEAR}$(printf %02g ${MON}) and ICMSH${EXP}+${YEAR}$(printf %02g ${MON})"
 
-    $filter -o $FILTDATA $GGFILE
-    $filter -o $FILTDATA $SHFILE
+    $filter -o $FILTDATA -p $GGFILE_M1 $GGFILE
+    $filter -o $FILTDATA -p $SHFILE_M1 $SHFILE
 
     echo "Filtering complete!"
 }
@@ -168,6 +184,7 @@ function runece2cmor_atm {
     fi
     if [ $PREFIX == "CMIP6" ]; then
         VARLIST=$VARLISTDIR/varlist-cmip6.json
+	#VARLIST=$VARLISTDIR/varlist-cmip6-paolo.json
     fi
     if [ $PREFIX == "PRIMAVERA" ]; then
         VARLIST=$VARLISTDIR/varlist-prim.json
@@ -195,7 +212,7 @@ function runece2cmor_atm {
     echo "  Frequency = ${FREQARG}hr"
     echo "  Using $PREFIX tables"
     echo "================================================================" 
-    $ece2cmor $ATMDIR $YEAR-$(printf %02g $MON)-01 --exp $EXP --freq $FREQARG --conf $CONFIGFILE --vars $VARLIST --npp $THREADS --tmpdir $TMPDIR --tabid $PREFIX --mode append --atm
+    $ece2cmor $ATMDIR $YEAR-$(printf %02g $MON)-01 --exp $EXP --freq $FREQARG --conf $CONFIGFILE --vars $VARLIST --npp $THREADS --tmpdir $TMPDIR --tabid $PREFIX --mode append --atm 
     
 
     # Removing tmp directory
@@ -217,12 +234,13 @@ function runece2cmor_oce {
     FREQARG=$1
     PREFIX=$2
     THREADS=$3
-    OCEDIR=$WORKDIR/NEMO
+    OCEDIR=$WORKDIR/Output_${YEAR}/NEMO
     if [ "$OCE" -eq 1 ] && [ ! -d "$OCEDIR" ]; then
         echo "Error: data directory $OCEDIR for NEMO output does not exist, aborting" >&2; exit 1
     fi
     if [ $PREFIX == "CMIP6" ]; then
-        VARLIST=$VARLISTDIR/varlist-cmip6.json
+        #VARLIST=$VARLISTDIR/varlist-cmip6.json
+	VARLIST=$VARLISTDIR/varlist-paolo-oce.json
     fi
     if [ $PREFIX == "PRIMAVERA" ]; then
         VARLIST=$VARLISTDIR/varlist-prim.json
@@ -234,9 +252,9 @@ function runece2cmor_oce {
 
     OCEDIR2=$TMPDIR/DATA
     mkdir -p $OCEDIR2
-    echo "Copying single processors data"
-    for t in grid_T grid_U grid_V icemod SBC ; do
-	cp $OCEDIR/*${t}.nc $OCEDIR2
+    echo "Copying rebuild processors data"
+    for t in grid_T grid_U grid_V grid_W icemod scalar SBC ; do
+	ln -s $OCEDIR/*${t}.nc $OCEDIR2/
     done
     	
 
@@ -297,15 +315,14 @@ echo "========================================================="
 
 if [ "$ATM" -eq 1 ]; then
     filteroutput 
-    runece2cmor_atm 3 CMIP6 16
-    runece2cmor_atm 6 CMIP6 16
-    #runece2cmor_atm 3 PRIMAVERA 16
-    #runece2cmor_atm 6 PRIMAVERA 16 # <-- still some issues with this
+    runece2cmor_atm 3 CMIP6 $NCORES 
+    runece2cmor_atm 6 CMIP6 $NCORES 
+    #runece2cmor_atm 3 PRIMAVERA $NCORES 
+    #runece2cmor_atm 6 PRIMAVERA $NCORES  # <-- still some issues with this
 fi
 
 if [ "$OCE" -eq 1 ]; then
-     runece2cmor_oce 6 CMIP6 16
-    #runece2cmor_oce 6 PRIMAVERA 16
+    runece2cmor_oce 6 CMIP6 $NCORES 
 fi
 
 
