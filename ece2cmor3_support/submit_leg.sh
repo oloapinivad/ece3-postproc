@@ -37,11 +37,12 @@ LEG=${LEG:-000}
 STARTYEAR=${STARTYEAR:-1950}
 MON=${MON:-0}
 ATM=${ATM:-1}
-OCE=${OCE:-0}
+OCE=${OCE:-1}
 USERNAME=${USERNAME:-pdavini0}
 USEREXP=imavilia  #extra by P. davini: allows analysis of experiment owned by different user
 VERBOSE=${VERBOSE:-1}
 NCORES=32
+ACCOUNT=IscrB_DIXIT
 
 
 OPTIND=1
@@ -121,7 +122,7 @@ if [ "$ATM" -eq 1 ] ; then
 #for MON in $(seq $MONMIN $MONMAX); do
 for MON in 1 ; do
     SUBOPT="$SLURMOPT_ATM,MON=$MON"
-    JOBID=$($SUBMIT --job-name=proc_ifs-${YEAR}-${MON} --output=$LOGFILE/cmor_${EXP}_${YEAR}_${MON}_ifs_%j.out --error=$LOGFILE/cmor_${EXP}_${YEAR}_${MON}_ifs_%j.err --export=$SUBOPT ./cmor_mon_base.sh)
+    JOBID=$($SUBMIT --account=$ACCOUNT --job-name=proc_ifs-${YEAR}-${MON} --output=$LOGFILE/cmor_${EXP}_${YEAR}_${MON}_ifs_%j.out --error=$LOGFILE/cmor_${EXP}_${YEAR}_${MON}_ifs_%j.err --export=$SUBOPT ./cmor_mon_filter.sh)
 done
 
 fi
@@ -132,7 +133,7 @@ fi
 if [ "$OCE" -eq 1 ]; then
     SLURMOPT_OCE="EXP=$EXP,LEG=$LEG,STARTYEAR=$STARTYEAR,ATM=0,OCE=$OCE,VERBOSE=$VERBOSE,USERNAME=$USERNAME,USEREXP=$USEREXP,NCORES=$NCORES"
     echo SLURMOPT_OCE=${SLURMOPT_OCE}
-    JOBID=$($SUBMIT --job-name=proc_nemo-${YEAR}-${MON} --output=$LOGFILE/cmor_${EXP}_${YEAR}_${MON}_nemo_%j.out --error=$LOGFILE/cmor_${EXP}_${YEAR}_${MON}_nemo_%j.err --export=$SLURMOPT_OCE ./cmor_mon_base.sh)
+    JOBID=$($SUBMIT  --account=$ACCOUNT --job-name=proc_nemo-${YEAR}-${MON} --output=$LOGFILE/cmor_${EXP}_${YEAR}_${MON}_nemo_%j.out --error=$LOGFILE/cmor_${EXP}_${YEAR}_${MON}_nemo_%j.err --export=$SLURMOPT_OCE ./cmor_mon_filter.sh)
 fi
 
 

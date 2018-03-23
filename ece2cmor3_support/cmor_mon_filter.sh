@@ -18,7 +18,7 @@
 #
 #
 #
-#SBATCH -A Pra13_3311
+#SBATCH -A IscrC_ECE3SPH
 #SBATCH -N1 -n36
 #SBATCH --partition=bdw_usr_prod
 #SBATCH --mem=110GB
@@ -39,7 +39,7 @@ LEG=${LEG:-000}
 STARTYEAR=${STARTYEAR:-2002}
 MON=${MON:-1}
 ATM=${ATM:-1}
-OCE=${OCE:-0}
+OCE=${OCE:-1}
 VERBOSE=${VERBOSE:-1}
 USERNAME=${USERNAME:-pdavini0}
 USEREXP=${USEREXP:-imavilia}
@@ -72,21 +72,16 @@ fi
 
 
 # Location of ece2cmor.py
-#SRCDIR=/marconi_work/Pra13_3311/ecearth3/post/ece2cmor3/ece2cmor3/ece2cmor3
 SRCDIR=/marconi_work/Pra13_3311/ecearth3/PRIMAVERA/cmorize/ece2cmor3/ece2cmor3
 
 #locaton of the ece2cmor3_support
-SCRIPTDIR=$(pwd) 
-
+SCRIPTDIR=/marconi/home/userexternal/pdavini0/ecearth3/ece3-postproc/ece2cmor3_support
 
 # Location of the experiment output.
 # It is assumed that IFS output is in $WORKDIR/IFS, and that NEMO output is in $WORKDIR/NEMO (if it exists)
-#WORKDIR=$SCRATCH/ece3/${EXP}/output/Output_${YEAR}
 if [[ $USEREXP != $USERNAME ]] ; then 
-   #WORKDIR=/marconi_scratch/userexternal/$USEREXP/ece3/${EXP}/output/Output_${YEAR}
    WORKDIR=/marconi_scratch/userexternal/$USEREXP/ece3/${EXP}/output
 else
-   #WORKDIR=/marconi_scratch/userexternal/$USERNAME/ece3/${EXP}/output/Output_${YEAR}
    WORKDIR=/marconi_scratch/userexternal/$USERNAME/ece3/${EXP}/output
 fi
 
@@ -94,37 +89,29 @@ fi
 # Temporary direc=tory
 BASETMPDIR=$SCRATCH/tmp_cmor/${EXP}_${RANDOM}
 TMPDIR=$BASETMPDIR/tmp_${YEAR}_${MON}/cmorized
-# Where to put filtered data (temporary folder)
-FILTDATA=$BASETMPDIR/tmp_${YEAR}_${MON}/filtered
+# Where to put linked data (temporary folder)
+LINKDATA=$BASETMPDIR/tmp_${YEAR}_${MON}/linkdata
 
 # Output directory for the cmorized data
 #CMORDIR=$SCRATCH/ece3/${EXP}/cmorized/Year_${YEAR}/Month_${MON}
 #CMORDIR=$SCRATCH/ece3/${EXP}/cmorized/Year_${YEAR}
-CMORDIR=$SCRATCH/newtest
+CMORDIR=$SCRATCH/newtest_23mar
 
 
 # Metadata template file.  
 # Should really use different customized file for each experiment type!
-#METADATAFILE=$SCRIPTDIR/metadata/metadata-test.json
 METADATAFILE=$SCRIPTDIR/metadata/metadata-template.json
 #METADATAFILE=$SCRIPTDIR/metadata/metadata-stochastic-amip.json
 #METADATAFILE_DEFAULT=$SRCDIR/resources/metadata_templates/metadata-template.json
 
-
 # Root directory of tables
 TABDIR_ROOT=$SRCDIR/resources/tables
-
 
 # Variable list directory
 #VARLISTDIR=$SRCDIR/resources
 VARLISTDIR=$SCRIPTDIR/varlist
 
-
-
-
-
 # Some prelimina1ry setup
-
 module unload hdf5 netcdf
 module load hdf5/1.8.17--intel--pe-xe-2017--binary
 module load netcdf/4.4.1--intel--pe-xe-2017--binary
@@ -141,35 +128,35 @@ ece2cmor=$SRCDIR/ece2cmor.py
 
 
 mkdir -p $CMORDIR
-mkdir -p $FILTDATA
+mkdir -p $LINKDATA
 mkdir -p $TMPDIR
 
 
 
 # Defining filtering function (for separating IFS data in 3hrly and 6hrly components)
 
-function filteroutput {
+#function filteroutput {
    
-    GGFILE=$WORKDIR/Output_${YEAR}/IFS/ICMGG${EXP}+${YEAR}$(printf %02g ${MON})
-    SHFILE=$WORKDIR/Output_${YEAR}/IFS/ICMSH${EXP}+${YEAR}$(printf %02g ${MON})
+    #GGFILE=$WORKDIR/Output_${YEAR}/IFS/ICMGG${EXP}+${YEAR}$(printf %02g ${MON})
+    #SHFILE=$WORKDIR/Output_${YEAR}/IFS/ICMSH${EXP}+${YEAR}$(printf %02g ${MON})
     
-    if [[ $MON -eq 1 ]] ; then 
-       	YEAR_M1=$((YEAR-1))
-       	GGFILE_M1=$WORKDIR/Output_${YEAR_M1}/IFS/ICMGG${EXP}+${YEAR_M1}12
-        SHFILE_M1=$WORKDIR/Output_${YEAR_M1}/IFS/ICMSH${EXP}+${YEAR_M1}12
-    else
-	MON_M1=$((MON-1))
-	GGFILE_M1=$WORKDIR/Output_${YEAR}/IFS/ICMGG${EXP}+${YEAR}$(printf %02g ${MON_M1})
-    	SHFILE_M1=$WORKDIR/Output_${YEAR}/IFS/ICMSH${EXP}+${YEAR}$(printf %02g ${MON_M1})
-    fi
+    #if [[ $MON -eq 1 ]] ; then 
+       	#YEAR_M1=$((YEAR-1))
+       	#GGFILE_M1=$WORKDIR/Output_${YEAR_M1}/IFS/ICMGG${EXP}+${YEAR_M1}12
+        #SHFILE_M1=$WORKDIR/Output_${YEAR_M1}/IFS/ICMSH${EXP}+${YEAR_M1}12
+    #else
+	#MON_M1=$((MON-1))
+	#GGFILE_M1=$WORKDIR/Output_${YEAR}/IFS/ICMGG${EXP}+${YEAR}$(printf %02g ${MON_M1})
+    	#SHFILE_M1=$WORKDIR/Output_${YEAR}/IFS/ICMSH${EXP}+${YEAR}$(printf %02g ${MON_M1})
+    #fi
 
-    echo "Filtering output files ICMGG${EXP}+${YEAR}$(printf %02g ${MON}) and ICMSH${EXP}+${YEAR}$(printf %02g ${MON})"
+    #echo "Filtering output files ICMGG${EXP}+${YEAR}$(printf %02g ${MON}) and ICMSH${EXP}+${YEAR}$(printf %02g ${MON})"
 
-    $filter -o $FILTDATA -p $GGFILE_M1 $GGFILE
-    $filter -o $FILTDATA -p $SHFILE_M1 $SHFILE
+    #$filter -o $FILTDATA -p $GGFILE_M1 $GGFILE
+    #$filter -o $FILTDATA -p $SHFILE_M1 $SHFILE
 
-    echo "Filtering complete!"
-}
+    #echo "Filtering complete!"
+#}
     
     
 # Function defining CMORization of IFS output
@@ -180,7 +167,7 @@ function runece2cmor_atm {
     YEAR=$3
     MON=$4
     #ATMDIR=$FILTDATA/${FREQARG}hr
-    ATMDIR=$FILTDATA
+    ATMDIR=$LINKDATA
 
     IFSFILE=$WORKDIR/Output_${YEAR}/IFS/ICM??${EXP}+${YEAR}$(printf %02g ${MON})
     if [[ $MON -eq 1 ]] ; then
@@ -190,17 +177,16 @@ function runece2cmor_atm {
         MON_M1=$((MON-1))
         IFSFILE_M1=$WORKDIR/Output_${YEAR}/IFS/ICM??${EXP}+${YEAR}$(printf %02g ${MON_M1})
     fi
-    
 
     ln -s $IFSFILE $ATMDIR/
     ln -s $IFSFILE_M1 $ATMDIR/
-
 
     if [ "$ATM" -eq 1 ] && [ ! -d "$ATMDIR" ]; then
         echo "Error: data directory $ATMDIR for IFS output does not exist, aborting" >&2; exit 1
     fi
     if [ $PREFIX == "CMIP6" ]; then
-        VARLIST=$VARLISTDIR/varlist-cmip6.json
+        VARLIST=$VARLISTDIR/varlist-branch-primavera.json
+	#VARLIST=$VARLISTDIR/varlist-atm-prova.json
 	#VARLIST=$VARLISTDIR/varlist-cmip6-paolo.json
     fi
     if [ $PREFIX == "PRIMAVERA" ]; then
@@ -249,16 +235,16 @@ function runece2cmor_atm {
 # Function defining CMORization of NEMO output
 
 function runece2cmor_oce {
-    FREQARG=$1
-    PREFIX=$2
-    THREADS=$3
+    PREFIX=$1
+    THREADS=$2
     OCEDIR=$WORKDIR/Output_${YEAR}/NEMO
     if [ "$OCE" -eq 1 ] && [ ! -d "$OCEDIR" ]; then
         echo "Error: data directory $OCEDIR for NEMO output does not exist, aborting" >&2; exit 1
     fi
     if [ $PREFIX == "CMIP6" ]; then
         #VARLIST=$VARLISTDIR/varlist-cmip6.json
-	VARLIST=$VARLISTDIR/varlist-paolo-oce.json
+	#VARLIST=$VARLISTDIR/varlist-oce-prova.json
+	VARLIST=$VARLISTDIR/varlist-branch-primavera.json
     fi
     if [ $PREFIX == "PRIMAVERA" ]; then
         VARLIST=$VARLISTDIR/varlist-prim.json
@@ -294,7 +280,7 @@ function runece2cmor_oce {
     echo "  Processing and CMORizing NEMO data with ece2cmor3"
     echo "  Using $PREFIX tables"
     echo "================================================================" 
-    $ece2cmor $OCEDIR2 $YEAR-$(printf %02g $MON)-01 --exp $EXP --freq $FREQARG --conf $CONFIGFILE --vars $VARLIST --npp $THREADS --tmpdir $TMPDIR --tabid $PREFIX --mode append --oce    
+    $ece2cmor $OCEDIR2 $YEAR-$(printf %02g $MON)-01 --exp $EXP --conf $CONFIGFILE --vars $VARLIST --npp $THREADS --tmpdir $TMPDIR --tabid $PREFIX --mode append --oce    
     
 
     # Removing tmp directory
@@ -332,15 +318,13 @@ echo "========================================================="
 # Currently set up to run everything that works!
 
 if [ "$ATM" -eq 1 ]; then
-    #filteroutput 
     runece2cmor_atm CMIP6 $NCORES $YEAR $MON
-    #runece2cmor_atm 6 CMIP6 $NCORES 
-    #runece2cmor_atm 3 PRIMAVERA $NCORES 
-    #runece2cmor_atm 6 PRIMAVERA $NCORES  # <-- still some issues with this
+    #runece2cmor_atm PRIMAVERA $NCORES $YEAR $MON
 fi
 
 if [ "$OCE" -eq 1 ]; then
-    runece2cmor_oce 6 CMIP6 $NCORES 
+    runece2cmor_oce CMIP6 $NCORES 
+    #runece2cmor_oce PRIMAVERA $NCORES
 fi
 
 
@@ -361,10 +345,10 @@ echo "==========================================================="
 # Removing unprocessed filtered data
 
 echo "Removing unprocessed data..."
-if [ -d $"{FILTDATA}" ]
+if [ -d $"{LINKDATA}" ]
 then
-    echo "Deleting temp dir ${FILTDATA}"
-    rm -rf "${FILTDATA}"
+    echo "Deleting temp dir ${LINKDATA}"
+    rm -rf "${LINKDATA}"
 fi
 
 

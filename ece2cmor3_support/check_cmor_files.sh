@@ -1,12 +1,16 @@
 #!/bin/bash
 
-exp=qsh0
-year=2002
+exp=$1
+year=$2
 table=CMIP6
-DIRFILE=/marconi/home/userexternal/pdavini0/scratch/ece3/$exp/cmorized/Year_$year/$table/CMIP/EC-Earth-Consortium/EC-Earth3-HR/historical/r1i1p1f1
+if [[ $exp == "qsh0" ]] ; then
+	DIRFILE=/marconi/home/userexternal/pdavini0/scratch/ece3/$exp/cmorized/Year_$year/$table/CMIP/EC-Earth-Consortium/EC-Earth3-HR/historical/r1i1p1f1
+else
+	DIRFILE=/marconi/home/userexternal/pdavini0/scratch/newtest/CMIP6/CMIP/EC-Earth-Consortium/EC-Earth3-HR/historical/r1i1p1f1
+fi
 categories=$(ls $DIRFILE)
 varlist=/marconi/home/userexternal/pdavini0/ecearth3/ece3-postproc/ece2cmor3_support/varlist/varlist-branch-primavera.json
-verbose=0
+verbose=1
 
 #for cat in $categories ; do
 #	nfiles=$(ls $DIRFILE/$cat/*/*/*/* | wc -l)

@@ -1,0 +1,146 @@
+----------------------------------------------
+Variables from varlist vs. Variables CMORIZED!
+Experiment qsh0 ------------------ Year 2002 
+----------------------------------------------
+3hr -> Theory: 22 Actual: 8
+pr missing
+hfls missing
+hfss missing
+rlds missing
+rlus missing
+rsds missing
+rsus missing
+tso missing
+prc missing
+prsn missing
+mrro missing
+rldscs missing
+rsdscs missing
+rsuscs missing
+ps is double
+clt missing
+Missing are 15, Double are 1, Overwritten are 0
+
+SImon -> Theory: 17 Actual: 14
+siprn missing
+siconc missing
+sidivvel missing
+Missing are 3, Double are 0, Overwritten are 0
+
+Amon -> Theory: 46 Actual: 43
+cl missing
+clw missing
+cli missing
+Missing are 3, Double are 0, Overwritten are 0
+
+CFmon -> Theory: 3 Actual: 0
+ta missing
+hur missing
+hus missing
+Missing are 3, Double are 0, Overwritten are 0
+
+Omon -> Theory: 37 Actual: 25
+masscello missing
+thetaoga missing
+soga missing
+hfbasin missing
+hfx missing
+hfy missing
+ficeberg2d missing
+zfullo missing
+zhalfo missing
+msftyrho missing
+precip missing
+tosga missing
+bigthetaoga missing
+Missing are 13, Double are 0, Overwritten are -1
+
+SIday -> Theory: 6 Actual: 3
+sistrxdtop missing
+sistrydtop missing
+siconc missing
+Missing are 3, Double are 0, Overwritten are 0
+
+E3hr -> Theory: 8 Actual: 0
+rlut missing
+rsut missing
+rlutcs missing
+rsdt missing
+prw missing
+clwvi missing
+clivi missing
+rsutcs missing
+Missing are 8, Double are 0, Overwritten are 0
+
+6hrPlev -> Theory: 2 Actual: 0
+psl missing
+wap4 missing
+Missing are 2, Double are 0, Overwritten are 0
+
+Eday -> Theory: 8 Actual: 6
+snw missing
+mrro missing
+Missing are 2, Double are 0, Overwritten are 0
+
+AERmon -> Theory: 2 Actual: 1
+orog missing
+Missing are 1, Double are 0, Overwritten are 0
+
+Emon -> Theory: 16 Actual: 5
+wap missing
+u2 missing
+v2 missing
+wap2 missing
+t2 missing
+uv missing
+uwap missing
+vwap missing
+ut missing
+vt missing
+twap missing
+Missing are 11, Double are 0, Overwritten are 0
+
+CFday -> Theory: 23 Actual: 12
+ua missing
+va missing
+ta missing
+hus missing
+wap missing
+zg missing
+hur missing
+cl missing
+clw missing
+cli missing
+pfull missing
+Missing are 11, Double are 0, Overwritten are 0
+
+Oday -> Theory: 3 Actual: 4
+tos is double
+Missing are 0, Double are 1, Overwritten are 0
+
+E3hrPt -> Theory: 3 Actual: 0
+ua850 missing
+va850 missing
+psl missing
+Missing are 3, Double are 0, Overwritten are 0
+
+Lmon -> Theory: 7 Actual: 6
+mrlsl missing
+Missing are 1, Double are 0, Overwritten are 0
+
+LImon -> Theory: 8 Actual: 8
+Missing are 0, Double are 0, Overwritten are 0
+
+6hrPlevPt -> Theory: 20 Actual: 14
+mrlsl missing
+ts missing
+tsl missing
+Missing are 3, Double are 0, Overwritten are 3
+
+day -> Theory: 35 Actual: 35
+Missing are 0, Double are 0, Overwritten are 0
+
+
+TOTAL -> Theory: 266 Actual: 184 i.e. 69.00 % 
+Total space occupied by one year of exp qsh0 is: 52G
+
