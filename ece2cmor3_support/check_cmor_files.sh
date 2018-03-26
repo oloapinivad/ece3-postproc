@@ -1,29 +1,29 @@
 #!/bin/bash
 
-exp=$1
-year=$2
-table=CMIP6
-if [[ $exp == "qsh0" ]] ; then
-	DIRFILE=/marconi/home/userexternal/pdavini0/scratch/ece3/$exp/cmorized/Year_$year/$table/CMIP/EC-Earth-Consortium/EC-Earth3-HR/historical/r1i1p1f1
-else
-	DIRFILE=/marconi/home/userexternal/pdavini0/scratch/newtest/CMIP6/CMIP/EC-Earth-Consortium/EC-Earth3-HR/historical/r1i1p1f1
-fi
-categories=$(ls $DIRFILE)
-varlist=/marconi/home/userexternal/pdavini0/ecearth3/ece3-postproc/ece2cmor3_support/varlist/varlist-branch-primavera.json
-verbose=1
+verbose=0
 
-#for cat in $categories ; do
-#	nfiles=$(ls $DIRFILE/$cat/*/*/*/* | wc -l)
-#	echo $cat $nfiles
-#done
+for table in CMIP6 PRIMAVERA ; do
+
+#DIRFILE=/marconi/home/userexternal/pdavini0/scratch/newtest_23mar/$table/CMIP/EC-Earth-Consortium/EC-Earth3-HR/historical/r1i1p1f1
+DIRFILE=/marconi/home/userexternal/pdavini0/scratch/newtest_24mar/$table/CMIP/EC-Earth-Consortium/EC-Earth3-HR/piControl/r1i1p1f1
+
+if [[ $table == CMIP6 ]] ; then
+	varlist=$HOME/ecearth3/ece3-postproc/ece2cmor3_support/varlist/varlist-branch-primavera.json
+elif [[ $table == PRIMAVERA ]] ; then
+	varlist=$HOME/ecearth3/ece3-postproc/ece2cmor3_support/varlist/varlist-prim.json
+fi
 
 echo "----------------------------------------------"
 echo "Variables from varlist vs. Variables CMORIZED!"
-echo "Experiment $exp ------------------ Year $year "
+echo "-------- Table $table ------------------------"
+#echo "Experiment $exp ------------------ Year $year "
 echo "----------------------------------------------"
+
+categories=$(ls $DIRFILE)
 
 s0=($(cat $varlist | grep -n ": " | cut -f 1 -d :))
 f0=($(cat $varlist | grep -n "]" | cut -f 1 -d :))
+totvars=0; totfiles=0
 
 for t in $(seq 0 $((${#s0[@]}-1))) ; do
 #for t in 16 ; do
@@ -59,5 +59,7 @@ echo
 perc=$(bc <<< "scale=2; $totfiles/$totvars*100")
 echo "TOTAL -> Theory:" $totvars "Actual:" $totfiles "i.e. $perc % "
 space=$(du -sh $DIRFILE | cut -f 1)
-echo "Total space occupied by one year of exp $exp is: $space"
+#echo "Total space occupied by one year of exp $exp is: $space"
 echo
+
+done

@@ -25,6 +25,7 @@
     ],
     "SImon": [
         "siprn",
+        "siconc",
         "sisnthick",
         "sispeed",
         "sitemptop",
@@ -138,6 +139,7 @@
         "siv",
         "sistrxdtop",
         "sistrydtop",
+        "siconc"
     ],
     "E3hr": [
         "rlut",

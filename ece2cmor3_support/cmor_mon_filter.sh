@@ -22,7 +22,7 @@
 #SBATCH -N1 -n36
 #SBATCH --partition=bdw_usr_prod
 #SBATCH --mem=110GB
-#SBATCH --time 03:00:00
+#SBATCH --time 05:00:00
 #SBATCH --job-name=cmor_mon
 #SBATCH --error=outfile_cmor.o%a
 #SBATCH --output=outfile_cmor.o%a
@@ -34,11 +34,11 @@
 
 # Required arguments
 
-EXP=${EXP:-qsh0}
+EXP=${EXP:-qctr}
 LEG=${LEG:-000}
-STARTYEAR=${STARTYEAR:-2002}
+STARTYEAR=${STARTYEAR:-1950}
 MON=${MON:-1}
-ATM=${ATM:-1}
+ATM=${ATM:-0}
 OCE=${OCE:-1}
 VERBOSE=${VERBOSE:-1}
 USERNAME=${USERNAME:-pdavini0}
@@ -89,26 +89,25 @@ fi
 # Temporary direc=tory
 BASETMPDIR=$SCRATCH/tmp_cmor/${EXP}_${RANDOM}
 TMPDIR=$BASETMPDIR/tmp_${YEAR}_${MON}/cmorized
+
 # Where to put linked data (temporary folder)
 LINKDATA=$BASETMPDIR/tmp_${YEAR}_${MON}/linkdata
 
 # Output directory for the cmorized data
 #CMORDIR=$SCRATCH/ece3/${EXP}/cmorized/Year_${YEAR}/Month_${MON}
 #CMORDIR=$SCRATCH/ece3/${EXP}/cmorized/Year_${YEAR}
-CMORDIR=$SCRATCH/newtest_23mar
+CMORDIR=$SCRATCH/newtest_24mar
 
 
 # Metadata template file.  
 # Should really use different customized file for each experiment type!
-METADATAFILE=$SCRIPTDIR/metadata/metadata-template.json
-#METADATAFILE=$SCRIPTDIR/metadata/metadata-stochastic-amip.json
-#METADATAFILE_DEFAULT=$SRCDIR/resources/metadata_templates/metadata-template.json
+#METADATAFILE=$SCRIPTDIR/metadata/metadata-template.json
+METADATAFILE=$SCRIPTDIR/metadata/metadata-primavera.json
 
-# Root directory of tables
-TABDIR_ROOT=$SRCDIR/resources/tables
+#PRIMAVERA tables
+TABDIR=/marconi_work/Pra13_3311/ecearth3/PRIMAVERA/cmorize/cmip6-cmor-tables/Tables
 
 # Variable list directory
-#VARLISTDIR=$SRCDIR/resources
 VARLISTDIR=$SCRIPTDIR/varlist
 
 # Some prelimina1ry setup
@@ -123,42 +122,11 @@ export PYTHONPATH=/marconi_work/Pra13_3311/opt/anaconda/envs/ece2cmor3/lib/pytho
 export HDF5_DISABLE_VERSION_CHECK=1
 
 ece2cmor=$SRCDIR/ece2cmor.py
-#filter=$SRCDIR/filterscripts/filter6h.py
-#filter=/marconi_work/Pra13_3311/ecearth3/post/ece2cmor3/ece2cmor3/ece2cmor3/filterscripts/filter6h.py
-
 
 mkdir -p $CMORDIR
 mkdir -p $LINKDATA
 mkdir -p $TMPDIR
 
-
-
-# Defining filtering function (for separating IFS data in 3hrly and 6hrly components)
-
-#function filteroutput {
-   
-    #GGFILE=$WORKDIR/Output_${YEAR}/IFS/ICMGG${EXP}+${YEAR}$(printf %02g ${MON})
-    #SHFILE=$WORKDIR/Output_${YEAR}/IFS/ICMSH${EXP}+${YEAR}$(printf %02g ${MON})
-    
-    #if [[ $MON -eq 1 ]] ; then 
-       	#YEAR_M1=$((YEAR-1))
-       	#GGFILE_M1=$WORKDIR/Output_${YEAR_M1}/IFS/ICMGG${EXP}+${YEAR_M1}12
-        #SHFILE_M1=$WORKDIR/Output_${YEAR_M1}/IFS/ICMSH${EXP}+${YEAR_M1}12
-    #else
-	#MON_M1=$((MON-1))
-	#GGFILE_M1=$WORKDIR/Output_${YEAR}/IFS/ICMGG${EXP}+${YEAR}$(printf %02g ${MON_M1})
-    	#SHFILE_M1=$WORKDIR/Output_${YEAR}/IFS/ICMSH${EXP}+${YEAR}$(printf %02g ${MON_M1})
-    #fi
-
-    #echo "Filtering output files ICMGG${EXP}+${YEAR}$(printf %02g ${MON}) and ICMSH${EXP}+${YEAR}$(printf %02g ${MON})"
-
-    #$filter -o $FILTDATA -p $GGFILE_M1 $GGFILE
-    #$filter -o $FILTDATA -p $SHFILE_M1 $SHFILE
-
-    #echo "Filtering complete!"
-#}
-    
-    
 # Function defining CMORization of IFS output
 
 function runece2cmor_atm {
@@ -166,7 +134,6 @@ function runece2cmor_atm {
     THREADS=$2
     YEAR=$3
     MON=$4
-    #ATMDIR=$FILTDATA/${FREQARG}hr
     ATMDIR=$LINKDATA
 
     IFSFILE=$WORKDIR/Output_${YEAR}/IFS/ICM??${EXP}+${YEAR}$(printf %02g ${MON})
@@ -185,12 +152,13 @@ function runece2cmor_atm {
         echo "Error: data directory $ATMDIR for IFS output does not exist, aborting" >&2; exit 1
     fi
     if [ $PREFIX == "CMIP6" ]; then
-        VARLIST=$VARLISTDIR/varlist-branch-primavera.json
+        #VARLIST=$VARLISTDIR/varlist-branch-primavera.json
 	#VARLIST=$VARLISTDIR/varlist-atm-prova.json
-	#VARLIST=$VARLISTDIR/varlist-cmip6-paolo.json
+	VARLIST=$VARLISTDIR/varlist-cmip6-paolo.json
     fi
     if [ $PREFIX == "PRIMAVERA" ]; then
-        VARLIST=$VARLISTDIR/varlist-prim.json
+        #VARLIST=$VARLISTDIR/varlist-prim.json
+	VARLIST=$VARLISTDIR/varlist-primavera-paolo.json
     fi
     if [ ! -f $VARLIST ]; then
         echo "Skipping non-existent varlist $VARLIST"
@@ -205,9 +173,6 @@ function runece2cmor_atm {
     CONFIGFILE=$TMPDIR/metadata-${EXP}-leg${LEG}.json
 
 
-    # For choosing only specific tables. Probably it's better to specify a different variable list? Needs testing.
-    #TABDIR=${TABDIR_ROOT}/<your table directory>
-
 
     # Launching ece2cmor3
     echo "================================================================"
@@ -215,8 +180,7 @@ function runece2cmor_atm {
     echo "  Frequency = ${FREQARG}hr"
     echo "  Using $PREFIX tables"
     echo "================================================================" 
-    #$ece2cmor $ATMDIR $YEAR-$(printf %02g $MON)-01 --exp $EXP --freq $FREQARG --conf $CONFIGFILE --vars $VARLIST --npp $THREADS --tmpdir $TMPDIR --tabid $PREFIX --mode append --atm 
-    $ece2cmor $ATMDIR $YEAR-$(printf %02g $MON)-01 --exp $EXP --conf $CONFIGFILE --vars $VARLIST --npp $THREADS --tmpdir $TMPDIR --tabid $PREFIX --mode append --atm --filter
+    $ece2cmor $ATMDIR $YEAR-$(printf %02g $MON)-01 --exp $EXP --conf $CONFIGFILE --vars $VARLIST --npp $THREADS --tmpdir $TMPDIR --tabid $PREFIX --tabdir $TABDIR  --mode append --atm --filter
     
 
     # Removing tmp directory
@@ -229,8 +193,6 @@ function runece2cmor_atm {
     echo "ece2cmor3 complete!"
 
 }
-
-
 
 # Function defining CMORization of NEMO output
 
@@ -271,16 +233,12 @@ function runece2cmor_oce {
 
 
 
-    # For choosing only specific tables. Perhaps it's better to specificy a different variable list?
-    #TABDIR=${TABDIR_ROOT}/${PREFIX}_${FREQARG}hr
-
-
     # Launching ece2cmor3
     echo "================================================================"
     echo "  Processing and CMORizing NEMO data with ece2cmor3"
     echo "  Using $PREFIX tables"
     echo "================================================================" 
-    $ece2cmor $OCEDIR2 $YEAR-$(printf %02g $MON)-01 --exp $EXP --conf $CONFIGFILE --vars $VARLIST --npp $THREADS --tmpdir $TMPDIR --tabid $PREFIX --mode append --oce    
+    $ece2cmor $OCEDIR2 $YEAR-$(printf %02g $MON)-01 --exp $EXP --conf $CONFIGFILE --vars $VARLIST --npp $THREADS --tmpdir $TMPDIR --tabid $PREFIX --tabdir $TABDIR --mode append --oce    
     
 
     # Removing tmp directory
@@ -319,7 +277,7 @@ echo "========================================================="
 
 if [ "$ATM" -eq 1 ]; then
     runece2cmor_atm CMIP6 $NCORES $YEAR $MON
-    #runece2cmor_atm PRIMAVERA $NCORES $YEAR $MON
+    runece2cmor_atm PRIMAVERA $NCORES $YEAR $MON
 fi
 
 if [ "$OCE" -eq 1 ]; then
