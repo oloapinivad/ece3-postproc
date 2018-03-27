@@ -17,7 +17,6 @@
 #########################################################################
 #
 #
-#
 #SBATCH -A IscrC_ECE3SPH
 #SBATCH -N1 -n36
 #SBATCH --partition=bdw_usr_prod
@@ -28,9 +27,7 @@
 #SBATCH --output=outfile_cmor.o%a
 #SBATCH --mail-type=ALL
 
-
 #set -e
-
 
 # Required arguments
 
@@ -38,8 +35,8 @@ EXP=${EXP:-qctr}
 LEG=${LEG:-000}
 STARTYEAR=${STARTYEAR:-1950}
 MON=${MON:-1}
-ATM=${ATM:-0}
-OCE=${OCE:-1}
+ATM=${ATM:-1}
+OCE=${OCE:-0}
 VERBOSE=${VERBOSE:-1}
 USERNAME=${USERNAME:-pdavini0}
 USEREXP=${USEREXP:-imavilia}
@@ -69,13 +66,11 @@ if [ $VERBOSE == 1 ]; then
     set -x
 fi
 
-
-
 # Location of ece2cmor.py
 SRCDIR=/marconi_work/Pra13_3311/ecearth3/PRIMAVERA/cmorize/ece2cmor3/ece2cmor3
 
 #locaton of the ece2cmor3_support
-SCRIPTDIR=/marconi/home/userexternal/pdavini0/ecearth3/ece3-postproc/ece2cmor3_support
+SCRIPTDIR=$HOME/ecearth3/ece3-postproc/ece2cmor3_support
 
 # Location of the experiment output.
 # It is assumed that IFS output is in $WORKDIR/IFS, and that NEMO output is in $WORKDIR/NEMO (if it exists)
@@ -85,19 +80,19 @@ else
    WORKDIR=/marconi_scratch/userexternal/$USERNAME/ece3/${EXP}/output
 fi
 
-
-# Temporary direc=tory
+# Temporary directories: cmor and linkdata
 BASETMPDIR=$SCRATCH/tmp_cmor/${EXP}_${RANDOM}
 TMPDIR=$BASETMPDIR/tmp_${YEAR}_${MON}/cmorized
-
-# Where to put linked data (temporary folder)
 LINKDATA=$BASETMPDIR/tmp_${YEAR}_${MON}/linkdata
 
 # Output directory for the cmorized data
 #CMORDIR=$SCRATCH/ece3/${EXP}/cmorized/Year_${YEAR}/Month_${MON}
-#CMORDIR=$SCRATCH/ece3/${EXP}/cmorized/Year_${YEAR}
 CMORDIR=$SCRATCH/newtest_24mar
 
+#create folders
+mkdir -p $CMORDIR
+mkdir -p $LINKDATA
+mkdir -p $TMPDIR
 
 # Metadata template file.  
 # Should really use different customized file for each experiment type!
@@ -110,25 +105,18 @@ TABDIR=/marconi_work/Pra13_3311/ecearth3/PRIMAVERA/cmorize/cmip6-cmor-tables/Tab
 # Variable list directory
 VARLISTDIR=$SCRIPTDIR/varlist
 
-# Some prelimina1ry setup
+# Some preliminary setup
 module unload hdf5 netcdf
 module load hdf5/1.8.17--intel--pe-xe-2017--binary
 module load netcdf/4.4.1--intel--pe-xe-2017--binary
 module load cdo
 source activate ece2cmor3
-#export PATH="/marconi/home/userexternal/${USERNAME}/anaconda2/bin:$PATH"
 export PYTHONNOUSERSITE=True
 export PYTHONPATH=/marconi_work/Pra13_3311/opt/anaconda/envs/ece2cmor3/lib/python2.7/site-packages
 export HDF5_DISABLE_VERSION_CHECK=1
-
 ece2cmor=$SRCDIR/ece2cmor.py
 
-mkdir -p $CMORDIR
-mkdir -p $LINKDATA
-mkdir -p $TMPDIR
-
 # Function defining CMORization of IFS output
-
 function runece2cmor_atm {
     PREFIX=$1
     THREADS=$2
@@ -153,7 +141,6 @@ function runece2cmor_atm {
     fi
     if [ $PREFIX == "CMIP6" ]; then
         #VARLIST=$VARLISTDIR/varlist-branch-primavera.json
-	#VARLIST=$VARLISTDIR/varlist-atm-prova.json
 	VARLIST=$VARLISTDIR/varlist-cmip6-paolo.json
     fi
     if [ $PREFIX == "PRIMAVERA" ]; then
@@ -164,15 +151,11 @@ function runece2cmor_atm {
         echo "Skipping non-existent varlist $VARLIST"
         return
     fi
-    TMPDIR=$TMPDIR/$PREFIX
-    mkdir -p $TMPDIR
-   
+    
     BASECONFIG=$METADATAFILE
     sed -e 's,<FREQ>,'${FREQARG}'hr,g' $BASECONFIG > $TMPDIR/temp-leg${LEG}.json
     sed -e 's,<OUTDIR>,'${CMORDIR}',g' $TMPDIR/temp-leg${LEG}.json > $TMPDIR/metadata-${EXP}-leg${LEG}.json
     CONFIGFILE=$TMPDIR/metadata-${EXP}-leg${LEG}.json
-
-
 
     # Launching ece2cmor3
     echo "================================================================"
@@ -182,7 +165,6 @@ function runece2cmor_atm {
     echo "================================================================" 
     $ece2cmor $ATMDIR $YEAR-$(printf %02g $MON)-01 --exp $EXP --conf $CONFIGFILE --vars $VARLIST --npp $THREADS --tmpdir $TMPDIR --tabid $PREFIX --tabdir $TABDIR  --mode append --atm --filter
     
-
     # Removing tmp directory
     if [ -d "${TMPDIR}" ]
     then
@@ -204,34 +186,26 @@ function runece2cmor_oce {
         echo "Error: data directory $OCEDIR for NEMO output does not exist, aborting" >&2; exit 1
     fi
     if [ $PREFIX == "CMIP6" ]; then
-        #VARLIST=$VARLISTDIR/varlist-cmip6.json
-	#VARLIST=$VARLISTDIR/varlist-oce-prova.json
-	VARLIST=$VARLISTDIR/varlist-branch-primavera.json
+        #VARLIST=$VARLISTDIR/varlist-cmip6-primavera.json
+	VARLIST=$VARLISTDIR/varlist-cmip6-paolo.json
     fi
     if [ $PREFIX == "PRIMAVERA" ]; then
-        VARLIST=$VARLISTDIR/varlist-prim.json
+	 VARLIST=$VARLISTDIR/varlist-primavera-paolo.json
     fi
     if [ ! -f $VARLIST ]; then
         echo "Skipping non-existent varlist $VARLIST"
         return
     fi
 
-    OCEDIR2=$TMPDIR/DATA
-    mkdir -p $OCEDIR2
-    echo "Copying rebuild processors data"
+    OCEDIR2=$LINKDATA
+    echo "Linkining rebuild processors data"
     for t in grid_T grid_U grid_V grid_W icemod scalar SBC ; do
 	ln -s $OCEDIR/*${t}.nc $OCEDIR2/
     done
-    	
 
-    TMPDIR=$TMPDIR/$PREFIX
-    mkdir -p $TMPDIR
-   
     sed -e 's,<FREQ>,'${FREQARG}'hr,g' $METADATAFILE > $TMPDIR/temp-leg${LEG}.json
     sed -e 's,<OUTDIR>,'${CMORDIR}',g' $TMPDIR/temp-leg${LEG}.json > $TMPDIR/metadata-${EXP}-leg${LEG}.json
     CONFIGFILE=$TMPDIR/metadata-${EXP}-leg${LEG}.json
-
-
 
     # Launching ece2cmor3
     echo "================================================================"
@@ -240,7 +214,6 @@ function runece2cmor_oce {
     echo "================================================================" 
     $ece2cmor $OCEDIR2 $YEAR-$(printf %02g $MON)-01 --exp $EXP --conf $CONFIGFILE --vars $VARLIST --npp $THREADS --tmpdir $TMPDIR --tabid $PREFIX --tabdir $TABDIR --mode append --oce    
     
-
     # Removing tmp directory
     if [ -d "${TMPDIR}" ]
     then
@@ -252,10 +225,7 @@ function runece2cmor_oce {
 
 }
 
-
-
 # Running functions
-
 time_start=$(date +%s)
 date_start=$(date)
 echo "========================================================="
@@ -270,11 +240,7 @@ fi
 echo "     Time at start: ${date_start}"
 echo "========================================================="
 
-
-
-
 # Currently set up to run everything that works!
-
 if [ "$ATM" -eq 1 ]; then
     runece2cmor_atm CMIP6 $NCORES $YEAR $MON
     runece2cmor_atm PRIMAVERA $NCORES $YEAR $MON
@@ -285,10 +251,6 @@ if [ "$OCE" -eq 1 ]; then
     #runece2cmor_oce PRIMAVERA $NCORES
 fi
 
-
-
-
-
 time_end=$(date +%s)
 time_taken=$((time_end - time_start))
 date_end=$(date)
@@ -298,19 +260,13 @@ echo "     Time at end: ${date_end}"
 echo "     Total time taken: ${time_taken} seconds"
 echo "==========================================================="
 
-
-
 # Removing unprocessed filtered data
-
 echo "Removing unprocessed data..."
 if [ -d $"{LINKDATA}" ]
 then
     echo "Deleting temp dir ${LINKDATA}"
     rm -rf "${LINKDATA}"
 fi
-
-
-
 
 # End of script
 echo "Exiting script"

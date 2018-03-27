@@ -25,10 +25,8 @@
 #
 ################################################################################
 
-
 #set -u
 set -e
-
 
 # Required arguments
 
@@ -43,7 +41,6 @@ USEREXP=imavilia  #extra by P. davini: allows analysis of experiment owned by di
 VERBOSE=${VERBOSE:-1}
 NCORES=32
 ACCOUNT=IscrB_DIXIT
-
 
 OPTIND=1
 while getopts ":h:e:l:s:m:v:" OPT; do
@@ -62,9 +59,6 @@ while getopts ":h:e:l:s:m:v:" OPT; do
     esac
 done
 shift $((OPTIND-1))
-
-
-
 
 # Determining year and months
 YEAR=$(( STARTYEAR + $((10#$LEG + 1)) - 1))
@@ -86,8 +80,6 @@ echo "Startyear for this experiment = ${STARTYEAR}"
 echo "Year corresponding to this leg = ${YEAR}"
 echo "Log file will be in = $LOGFILE" 
 
-
-
 if (( MON > 0 )); then
     echo "Only processing month ${MON}"
 fi
@@ -108,8 +100,6 @@ if [ "$ATM" -eq 0 ] && [ "$OCE" -eq 0 ]; then
     echo "Error: ATM and OCE arguments cannot both be 0!" >&2; exit 1
 fi
 
-
-
 SUBMIT="sbatch"
 SLURMOPT_ATM="EXP=$EXP,LEG=$LEG,STARTYEAR=$STARTYEAR,ATM=$ATM,OCE=0,VERBOSE=$VERBOSE,USERNAME=$USERNAME,USEREXP=$USEREXP,NCORES=$NCORES"
 echo SLURMOPT_ATM=${SLURMOPT_ATM}
@@ -127,7 +117,6 @@ done
 
 fi
 
-
 # Because NEMO output files corresponding to same leg are all in one big file, we don't
 # need to submit a job for each month, only one for each leg
 if [ "$OCE" -eq 1 ]; then
@@ -136,11 +125,8 @@ if [ "$OCE" -eq 1 ]; then
     JOBID=$($SUBMIT  --account=$ACCOUNT --job-name=proc_nemo-${YEAR}-${MON} --output=$LOGFILE/cmor_${EXP}_${YEAR}_${MON}_nemo_%j.out --error=$LOGFILE/cmor_${EXP}_${YEAR}_${MON}_nemo_%j.err --export=$SLURMOPT_OCE ./cmor_mon_filter.sh)
 fi
 
-
-
 echo "Jobs submitted!"
 echo "========================================================="
-
 
 # End of script
 exit 0

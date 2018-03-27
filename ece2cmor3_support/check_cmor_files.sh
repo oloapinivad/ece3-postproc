@@ -8,9 +8,9 @@ for table in CMIP6 PRIMAVERA ; do
 DIRFILE=/marconi/home/userexternal/pdavini0/scratch/newtest_24mar/$table/CMIP/EC-Earth-Consortium/EC-Earth3-HR/piControl/r1i1p1f1
 
 if [[ $table == CMIP6 ]] ; then
-	varlist=$HOME/ecearth3/ece3-postproc/ece2cmor3_support/varlist/varlist-branch-primavera.json
+	varlist=$HOME/ecearth3/ece3-postproc/ece2cmor3_support/varlist/varlist-cmip6-paolo.json
 elif [[ $table == PRIMAVERA ]] ; then
-	varlist=$HOME/ecearth3/ece3-postproc/ece2cmor3_support/varlist/varlist-prim.json
+	varlist=$HOME/ecearth3/ece3-postproc/ece2cmor3_support/varlist/varlist-primavera-paolo.json
 fi
 
 echo "----------------------------------------------"
@@ -56,7 +56,7 @@ for t in $(seq 0 $((${#s0[@]}-1))) ; do
 	#sed "${s0s[$t]},${f0s[$t]}!d" $varlist 
 done 
 echo
-perc=$(bc <<< "scale=2; $totfiles/$totvars*100")
+perc=$(bc <<< "scale=2; 100*$totfiles/$totvars")
 echo "TOTAL -> Theory:" $totvars "Actual:" $totfiles "i.e. $perc % "
 space=$(du -sh $DIRFILE | cut -f 1)
 #echo "Total space occupied by one year of exp $exp is: $space"
