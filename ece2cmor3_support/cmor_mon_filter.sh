@@ -35,8 +35,8 @@ EXP=${EXP:-qctr}
 LEG=${LEG:-000}
 STARTYEAR=${STARTYEAR:-1950}
 MON=${MON:-1}
-ATM=${ATM:-1}
-OCE=${OCE:-0}
+ATM=${ATM:-0}
+OCE=${OCE:-1}
 VERBOSE=${VERBOSE:-1}
 USERNAME=${USERNAME:-pdavini0}
 USEREXP=${USEREXP:-imavilia}
@@ -87,7 +87,7 @@ LINKDATA=$BASETMPDIR/tmp_${YEAR}_${MON}/linkdata
 
 # Output directory for the cmorized data
 #CMORDIR=$SCRATCH/ece3/${EXP}/cmorized/Year_${YEAR}/Month_${MON}
-CMORDIR=$SCRATCH/newtest_24mar
+CMORDIR=$SCRATCH/newtest_30mar
 
 #create folders
 mkdir -p $CMORDIR
@@ -142,10 +142,13 @@ function runece2cmor_atm {
     if [ $PREFIX == "CMIP6" ]; then
         #VARLIST=$VARLISTDIR/varlist-branch-primavera.json
 	VARLIST=$VARLISTDIR/varlist-cmip6-paolo.json
+	#VARLIST=$VARLISTDIR/varlist-short.json
+
     fi
     if [ $PREFIX == "PRIMAVERA" ]; then
         #VARLIST=$VARLISTDIR/varlist-prim.json
 	VARLIST=$VARLISTDIR/varlist-primavera-paolo.json
+	VARLIST=$VARLISTDIR/varlist-short.json
     fi
     if [ ! -f $VARLIST ]; then
         echo "Skipping non-existent varlist $VARLIST"
@@ -153,6 +156,8 @@ function runece2cmor_atm {
     fi
     
     BASECONFIG=$METADATAFILE
+    TMPDIR=$TMPDIR/$PREFIX
+    mkdir -p $TMPDIR
     sed -e 's,<FREQ>,'${FREQARG}'hr,g' $BASECONFIG > $TMPDIR/temp-leg${LEG}.json
     sed -e 's,<OUTDIR>,'${CMORDIR}',g' $TMPDIR/temp-leg${LEG}.json > $TMPDIR/metadata-${EXP}-leg${LEG}.json
     CONFIGFILE=$TMPDIR/metadata-${EXP}-leg${LEG}.json
@@ -188,6 +193,7 @@ function runece2cmor_oce {
     if [ $PREFIX == "CMIP6" ]; then
         #VARLIST=$VARLISTDIR/varlist-cmip6-primavera.json
 	VARLIST=$VARLISTDIR/varlist-cmip6-paolo.json
+	#VARLIST=$VARLISTDIR/varlist-short.json
     fi
     if [ $PREFIX == "PRIMAVERA" ]; then
 	 VARLIST=$VARLISTDIR/varlist-primavera-paolo.json
@@ -203,6 +209,8 @@ function runece2cmor_oce {
 	ln -s $OCEDIR/*${t}.nc $OCEDIR2/
     done
 
+    TMPDIR=$TMPDIR/$PREFIX
+    mkdir -p $TMPDIR
     sed -e 's,<FREQ>,'${FREQARG}'hr,g' $METADATAFILE > $TMPDIR/temp-leg${LEG}.json
     sed -e 's,<OUTDIR>,'${CMORDIR}',g' $TMPDIR/temp-leg${LEG}.json > $TMPDIR/metadata-${EXP}-leg${LEG}.json
     CONFIGFILE=$TMPDIR/metadata-${EXP}-leg${LEG}.json
@@ -242,7 +250,7 @@ echo "========================================================="
 
 # Currently set up to run everything that works!
 if [ "$ATM" -eq 1 ]; then
-    runece2cmor_atm CMIP6 $NCORES $YEAR $MON
+    #runece2cmor_atm CMIP6 $NCORES $YEAR $MON
     runece2cmor_atm PRIMAVERA $NCORES $YEAR $MON
 fi
 

@@ -4,7 +4,6 @@
     ],
     "Prim6hr": [
         "wsgmax",
-        "sfcWindmax",
         "pr",
         "rsds",
         "ps",
@@ -13,23 +12,9 @@
         "va4",
         "hus4"
     ],
-    "Prim3hrPt": [
-        "ua100m",
-        "va100m",
-        "ua100",
-        "va100",
-        "ta100",
-        "hus100",
-        "vortmean",
-        "zg7h",
-        "ua1000",
-        "va1000",
-        "hus1000"
-    ],
     "Prim3hr": [
         "sfcWind",
         "evspsbl",
-        "sfcWindmax"
     ],
     "Primmon": [
         "lwp"
