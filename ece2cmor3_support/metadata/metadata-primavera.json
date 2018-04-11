@@ -13,7 +13,6 @@
     "data_specs_version":           "1.3.15",
     "experiment_id":                "piControl",
     "forcing_index":                "1",
-    "further_info_url":             "http://furtherinfo.es-doc.org/piControl",
     "history":                      "",
     "initialization_index":         "1",
     "institution_id":               "EC-Earth-Consortium",

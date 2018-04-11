@@ -1,11 +1,12 @@
 #!/bin/bash
 
-verbose=1
+verbose=0
 
 for table in CMIP6 PRIMAVERA ; do
 
 #DIRFILE=/marconi/home/userexternal/pdavini0/scratch/newtest_23mar/$table/CMIP/EC-Earth-Consortium/EC-Earth3-HR/historical/r1i1p1f1
-DIRFILE=/marconi/home/userexternal/pdavini0/scratch/newtest_28mar/$table/CMIP/EC-Earth-Consortium/EC-Earth3-HR/piControl/r1i1p1f1
+DIRFILE=/marconi/home/userexternal/pdavini0/scratch/newtest_11apr/$table/CMIP/EC-Earth-Consortium/EC-Earth3-HR/piControl/r1i1p1f1
+#DIRFILE=/marconi/home/userexternal/pdavini0/scratch/newtest_30mar/$table/CMIP/EC-Earth-Consortium/EC-Earth3-HR/piControl/r1i1p1f1
 
 if [[ $table == CMIP6 ]] ; then
 	varlist=$HOME/ecearth3/ece3-postproc/ece2cmor3_support/varlist/varlist-cmip6-paolo.json

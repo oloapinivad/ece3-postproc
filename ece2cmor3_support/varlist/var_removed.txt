@@ -18,7 +18,7 @@ Prim3hr (1) : sfcWindmax (no sense looking for maxima for a 3hr output!)
 Prim6hr (1) : sfcWindmax (no sense looking for maxima for a 3hr output!)
  
 # Special handling
-CMIP6_3hr : replaced tso with tos
+CMIP6_3hr : replaced tso with tos, had to change it also in Jon Seddon's CMIP6_3hr table.
 
 #Changes in nemopar.json
 sctemtot -> thetaoga
