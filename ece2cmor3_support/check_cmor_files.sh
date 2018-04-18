@@ -1,11 +1,11 @@
 #!/bin/bash
 
-verbose=0
+verbose=1
 
 for table in CMIP6 PRIMAVERA ; do
 
 #DIRFILE=/marconi/home/userexternal/pdavini0/scratch/newtest_23mar/$table/CMIP/EC-Earth-Consortium/EC-Earth3-HR/historical/r1i1p1f1
-DIRFILE=/marconi/home/userexternal/pdavini0/scratch/newtest_11apr/$table/CMIP/EC-Earth-Consortium/EC-Earth3-HR/piControl/r1i1p1f1
+DIRFILE=/marconi/home/userexternal/pdavini0/scratch/newtest_17apr/$table/CMIP/EC-Earth-Consortium/EC-Earth3-HR/piControl/r1i1p1f1
 #DIRFILE=/marconi/home/userexternal/pdavini0/scratch/newtest_30mar/$table/CMIP/EC-Earth-Consortium/EC-Earth3-HR/piControl/r1i1p1f1
 
 if [[ $table == CMIP6 ]] ; then
@@ -36,9 +36,12 @@ for t in $(seq 0 $((${#s0[@]}-1))) ; do
 		vars=$(sed "$((${s0[$t]}+1)),$((${f0[$t]}-1))!d" $varlist | cut -f 2 -d '"')
 		nn=0; mm=0
 		for var in $vars ; do
-			#if [ "${var: -2}" -eq "27" ] 2> /dev/null ; then var=${var::-2} ; fi
-			#if [ ${var: -2} == 7h ] 2> /dev/null ; then var=${var::-2} ; fi
-			#echo ${var: -2} 
+			if [[ "$table" == CMIP6 ]] ; then
+				if [ "${var: -2}" -eq "27" ] 2> /dev/null ; then var=${var::-2} ; fi
+				if [ ${var: -2} == 7h ] 2> /dev/null ; then var=${var::-2} ; fi
+				if [ ${var: -1} == 4 ] 2> /dev/null ; then var=${var::-1} ; fi
+				#echo ${var: -2} 
+			fi
 			check=$(ls $DIRFILE/$categ/*/*/*/* 2> /dev/null | grep "/${var}_" | wc -l)
 			if [ $check -eq 0 ] ; then
 				echo "$var missing"

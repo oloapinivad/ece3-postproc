@@ -31,8 +31,9 @@ USEREXP=imavilia  #extra by P. davini: allows analysis of experiment owned by di
 NCORES=8
 ACCOUNT=IscrB_DIXIT
 MEMORY=50GB
-TLIMIT="04:59:00"
+TLIMIT="03:59:00"
 SUBMIT="sbatch"
+PARTITION=bdw_usr_prod
 
 #-----------------------#
 
@@ -61,7 +62,7 @@ echo "Submitting jobs via Slurm..."
 
 # Define basic options for slurm submission
 BASE_OPT="EXP=$EXP,YEAR=$YEAR,USEREXP=$USEREXP,NCORES=$NCORES"
-MACHINE_OPT="--account=$ACCOUNT --time $TLIMIT -n $NCORES --partition=bdw_usr_prod --mem=$MEMORY"
+MACHINE_OPT="--account=$ACCOUNT --time $TLIMIT -n $NCORES --partition=$PARTITION --mem=$MEMORY"
 
 # Atmospheric submission
 # For IFS we submit one job for each month

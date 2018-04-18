@@ -8,6 +8,7 @@
 #
 #########################################################################
 
+set -ex
 # Required arguments
 
 EXP=${EXP:-qctr}
@@ -17,6 +18,7 @@ ATM=${ATM:-1}
 OCE=${OCE:-1}
 USEREXP=${USEREXP:-imavilia}
 NCORES=${NCORES:-1}
+DO_PRIMA=true #extra flag for primavera tables
 
 # options controller 
 OPTIND=1
@@ -38,26 +40,29 @@ shift $((OPTIND-1))
 #----program folder definition ------- #
 
 # Location of cmorization tool
-SRCDIR=/marconi_work/Pra13_3311/ecearth3/PRIMAVERA/cmorization
+SRCDIR=${WORK}/ecearth3/cmorization
 
 #source code of ece2cmor3
 ECE2CMOR3DIR=${SRCDIR}/ece2cmor3/ece2cmor3
 
 #Jon Seddon tables
-TABDIR=${SRCDIR}/cmip6-cmor-tables/Tables
+TABDIR=${SRCDIR}/jon-seddon-tables/Tables
 
 #locaton of the ece2cmor3_support (this folder)
-SCRIPTDIR=$HOME/ecearth3/ece3-postproc/ece2cmor3_support
+SCRIPTDIR=${HOME}/ecearth3/ece3-postproc/ece2cmor3_support
+
+#anaconda location
+CONDADIR=${WORK}/opt/anaconda2/bin
 
 #---------user configuration ---------#
 
 # Output directory for the cmorized data
 #CMORDIR=$SCRATCH/ece3/${EXP}/cmorized/Year_${YEAR}/Month_${MON}
-CMORDIR=$SCRATCH/newtest_11apr
+CMORDIR=${SCRATCH}/newtest_17apr
 
 # Metadata directory and file
-METADATADIR=$SCRIPTDIR/metadata/
-METADATAFILE=$METADATADIR/metadata-primavera-${EXP}.json
+METADATADIR=${SCRIPTDIR}/metadata/
+METADATAFILE=${METADATADIR}/metadata-primavera-${EXP}.json
 
 # Variable list directory and files
 VARLISTDIR=$SCRIPTDIR/varlist
@@ -68,8 +73,8 @@ prim_var=$VARLISTDIR/varlist-primavera-paolo.json
 # Parameter table directory and files
 PARAMDIR=$SCRIPTDIR/paramtable
 IFSPAR=$PARAMDIR/ifspar.json
+#IFSPAR=/marconi_work/IscrB_DIXIT/ecearth3/cmorization/ece2cmor3/ece2cmor3/resources/ifspar.json
 NEMOPAR=$PARAMDIR/nemopar.json
-#NEMOPAR=/marconi_work/Pra13_3311/ecearth3/PRIMAVERA/cmorization/ece2cmor3/ece2cmor3/resources
 
 
 #--------output and tmpdir definition------#
@@ -84,7 +89,7 @@ fi
 # Temporary directories: cmor and linkdata
 BASETMPDIR=$SCRATCH/tmp_cmor/${EXP}_${RANDOM}
 
-#-------prelimiary setup------------------#
+#-------preliminary setup------------------#
 
 #clean up modules
 module unload hdf5 netcdf cdo netcdff szip zlib python intel
@@ -98,10 +103,11 @@ echo $LD_LIBRARY_PATH
 mkdir -p $CMORDIR $BASETMPDIR 
 
 #conda activation
-export PATH="/marconi/home/userexternal/pdavini0/work/opt/anaconda/bin:$PATH"
+export PATH="$CONDADIR:$PATH"
+echo $PATH
 source activate ece2cmor3
 export PYTHONNOUSERSITE=True
-export PYTHONPATH=/marconi_work/Pra13_3311/opt/anaconda/envs/ece2cmor3/lib/python2.7/site-packages
+#export PYTHONPATH=/marconi_work/Pra13_3311/opt/anaconda/envs/ece2cmor3/lib/python2.7/site-packages
 #export HDF5_DISABLE_VERSION_CHECK=1
 ece2cmor=$ECE2CMOR3DIR/ece2cmor.py
 
@@ -163,8 +169,8 @@ function runece2cmor_atm {
     fi
     
     # Removing linked directory
-    if [ -d "${OCEDIR}" ] ; then
-        echo "Deleting link dir ${OCEDIR}"; rm -rf "${OCEDIR}"
+    if [ -d "${ATMDIR}" ] ; then
+        echo "Deleting link dir ${ATMDIR}"; rm -rf "${ATMDIR}"
     fi
    
     #cleanup
@@ -254,12 +260,12 @@ echo "========================================================="
 # Currently set up to run everything that works!
 if [ "$ATM" -eq 1 ]; then
     runece2cmor_atm CMIP6 $NCORES $YEAR $MON
-    runece2cmor_atm PRIMAVERA $NCORES $YEAR $MON
+    if [[ ${DO_PRIMA} == true ]] ; then runece2cmor_atm PRIMAVERA $NCORES $YEAR $MON ; fi
 fi
 
 if [ "$OCE" -eq 1 ]; then
     runece2cmor_oce CMIP6 $NCORES $YEAR
-    #runece2cmor_oce PRIMAVERA $NCORES $YEAR
+    #if [[ ${DO_PRIMA} == true ]] ; then runece2cmor_oce PRIMAVERA $NCORES $YEAR ; fi
 fi
 
 # Removing linked directory
@@ -280,6 +286,7 @@ echo "==========================================================="
 
 # End of script
 echo "Exiting script"
+source deactivate
 exit 0
 
 

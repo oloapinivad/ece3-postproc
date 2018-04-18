@@ -137,16 +137,13 @@
     "Eday": [
         "tauu",
         "tauv",
-        "snw",
-        "mrro",
         "mrros",
         "snd",
         "lwsnl",
         "snm"
     ],
     "AERmon": [
-        "orog",
-        "ps"
+	"ps"
     ],
     "Emon": [
         "ta27",
@@ -174,18 +171,12 @@
         "tos",
         "sos"
     ],
-    "E3hrPt": [
-        "ua850",
-        "va850",
-        "psl"
-    ],
     "Lmon": [
         "mrsos",
         "mrso",
         "mrros",
         "mrro",
         "evspsblsoi",
-        "mrlsl",
         "tsl"
     ],
     "LImon": [
@@ -199,21 +190,17 @@
         "hfdsn"
     ],
     "6hrPlevPt": [
-        "hus27",
         "huss",
-        "mrlsl",
         "mrsos",
         "psl",
         "sfcWind",
         "snw",
-        "ta27",
         "tas",
         "ts",
         "tsl",
         "uas",
         "vas",
         "vortmean",
-        "zg27",
         "hus7h",
         "ta7h",
         "va7h",

@@ -1,7 +1,11 @@
 {
-    "day": [
-	"tas",
-        "ua"
+    "6hrPlevPt": [
+        "psl",
+	"ts",
+	"tsl"
+    ],
+     "6hrPlev": [
+        "psl"
     ],
      "SImon": [
         "sivol"

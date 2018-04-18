@@ -9,7 +9,11 @@ SIday (2) : sistrxdtop",sistrydtop (not defined in table)
 Amon  (3) : cl,clw,cli (alevel i.e. model levels, missing in output)
 CFmon (3) : ta,hur,hus (alevel i.e. model levels, missing in output)
 Emon  (11): wap,u2,v2,wap2,t2,uv,uwap,vwap,ut,vt,twap (alevel i.e. model levels, missing in output)
+AERmon (1) : orog (not existing in table)
+E3hrPt (3) : psl,ua850,va850 (not existing in any table!)
+Eday (1) :  snw,mrro (not in table, repetition from day)
 CFday (11): ua,va,ta,hus,wap,zg,hur,cl,clw,cli,pfull (alevel i.e. model levels, missing in output)
+6hrPlevPt (3): hus27,zg27,ta27 (too many data, we already have plev7h)
 Omon (7) : precip (not defined in table),hfbasin,hfx,hfy,msftyrho,tosga,bigthetaoga,masscello (missing in nemopar.json),zfullo,zhalfo(olevel, missing in output)
 
 PRIMAVERA tables
@@ -19,6 +23,7 @@ Prim6hr (1) : sfcWindmax (no sense looking for maxima for a 3hr output!)
  
 # Special handling
 CMIP6_3hr : replaced tso with tos, had to change it also in Jon Seddon's CMIP6_3hr table.
+mrlsl converted to mrsol in 6hrPlevPt and in Lmon (to Emon)
 
 #Changes in nemopar.json
 sctemtot -> thetaoga
