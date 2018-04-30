@@ -58,7 +58,7 @@ CONDADIR=${WORK}/opt/anaconda2/bin
 
 # Output directory for the cmorized data
 #CMORDIR=$SCRATCH/ece3/${EXP}/cmorized/Year_${YEAR}/Month_${MON}
-CMORDIR=${SCRATCH}/newtest_17apr
+CMORDIR=${SCRATCH}/newtest_24apr
 
 # Metadata directory and file
 METADATADIR=${SCRIPTDIR}/metadata/
@@ -259,7 +259,7 @@ echo "========================================================="
 
 # Currently set up to run everything that works!
 if [ "$ATM" -eq 1 ]; then
-    runece2cmor_atm CMIP6 $NCORES $YEAR $MON
+    #runece2cmor_atm CMIP6 $NCORES $YEAR $MON
     if [[ ${DO_PRIMA} == true ]] ; then runece2cmor_atm PRIMAVERA $NCORES $YEAR $MON ; fi
 fi
 

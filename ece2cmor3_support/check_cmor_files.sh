@@ -5,7 +5,7 @@ verbose=1
 for table in CMIP6 PRIMAVERA ; do
 
 #DIRFILE=/marconi/home/userexternal/pdavini0/scratch/newtest_23mar/$table/CMIP/EC-Earth-Consortium/EC-Earth3-HR/historical/r1i1p1f1
-DIRFILE=/marconi/home/userexternal/pdavini0/scratch/newtest_17apr/$table/CMIP/EC-Earth-Consortium/EC-Earth3-HR/piControl/r1i1p1f1
+DIRFILE=/marconi/home/userexternal/pdavini0/scratch/newtest_24apr/$table/CMIP/EC-Earth-Consortium/EC-Earth3-HR/piControl/r1i1p1f1
 #DIRFILE=/marconi/home/userexternal/pdavini0/scratch/newtest_30mar/$table/CMIP/EC-Earth-Consortium/EC-Earth3-HR/piControl/r1i1p1f1
 
 if [[ $table == CMIP6 ]] ; then
