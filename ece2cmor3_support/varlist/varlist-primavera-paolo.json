@@ -1,0 +1,40 @@
+{
+    "Prim6hrPt": [
+        "thetapv2"
+    ],
+    "Prim6hr": [
+        "wsgmax",
+        "pr",
+        "rsds",
+        "ps",
+        "clt",
+        "ua4",
+        "va4",
+        "hus4"
+    ],
+    "Prim3hr": [
+        "sfcWind",
+        "evspsbl"
+    ],
+    "Primmon": [
+        "lwp"
+    ],
+    "PrimdayPt": [
+        "ua",
+        "va"
+    ],
+    "Primday": [
+        "prmax",
+        "prmin",
+        "mrso",
+        "mrlsl",
+        "evspsbl",
+        "ts",
+        "hus23",
+        "ta23",
+        "ua23",
+        "va23",
+        "wap23",
+        "zg23"
+    ]
+}
