@@ -18,6 +18,8 @@ usage()
 # options and arguments #
 #########################
 
+ALT_RUNDIR=""
+
 while getopts "h?ur:" opt; do
     case "$opt" in
         h|\?)
@@ -38,7 +40,6 @@ if [ $# -gt 3 ]; then
 fi
 
 exp=$1
-ALT_RUNDIR=""
 
 # set variables which can be eval'd
 EXPID=$exp
