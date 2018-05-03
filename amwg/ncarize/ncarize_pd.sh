@@ -43,10 +43,13 @@
 # Author: Laurent Brodeau (laurent@misu.su.se), 2014
 #==========================================================================================
 
-set -e
+# Are the output levels "lev" or "plev" ?
+LEV=plev
+
+#set -e
 
 # Getting list of available confs:
-list_confs=`\ls ../conf_*.bash | sed -e "s|../conf_||g" -e "s|.bash||g"`
+#list_confs=`\ls ../conf_*.bash | sed -e "s|../conf_||g" -e "s|.bash||g"`
 
 usage()
 {
@@ -94,7 +97,8 @@ echo " *** First year  = ${YEAR1}"
 echo " *** Last year   = ${YEAR2}"
 echo; echo
 
-fconfig="../conf_${MY_SETUP}.bash"
+#fconfig="../conf_${MY_SETUP}.bash"
+fconfig="$ECE3_POSTPROC_TOPDIR/conf/$ECE3_POSTPROC_MACHINE/conf_amwg_${ECE3_POSTPROC_MACHINE}.sh"
 if [ ! -f ${fconfig} ]; then echo " ERROR: no configuration file found: ${fconfig}"; exit; fi
 . ${fconfig}
 
@@ -104,7 +108,7 @@ echo " *** POST_DIR = ${POST_DIR}"
 echo " *** EMOP_CLIM_DIR = ${EMOP_CLIM_DIR}"
 echo " *** DIR_EXTRA = ${DIR_EXTRA}"
 echo " *** SOSIE_DROWN_EXEC = ${SOSIE_DROWN_EXEC}"
-echo " *** MESH_MASK_ORCA = ${MESH_MASK_ORCA}"
+echo " *** MESH_MASK_ORCA = ${NEMO_MESH_DIR}/${MESH_MASK_ORCA}"
 echo
 echo " *** requested fields for ocean:"
 echo "   => ${LIST_V_2D_OCE}"
@@ -127,8 +131,11 @@ mkdir -p ${DIR_CL} ; rm -f ${DIR_CL}/*.tmp  ; rm -f ${DIR_CL}/*.nc
 LM="01 02 03 04 05 06 07 08 09 10 11 12"
 
 # first, find IFS horizontal resolution from one of the processed output
-fname=$(ls -1 ${POST_DIR}/mon/Post_$YEAR1/* | tail -1)
+#fname=$(ls -1 ${POST_DIR}/mon/Post_$YEAR1/* | tail -1)
+fname=$(ls -1 ${POST_DIR}/mon/Post_$YEAR1/${expname}_${YEAR1}_msl.nc | tail -1)
+echo "fname $fname"
 GAUSS_RES=N$(($(ncdump -h ${fname} | sed -rn "s/lat = ([0-9]+) ;/\1/p") / 2))
+echo "gaussres $GAUSS_RES"
 
 # test if that was a coupled run, ie if we can find ocean fields:
 i_ocean=0
@@ -286,7 +293,8 @@ for var in ${LIST_V_2D_ATM}; do
 
                 # Testing if no degenerate level dimension and variable of length 1:
                 ca=`ncdump -h tmp.nc | grep " ${var}("`
-                for ctest in depth lev alt; do
+#                for ctest in depth lev alt; do
+                for ctest in depth $LEV alt; do
                     if [[ "${ca}" =~ "${ctest}, lat" ]]; then
                         echo "Need to remove degenerate dimension ${ctest} from ${var}"
                         ncwa -O -h    -a ${ctest} tmp.nc  -o tmp2.nc ; rm -f tmp.nc  ; # removes lev dimension
@@ -357,12 +365,12 @@ if [ ${i_ocean} -eq 1 ]; then
                 fi
                 
                 # If time-record is called "time_counter", renaming to "time"
-                #ca=`ncdump -h ${cf} | grep UNLIMITED | grep time_counter`
-                #if [ ! "${ca}" = "" ]; then
-                #    echo "ncrename -d time_counter,time ${cf}"
-                #    ncrename -O -d time_counter,time ${cf} -o ./copy.tmp
-                #    cf="./copy.tmp"
-                #fi
+#                ca=`ncdump -h ${cf} | grep UNLIMITED | grep time_counter`
+#                if [ ! "${ca}" = "" ]; then
+#                    echo "ncrename -d time_counter,time ${cf}"
+#                    ncrename -O -d time_counter,time ${cf} -o ./copy.tmp
+#                    cf="./copy.tmp"
+#                fi
 
                 if [ ! ${SOSIE_DROWN_EXEC} == "" ]; then
 
@@ -383,13 +391,28 @@ if [ ${i_ocean} -eq 1 ]; then
                 # Need to interpolate on gaussian grid ${GAUSS_RES}:
                 echo "cdo remapbil,${GAUSS_RES_lc} -selvar,${var} ${cf} tmp1.nc"
                 $cdo remapbil,${GAUSS_RES_lc}       -selvar,${var} ${cf} tmp1.nc
+
+#A                echo "fattooooo remap"
                 
                 rm -f tmp.nc; echo
                 
                 
                 for cm in ${LM}; do
-                    ncks -h -a -F -O -d time,${cm} tmp1.nc -o tmp2.nc
+#A                echo "${cm}"
+    
+#A                # If time-record is called "time_counter", renaming to "time"
+                ca=`ncdump -h ${cf} | grep UNLIMITED | grep time_counter`
+                if [ ! "${ca}" = "" ]; then            
+                  echo "ncrename -d time_counter,time ${cf}"
+#org                    ncrename -O -d time_counter,time ${cf} -o ./tmp1.nc
+                    ncrename -O -d time_counter,time tmp1.nc -o ./tmp3.nc
+                fi
+
+#org                    ncks -h -a -F -O -d time,${cm} tmp1.nc -o tmp2.nc
+                    ncks -h -a -F -O -d time,${cm} tmp3.nc -o tmp2.nc
                     ncatted -h -O -a history,global,d,, tmp2.nc ; # removing global attribute history
+
+#A                echo "fattooooo ncks!"
                     
                     fo=./${varncar}_${expname}_${jy}${cm}.tmp
                     if [ ! "${var}" = "${varncar}" ]; then
@@ -398,7 +421,7 @@ if [ ${i_ocean} -eq 1 ]; then
                         mv -f tmp2.nc ${fo}
                     fi
                 done
-                rm -f tmp1.nc copy.tmp
+                rm -f tmp1.nc copy.tmp tmp3.nc  #A tmp3.nc
                 jy=`expr ${jy} + 1`
             done
 
@@ -573,7 +596,7 @@ if [ `var_is_there Z3` -eq 1 ]; then
     echo; echo "Switching Z3 from m^2/s^2 to m !"
     for cm in ${LM}; do
     # Unit !!!
-        ncap2 -h -O -s 'Z3=Z3/9.8162' ${expname}_${cm}_climo.nc -o tmp.nc
+        ncap2 -h -O -s 'Z3=Z3/9.8162f' ${expname}_${cm}_climo.nc -o tmp.nc
         ncatted -O -a units,Z3,o,c,'m' tmp.nc
         ncks -h -A -a -v Z3 tmp.nc -o ${expname}_${cm}_climo.nc
         rm -f tmp.nc
@@ -676,7 +699,7 @@ for cvp in PRECT PRECC PRECL; do
     if [ `var_is_there ${cvp}` -eq 1 ]; then
         echo; echo "Switching ${cvp} from kg/m^2/s to m/s !"
         for cm in ${LM}; do
-            ncap2 -h -O -s "${cvp}=${cvp}/1000." ${expname}_${cm}_climo.nc -o tmp.nc
+            ncap2 -h -O -s "${cvp}=${cvp}/1000.f" ${expname}_${cm}_climo.nc -o tmp.nc
             ncatted -O -a units,${cvp},o,c,'m/s' tmp.nc
             #ncks -O -h -x -v ${cvp} ${expname}_${cm}_climo.nc -o ${expname}_${cm}_climo.nc ; # deleting ${cvp} from clim file
             ncks -h -A -a -v ${cvp} tmp.nc -o ${expname}_${cm}_climo.nc  ; # adding new ${cvp} from clim file
@@ -693,7 +716,7 @@ if [ ${i_ocean} -eq 0 ] ; then
         if [ `var_is_there PSL` -eq 1 ]; then
             echo; echo "Creating empty ${cv} field!"
             for cm in ${LM}; do
-                ncap2 -h -O -s "${cv}=float(PSL*0.)" ${expname}_${cm}_climo.nc -o tmp.nc
+                ncap2 -h -O -s "${cv}=float(PSL*0.f)" ${expname}_${cm}_climo.nc -o tmp.nc
                 ncks -h -A -a -v ${cv} tmp.nc -o ${expname}_${cm}_climo.nc
                 rm -f tmp.nc
             done
@@ -715,8 +738,15 @@ if [ ! -f ${fgwh} ]; then echo "PROBLEM: ${fgwh} is missing!!!"; exit 1; fi
 
 echo; echo "Adding gauss weight (gw)!"
 for cm in ${LM}; do
-    ncks -h -A -a -v gw ${fgwh} -o ${expname}_${cm}_climo.nc
+#    ncks -h -A -a -v gw ${fgwh} -o ${expname}_${cm}_climo.nc
+#-----------------------------------------------------------
+    ncks -h -O -4 ${fgwh} -o tmp$$.nc
+    ncap2 -h -O -s 'lon=double(lon);lat=double(lat)' ${expname}_${cm}_climo.nc ${expname}_${cm}_climo.nc
+    ncks -h -A -a -v gw tmp$$.nc -o ${expname}_${cm}_climo.nc
+    rm -f tmp$$.c
+#-----------------------------------------------------------
 done
+echo
 
 echo; echo "Adding land fraction (LANDFRAC)!"
 for cm in ${LM}; do
@@ -749,6 +779,12 @@ for cm in ${LM}; do
 
     # Flip latitude:
     ncpdq -O -h -a -lat ${expname}_${cm}_climo.nc ${expname}_${cm}_climo.nc
+
+    # Make sure levels are lev
+    if [[ $LEV == plev ]] ; then
+        ncrename -h -O -d plev,lev -v plev,lev ${expname}_${cm}_climo.nc ${expname}_${cm}_climo.nc
+    fi
+
 
     # from Pa to hPa (and renaming to mb)
     ncap2 -h -O -s 'lev=lev/100' -s "lev@units=\"mb\"" ${expname}_${cm}_climo.nc -o ${expname}_${cm}_climo.nc

@@ -1,8 +1,7 @@
-#!/bin/ksh
-
+#!/usr/bin/env bash
 
 # Getting list of available confs:
-list_confs=`\ls ../conf_*.bash | sed -e "s|../conf_||g" -e "s|.bash||g"`
+#list_confs=`\ls ../conf_*.bash | sed -e "s|../conf_||g" -e "s|.bash||g"`
 
 usage()
 {
@@ -45,7 +44,8 @@ then
     exit 1
 fi
 
-fconfig="../conf_${MY_SETUP}.bash"
+#fconfig="../conf_${MY_SETUP}.bash"
+fconfig="$ECE3_POSTPROC_TOPDIR/conf/$ECE3_POSTPROC_MACHINE/conf_amwg_${ECE3_POSTPROC_MACHINE}.sh"
 if [ ! -f ${fconfig} ]; then echo " ERROR: no configuration file found: ${fconfig}"; exit; fi
 . ${fconfig}
 
