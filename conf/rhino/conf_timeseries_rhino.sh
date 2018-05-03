@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/bash
 
 #############################################
 # Configuration file for timeseries script  #
@@ -11,11 +11,11 @@
 # Token ${USERexp} can be used (and set through -u option at the command line).
 # Provide default if using it. 
 # 
-export ECE3_POSTPROC_POSTDIR='/scratch/ms/nl/${USER}/ECEARTH-RUNS/${EXPID}/post'
+export ECE3_POSTPROC_POSTDIR='/lustre3/projects/CMIP6/${USER}/rundirs/${EXPID}/post'
 #
 # Where to find mesh and mask files for NEMO.
 # Files are expected in $MESHDIR_TOP/$NEMOCONFIG.
-export MESHDIR_TOP="/perm/ms/nl/nm6/ECE3-DATA/post-proc"
+export MESHDIR_TOP=${ECE3_POSTPROC_DATADIR}/post-proc
 
 # --- OUTPUT -----
 #
@@ -27,36 +27,28 @@ export MESHDIR_TOP="/perm/ms/nl/nm6/ECE3-DATA/post-proc"
 #     
 #     (See also ./conf_ecmean_rhino.sh for a similar 'diagdir')
 #     
-export ECE3_POSTPROC_DIAGDIR='$HOME/ecearth3/diag/'
+export ECE3_POSTPROC_DIAGDIR="$HOME/EC-Earth/diag"
 #
-#  [2] The output can be put on a remote machine RHOST (login: RUSER)
-#      in the WWW_DIR_ROOT/time_series/${EXPID} directory, using ssh and scp.
+#  [2] The output can be put on a remote machine through ssh and scp.
 #       =>  Comment or set RHOST="" to disable this function...
 #export RHOST=pc170547
 export RUSER=sager
 export WWW_DIR_ROOT="/usr/people/sager/ECEARTH/diag"
 
 
-############################
-# Required software   #
-############################
-
-for soft in nco netcdf python cdo cdftools
-do
-    if ! module -t list 2>&1 | grep -q $soft
-    then
-        module load $soft
-    fi
-done
+######################
+# Required software  #
+######################
+#  nco netcdf python cdo cdftools
 
 # The CDFTOOLS set of executables should be found into:
-export CDFTOOLS_BIN="${CDFTOOLS_DIR}/bin"
+export CDFTOOLS_BIN="/nfs/home/users/sager/installed/CDFTOOLS/bin"
 
 # The rebuild_nemo (provided with NEMO), that somebody has built (relies on flio_rbld.exe):
-export RBLD_NEMO="${PERM}/trunk/sources/nemo-3.6/TOOLS/REBUILD_NEMO/rebuild_nemo"
+export RBLD_NEMO="/nfs/home/users/sager/primavera/sources/nemo-3.6/TOOLS/REBUILD_NEMO/rebuild_nemo"
 
-export PYTHON=python
+export PYTHON=/nfs/home/users/sager/anaconda2/bin/python
 export cdo=cdo
 
 # job scheduler submit command
-submit_cmd="qsub"
+submit_cmd="sbatch"
