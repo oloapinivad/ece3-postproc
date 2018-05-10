@@ -24,7 +24,7 @@ set -ue
 EXP=qctr
 YEAR=1950
 ATM=1
-OCE=0
+OCE=1
 USEREXP=imavilia  #extra by P. davini: allows analysis of experiment owned by different user
 
 #----machine dependent argument----#
