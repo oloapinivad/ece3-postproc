@@ -37,7 +37,8 @@ while getopts "hu:a:m:n:" opt; do
             ;;
         m)  options=${options}" -m $OPTARG"
             ;;
-        u)  USERexp=$OPTARG
+        u)  options="${options} -u $OPTARG"
+            USERexp=$OPTARG
             ;;
         a)  account=$OPTARG
             ;;
@@ -54,6 +55,8 @@ fi
 
 EXPID=$1
 
+#echo "$USERexp"
+
 # check environment
 [[ -z "${ECE3_POSTPROC_TOPDIR:-}" ]] && echo "User environment not set. See ../README." && exit 1
 . ${ECE3_POSTPROC_TOPDIR}/functions.sh
@@ -63,11 +66,12 @@ check_environment
 CONFDIR=${ECE3_POSTPROC_TOPDIR}/conf/${ECE3_POSTPROC_MACHINE}
 
 . ${CONFDIR}/conf_hiresclim_${ECE3_POSTPROC_MACHINE}.sh
+echo "$USERexp"
 
-# -- add here options for submit commands
-case "${submit_cmd}" in
-        sbatch) queue_cmd="squeue -u $USER  -o %.16j" ;;
-esac
+# -- add here options for submit commands     (queue_cmd definito in config perchè diverso a seconda di cca o marconi) 
+#case "${submit_cmd}" in
+#        sbatch) queue_cmd="squeue -u $USER  -o %.16j" ;;
+#esac
 
 # -- Find first and last year
 year="*"

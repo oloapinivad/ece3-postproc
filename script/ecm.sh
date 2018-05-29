@@ -39,9 +39,6 @@ while getopts "hcr:u:a:py" opt; do
 	u)  options="${options} -u $OPTARG"
 	    USERexp=$OPTARG
             ;;
-        u)  options="${options} -u $OPTARG"
-            USERexp=$OPTARG
-            ;;
         p)  options="${options} -p"
             ;;
         y)  options="${options} -y"

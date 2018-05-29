@@ -14,9 +14,11 @@ unset echo verbose
 setenv DIAG_VERSION 120131  # version number YYMMDD
 
 set test_casename  = "${TEST_RUN}"
+set cntl_casename  = "${CNTL_RUN}"         #A
 set test_period    = "${TEST_PERIOD}"
 echo
 echo "test_casename = ${test_casename} !"
+echo "cntl_casename = ${cntl_casename} !"  #A
 echo "test_period = ${test_period} !"
 echo
 
@@ -132,8 +134,10 @@ sleep 2
 setenv DATA_HOME "DUMMY" ; #lolo
 set test_path_history  = ${EMOP_CLIM_DIR}/history/${test_casename}/ 
 set test_path_climo    = ${EMOP_CLIM_DIR}/clim_${test_casename}_${test_period}/
-set test_path_diag    = ${EMOP_CLIM_DIR}/diag_${test_casename}_${test_period}/
+#A set test_path_diag    = ${EMOP_CLIM_DIR}/diag_${test_casename}_${test_period}/
+set test_path_diag    = ${EMOP_CLIM_DIR}/diag_${test_casename}_${cntl_casename}_${test_period}/
 
+echo "path_diag is ${test_path_diag}"
 mkdir -p ${test_path_history}
 
 #------------------------------------------------------------------
@@ -1963,12 +1967,12 @@ if ($web_pages == 0) then
     cd $WKDIR
     set tarfile = ${test_casename}-obs_${test_period}.tar
   else          # model-to-model 
-    setenv WEBDIR ${WKDIR}${test_casename}_${test_period}_-_${cntl_casename}_${cntl_period}
+    setenv WEBDIR ${WKDIR}${test_casename}_${test_period}-mod_${cntl_casename}_${cntl_period}
     if (! -e $WEBDIR) mkdir $WEBDIR
     cd $WEBDIR
     $HTML_HOME/setup_2models ${test_casename} ${cntl_casename} $image
     cd $WKDIR
-    set tarfile = ${test_casename}_${test_period}_-_${cntl_casename}_${cntl_period}.tar
+    set tarfile = ${test_casename}_${test_period}-mod_${cntl_casename}_${cntl_period}.tar
   endif
 endif
 
@@ -3548,12 +3552,12 @@ if ($web_pages == 0) then
     cd ${test_path_diag}
     set tarfile = ${test_casename}-obs_${test_period}.tar
   else          # model-to-model 
-    setenv WEBDIR ${test_path_diag}${test_casename}_${test_period}_-_${cntl_casename}_${cntl_period}
+    setenv WEBDIR ${test_path_diag}${test_casename}_${test_period}-mod_${cntl_casename}_${cntl_period}
     if (! -e $WEBDIR) mkdir $WEBDIR
     cd $WEBDIR
     $HTML_HOME/setup_2models ${test_casename} ${cntl_casename} $image
     cd ${test_path_diag}
-    set tarfile = ${test_casename}_${test_period}_-_${cntl_casename}_${cntl_period}.tar
+    set tarfile = ${test_casename}_${test_period}-mod_${cntl_casename}_${cntl_period}.tar
   endif
 endif
 
@@ -4485,7 +4489,7 @@ rm -f ${DIAG_HOME}/emop_${1}.csh
 
 
 # Exporting to remote host:
-set DIR2EXP = "${EMOP_CLIM_DIR}/diag_${test_casename}_${test_period}/${test_casename}_${test_period}_-_${cntl_casename}_${cntl_period}"
+set DIR2EXP = "${EMOP_CLIM_DIR}/diag_${test_casename}_${test_period}/${test_casename}_${test_period}-mod_${cntl_casename}_${cntl_period}"
 
 set RWWWD   = ${WWW_DIR_ROOT}/AMWG
 
@@ -4508,7 +4512,7 @@ if ( ${RHOST} != "" ) then
     echo "rsync -avP -e 'ssh -c arcfour' ${DIR2EXP} ${RUSER}@${RHOST}:${RWWWD}/"
     rsync -avP -e 'ssh -c arcfour' ${DIR2EXP} ${RUSER}@${RHOST}:${RWWWD}/
     
-    echo "Diagnostic page installed on remote host ${RHOST} in ${RWWWD}/${test_casename}_${test_period}_-_${cntl_casename}_${cntl_period} !"
+    echo "Diagnostic page installed on remote host ${RHOST} in ${RWWWD}/${test_casename}_${test_period}-mod_${cntl_casename}_${cntl_period} !"
     echo "( Also browsable on local host in ${DIR2EXP}/ )"
 
 else

@@ -435,7 +435,7 @@ if (compare.eq."OBS") then
      A = cycle_PREH2O (infile1,outptr1)
    end if
    if (vars(i).eq."SOLIN") then
-     A = cycle_SOLIN (infile1,outptr1)
+     A = (/cycle_SOLIN (infile1,outptr1)/)
    end if
    if (vars(i).eq."TAUX_OCEAN") then
      A = cycle_TAUX_OCEAN (infile1,outptr1)

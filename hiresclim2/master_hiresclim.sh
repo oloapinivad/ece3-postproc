@@ -62,8 +62,13 @@ export months_per_leg
 . ${ECE3_POSTPROC_TOPDIR}/functions.sh
 check_environment
 
+echo "which cdo? echo $CDO_VERSION"
+echo "which netcdf? echo $NETCDF_DIR"
+echo "which netcdf4? echo $NETCDF4_DIR"
 # load user and machine specifics
 . $ECE3_POSTPROC_TOPDIR/conf/$ECE3_POSTPROC_MACHINE/conf_hiresclim_$ECE3_POSTPROC_MACHINE.sh
+echo "which cdo? echo $CDO_VERSION"
+echo "which netcdf? echo $CRAY_NETCDF_DIR"
 
 ########## POST-PROCESSING OPTIONS ###############
 
@@ -79,7 +84,10 @@ ifs_6hrs=${ECE3_POSTPROC_HC_IFS_6HRS:-0}
 
 # NEMO [ON by default (applied only if available), Extra (require nco) OFF by default]
 nemo=${ECE3_POSTPROC_HC_NEMO:-1}
-nemo_extra=${ECE3_POSTPROC_HC_NEMO_EXTRA:-0}
+nemo_extra=${ECE3_POSTPROC_HC_NEMO_EXTRA:-1}
+
+echo "nemo $nemo"
+echo "nemo_extra $nemo_extra"
 
 ########## HARDCODED OPTIONS ###############
 
@@ -110,13 +118,16 @@ mkdir -p $OUTDIR0
     echo "*EE* IFS output dir ($IFSRESULTS) for experiment $expname does not exist!" &&  \
     exit 1
 
+echo "$NEMORESULTS nemo"
+
 # does NEMO output exist? if interested, find resolution
 NEMOCONFIG=""
 if [[ -e ${NEMORESULTS} && $nemo == 1 ]]
 then 
     nemo=1
   
-    a_file=$(ls -1 ${NEMORESULTS}/*grid_V* | head -n1) 
+#A    a_file=$(ls -1 ${NEMORESULTS}/*grid_V* | head -n1) 
+    a_file=$(ls -r ${NEMORESULTS}/*grid_V* | head -n1) 
     ysize=$(cdo griddes $a_file | grep ysize | awk '{print $3}')
 
     case $ysize in

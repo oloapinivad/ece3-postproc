@@ -1,44 +1,159 @@
-#!/bin/ksh
-#PBS -N amwg_taj4
-#PBS -q ns
-#PBS -l EC_billing_account=spnltune
-#PBS -l EC_total_tasks=1
-#PBS -l EC_threads_per_task=1
-#PBS -l EC_memory_per_task=12GB
-#PBS -l EC_hyperthreads=1
-#PBS -l walltime=03:00:00
-#PBS -j oe
-#PBS -e /scratch/ms/it/ccjh/log/amwg_taj4.err
-#PBS -o /scratch/ms/it/ccjh/log/amwg_taj4.out
-#PBS -S /bin/bash
+#!/usr/bin/env bash
 
-set -uex
-cd $PBS_O_WORKDIR
-module load netcdf nco cdo python ncl
+usage()
+{
+   echo "Usage: amwg_modmod.sh [-u USERexp] [-r ALT_RUNDIR] EXP1 EXP2 YEAR1 YEAR2"
+   echo
+   echo "Do an AMWG analysis of experiment EXP1 EXP2 in years YEAR1 to YEAR2"
+   echo
+   echo "Basically a wrapper around:"
+   echo "     ncarize (to create climatology from post-processed EC-Earth output)"
+   echo "     diag_mod_vs_mod.sh (the plot engine)"
+   echo 
+   echo "Option:"
+   echo "   -r ALT_RUNDIR : fully qualified path to another user EC-Earth top RUNDIR [NOT TESTED YET!]"
+   echo "                that has been  processed by hiresclim2."
+   echo "                That means RUNDIR/EXP/post must exists, contain files, and be readable"
+   echo "   -u USERexp  : alternative user owner of the experiment, default $USER"
+}
 
-##########################
-## Configuration file
-##########################
+ALT_RUNDIR=""
+set -ue
 
-. $HOME/ecearth3/post/conf/conf_users.sh
-. $CONFDIR/conf_amwg_$MACHINE.sh
+# -- options
 
-expname1=taj1
-expname2=taj2
-year1=1991
-year2=1999
-resolution=N128 #aka T255
+while getopts "h?u:r:" opt; do
+    case "$opt" in
+        h|\?)
+            usage
+            exit 0
+            ;;
+        u)  USERexp=$OPTARG
+            ;;
+        r)  ALT_RUNDIR=$OPTARG 
+            ;;
+    esac
+done
+shift $((OPTIND-1))
 
-#Configuration file
-conf=$MACHINE
+if [ "$#" -ne 4 ]; then
+   usage
+   exit 0
+fi
 
-PROGDIR=$EMOP_DIR
-cd $PROGDIR/ncarize
-bash $PROGDIR/ncarize/ncarize_pd.sh -C $conf -R $expname2 -g $resolution -i ${year1} -e ${year2}
-cd $PROGDIR/amwg_diag
-bash $PROGDIR/amwg_diag/diag_mod_vs_mod.sh -C $conf -R $expname1,$expname2 -P ${year1}-${year2},${year1}-${year2}
+expname=$1
+expname2=$2
+year1=$3
+year2=$4
 
-DIAGS=$EMOP_CLIM_DIR/diag_${expname}_${year1}-${year2}
+EXPID=$expname
+
+# -- Sanity check
+[[ -z $ECE3_POSTPROC_TOPDIR  ]] && echo "User environment not set. See ../README." && exit 1 
+#[[ -z $ECE3_POSTPROC_RUNDIR  ]] && echo "User environment not set. See ../README." && exit 1 
+[[ -z $ECE3_POSTPROC_DATADIR ]] && echo "User environment not set. See ../README." && exit 1 
+[[ -z $ECE3_POSTPROC_MACHINE ]] && echo "User environment not set. See ../README." && exit 1 
+
+
+# -- User configuration
+. $ECE3_POSTPROC_TOPDIR/conf/$ECE3_POSTPROC_MACHINE/conf_amwg_${ECE3_POSTPROC_MACHINE}.sh
+
+# - installation params
+export EMOP_DIR=$ECE3_POSTPROC_TOPDIR/amwg
+export DIR_EXTRA="${EMOP_DIR}/data"
+
+# - HiresClim2 post-processed files loc 
+if [[ -n $ALT_RUNDIR ]]
+then
+#    export POST_DIR=$ALT_RUNDIR/mon
+    export POST_DIR=$ALT_RUNDIR
+else
+#    export POST_DIR=$(eval echo ${ECE3_POSTPROC_POSTDIR})/mon
+    export POST_DIR=$(eval echo ${ECE3_POSTPROC_POSTDIR})
+fi
+[[ ! -d $POST_DIR ]] && echo "*EE* Experiment output dir $POST_DIR does not exist!" && exit 1
+
+echo "$POST_DIR"
+
+# test if it was a coupled run, and find resolution
+# TODO use same checks in hiresclim2, ECMean and timeseries
+# TODO test with real 2 year data, in my (Etienne) tests with faked 2 year data the plots were very wrong
+check=$( ls $POST_DIR/mon/Post_*/*sosaline* 2>/dev/null || true )
+NEMOCONFIG=""
+do_ocean=0
+if [[ -n $check ]]
+then
+    do_ocean=1
+
+    a_file=$(ls -1 $POST_DIR/mon/Post_*/*sosaline.nc | head -n1)
+    ysize=$(cdo griddes $a_file | grep ysize | awk '{print $3}')
+
+    case $ysize in
+        1050)
+            NEMOCONFIG=ORCA025L75
+            ;;
+        292)
+            NEMOCONFIG=ORCA1L75
+            ;;
+        *)
+            echo '*EE* Unaccounted NEMO resolution: ysize=$ysize' && exit 1
+    esac
+
+    export NEMOCONFIG
+    echo "*II* ecmean accounts for nemo output"
+fi
+
+echo "nemoconf is $NEMOCONFIG"
+
+# where to find mesh and mask files 
+export NEMO_MESH_DIR=${MESHDIR_TOP}/$NEMOCONFIG
+echo "$NEMO_MESH_DIR"
+
+# -- get to work
+if [[ ! -d "$EMOP_CLIM_DIR/clim_${expname}_${year1}-${year2}" ]] 
+then
+
+  echo "get to work ncarize $expname $year1 $year2"
+  cd $EMOP_DIR/ncarize
+  ./ncarize_pd.sh -C ${ECE3_POSTPROC_MACHINE} -R $expname -i ${year1} -e ${year2}
+
+else
+  echo "bye bye $expname has already been postprocessed!"
+fi
+
+if [[ ! -d "$EMOP_CLIM_DIR/clim_${expname2}_${year1}-${year2}" ]] 
+then
+
+  echo "get to work ncarize $expname2 $year1 $year2"
+  cd $EMOP_DIR/ncarize
+  ./ncarize_pd.sh -C ${ECE3_POSTPROC_MACHINE} -R $expname2 -i ${year1} -e ${year2}
+
+else
+  echo "bye bye $expname2 has already been postprocessed!"
+fi
+
+######----prova-------
+#if [[  -d "$EMOP_CLIM_DIR/diag_${expname}_${expname2}_${year1}-${year2}" ]]
+#then
+
+#  echo "bye bye all has already been postprocessed!"
+
+#else
+
+#  echo "get to work..."
+cd $EMOP_DIR/amwg_diag
+./diag_mod_vs_mod.sh -C ${ECE3_POSTPROC_MACHINE} -R $expname,$expname2 -P ${year1}-${year2},${year1}-${year2}
+
+#fi
+######----prova-------
+
+# -- Store
+DIAGS=$EMOP_CLIM_DIR/diag_${expname}_${expname2}_${year1}-${year2}
 cd $DIAGS
-tar cvfz diag_${expname}.tar ${expname}-obs_${year1}-${year2}
-ectrans -remote sansone -source diag_${expname}.tar -verbose -overwrite
+rm -r -f diag_mod_${expname}-${expname2}.tar
+mv ${expname}_${year1}-${year2}-mod_${expname2}_${year1}-${year2} ${expname}-${expname2}-mod_${year1}-${year2}   #Ale
+tar cvf diag_${expname}-${expname2}_mod.tar ${expname}-${expname2}-mod_${year1}-${year2} 
+#tar cvf diag_mod_${expname}-${expname2}.tar ${expname}_${year1}-${year2}-mod_${expname2}_${year1}-${year2}
+ectrans -remote sansone -source diag_${expname}-${expname2}_mod.tar -verbose -overwrite
+ectrans -remote sansone -source ~/EXPERIMENTS.cca.$USER.dat -verbose -overwrite
+#ectrans -remote sansone -source ~/EXPERIMENTS.${ECE3_POSTPROC_MACHINE}.$USER.dat -verbose -overwrite

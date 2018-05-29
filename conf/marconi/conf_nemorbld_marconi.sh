@@ -25,8 +25,8 @@ ncrcat="$WORK/opt/bin/ncrcat"
 rbld="$WORK/ecearth3/rebuild_nemo/rebuild_nemo"
 
 # number of parallel procs for NEMO rebuild
-NEMO_NPROCS=12
-
+IFS_NPROCS=1
+NEMO_NPROCS=18
 
 # ---------- NEMO FILES MANGLING ----------------------
 

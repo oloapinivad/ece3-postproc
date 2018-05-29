@@ -14,7 +14,6 @@ set -ue
 # -- default options
 account="${ECE3_POSTPROC_ACCOUNT-}"
 options=""
-nprocs=12
 
 while getopts "h?u:a:" opt; do
     case "$opt" in
@@ -55,14 +54,11 @@ sed -i "s/<ACCOUNT>/$account/"  $tgt_script
 sed -i "s/<USER>/$USER/"  $tgt_script
 sed -i "s/<JOBID>/rbld/"  $tgt_script
 sed -i "s/<MEM>/24GB/"  $tgt_script
-sed -i "s/<TOTTIME>/10:00:00/"   $tgt_script
-sed -i "s/<THREADS>/18/"  $tgt_script
-sed -i "s/<IFS_PROCS>/1/"   $tgt_script
-sed -i "s/<NEMO_PROCS>/18/"   $tgt_script
+sed -i "s/<IFS_PROCS>/$IFS_NPROCS/"   $tgt_script
+sed -i "s/<NEMO_PROCS>/$NEMO_NPROCS/"   $tgt_script
 sed -i "s|<OUT>|$OUT|" $tgt_script
 
 echo ../nemo_rebuild/nemo_rebuilder.sh $1 $2 $3 >> $tgt_script
 
 
-${submit_cmd} $tgt_script
-squeue -u $USER
+#${submit_cmd} $tgt_script

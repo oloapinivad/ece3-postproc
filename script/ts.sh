@@ -64,11 +64,6 @@ CONFDIR=${ECE3_POSTPROC_TOPDIR}/conf/${ECE3_POSTPROC_MACHINE}
 # -- get OUTDIR, submit command
 . ${CONFDIR}/conf_timeseries_${ECE3_POSTPROC_MACHINE}.sh
 
-# -- add here options for submit commands  (these 3 lines are different from origin/master)
-case "${submit_cmd}" in
-        sbatch) queue_cmd="squeue -u $USER  -o %.16j" ;;
-esac
-
 # -- Check that base directory of HiresClim2 postprocessing output exists (repeated here for a "before submission" error catch)
 if [[ -n $ALT_RUNDIR ]]
 then

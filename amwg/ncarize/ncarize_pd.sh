@@ -43,9 +43,6 @@
 # Author: Laurent Brodeau (laurent@misu.su.se), 2014
 #==========================================================================================
 
-# Are the output levels "lev" or "plev" ?
-LEV=plev
-
 #set -e
 
 # Getting list of available confs:
@@ -97,10 +94,17 @@ echo " *** First year  = ${YEAR1}"
 echo " *** Last year   = ${YEAR2}"
 echo; echo
 
+EXPID=$expname
+
 #fconfig="../conf_${MY_SETUP}.bash"
 fconfig="$ECE3_POSTPROC_TOPDIR/conf/$ECE3_POSTPROC_MACHINE/conf_amwg_${ECE3_POSTPROC_MACHINE}.sh"
 if [ ! -f ${fconfig} ]; then echo " ERROR: no configuration file found: ${fconfig}"; exit; fi
 . ${fconfig}
+
+export POST_DIR=$(eval echo ${ECE3_POSTPROC_POSTDIR})
+echo "POST_DIR is ${POST_DIR}"
+echo "machine is $ECE3_POSTPROC_MACHINE and it's $LEV"
+echo "exp is $EXPID"
 
 echo; echo
 #echo " *** EMOP_DIR = ${EMOP_DIR}"
@@ -194,12 +198,23 @@ for var in ${LIST_V_3D_ATM}; do
                 ncatted -h -O -a history,global,d,, tmp.nc
                 
                 fo=./${varncar}_${expname}_${jy}${cm}.tmp
+
                 if [ ! "${var}" = "${varncar}" ]; then
                     echo "ncrename -h -O -v ${var},${varncar} tmp.nc -o ${fo}"
                     ncrename -h -O -v ${var},${varncar} tmp.nc -o ${fo} ; rm -f tmp.nc
                 else
                     mv -f tmp.nc ${fo}
                 fi
+
+####MOD
+                  cb=`ncdump -h ${fo} | grep " plev"`
+                  if [ ! "${cb}" = "" ]; then
+                    echo "ncrename -h -O -d plev,lev -v plev,lev ${fo} -o ${fo}"
+                    ncrename -h -O -d plev,lev -v plev,lev ${fo} -o ${fo}
+                  echo " => done!"
+                  fi
+####MOD
+
             done
             jy=`expr ${jy} + 1`
         done
@@ -780,14 +795,15 @@ for cm in ${LM}; do
     # Flip latitude:
     ncpdq -O -h -a -lat ${expname}_${cm}_climo.nc ${expname}_${cm}_climo.nc
 
-    # Make sure levels are lev
-    if [[ $LEV == plev ]] ; then
-        ncrename -h -O -d plev,lev -v plev,lev ${expname}_${cm}_climo.nc ${expname}_${cm}_climo.nc
-    fi
+#ORG    # Make sure levels are lev
+#    if [[ $LEV == plev ]] ; then
+#        ncrename -h -O -d plev,lev -v plev,lev ${expname}_${cm}_climo.nc ${expname}_${cm}_climo.nc
+#    fi
 
 
-    # from Pa to hPa (and renaming to mb)
+#ORG    # from Pa to hPa (and renaming to mb)  (older cdo >> lev)
     ncap2 -h -O -s 'lev=lev/100' -s "lev@units=\"mb\"" ${expname}_${cm}_climo.nc -o ${expname}_${cm}_climo.nc
+
 done
 
 echo; echo; echo

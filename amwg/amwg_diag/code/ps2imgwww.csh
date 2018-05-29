@@ -49,8 +49,8 @@ endif
 
 #set PTEXT = "-gravity southeast -stroke none -fill gray20 -font Helvetica -pointsize 12 -annotate +60+${hbot} built_with_EMoP"
 set PTEXT = ""
-set CONVERT = "$WORK/opt/ImageMagick/bin/convert -density ${DENSITY} ${PTEXT} -trim -bordercolor white -border 5x5 "
-#set CONVERT = "convert -density ${DENSITY} ${PTEXT} -trim -bordercolor white -border 5x5 "
+set CONVERT = "convert -density ${DENSITY} ${PTEXT} -trim -bordercolor white -border 5x5 "
+#set CONVERT = "$WORK/opt/ImageMagick/bin/convert -density ${DENSITY} ${PTEXT} -trim -bordercolor white -border 5x5 "
 
 #if (-e /contrib/bin/convert) then
 #  set CONVERT = "/contrib/bin/convert -density $DENSITY -trim -bordercolor white -border 5x5"

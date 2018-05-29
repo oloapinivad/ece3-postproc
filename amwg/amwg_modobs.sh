@@ -109,8 +109,16 @@ export NEMO_MESH_DIR=${MESHDIR_TOP}/$NEMOCONFIG
 echo "$NEMO_MESH_DIR"
 
 # -- get to work
-cd $EMOP_DIR/ncarize
-./ncarize_pd.sh -C ${ECE3_POSTPROC_MACHINE} -R $expname -i ${year1} -e ${year2}
+if [[ ! -d "$EMOP_CLIM_DIR/clim_${expname}_${year1}-${year2}" ]]
+then
+
+  echo "get to work ncarize $expname $year1 $year2"
+  cd $EMOP_DIR/ncarize
+  ./ncarize_pd.sh -C ${ECE3_POSTPROC_MACHINE} -R $expname -i ${year1} -e ${year2}
+
+else
+  echo "bye bye $expname has already been postprocessed!"
+fi
 
 cd $EMOP_DIR/amwg_diag
 ./diag_mod_vs_obs.sh -C ${ECE3_POSTPROC_MACHINE} -R $expname -P ${year1}-${year2}

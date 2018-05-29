@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+#PBS -N <JOBID>_<EXPID>
+#PBS -q nf
+#PBS -l EC_billing_account=<ACCOUNT>
+#PBS -l EC_total_tasks=1
+#PBS -l EC_memory_per_task=<MEM>
+#PBS -l EC_hyperthreads=1
+#PBS -l walltime=02:00:00
+#PBS -j oe
+#PBS -o <OUT>/log/<JOBID>_<EXPID>.out 
+
+set -e
+
+cd $ECE3_POSTPROC_TOPDIR/script
+
+NEMO_NPROCS=<NEMO_PROCS>
+IFS_NPROCS=<IFS_PROCS>
+

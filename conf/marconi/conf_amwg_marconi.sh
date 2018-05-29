@@ -7,12 +7,8 @@ module unload cdo hdf5 netcdf python numpy
 module load hdf5/1.8.17--intel--pe-xe-2017--binary netcdf/4.4.1--intel--pe-xe-2017--binary cdo python/2.7.12 numpy/1.11.2--python--2.7.12
 
 export ${USERexp:=$USER}
-export ECE3_POSTPROC_DIAGDIR='$HOME/ecearth3/diag'
 export ECE3_POSTPROC_POSTDIR='/marconi_scratch/userexternal/${USERexp}/ece3/${EXPID}/post'
 export MESHDIR_TOP="$WORK/ecearth3/nemo"
-
-# Root path to a temporary filesystem:
-export TMPDIR_ROOT="$SCRATCH/tmp_ecearth/amwg"
 
 # *** EMOP_CLIM_DIR: where to store the AMWG-friendly climatology files:
 export EMOP_CLIM_DIR="$SCRATCH/amwg"
@@ -20,15 +16,6 @@ export EMOP_CLIM_DIR="$SCRATCH/amwg"
 # AMWG NCAR data?
 export NCAR_DATA="$WORK/ecearth3/amwg_data"
 export DATA_OBS="${NCAR_DATA}/obs_data_5.5"
-
-
-# NEMO resolution
-#if [ -z $NEMOCONFIG ] ; then
-#export NEMOCONFIG="ORCA1L75"
-#fi
-
-# Where to store time-series produced by script
-export DIR_TIME_SERIES="${EMOP_CLIM_DIR}/timeseries"
 
 # About web page, on remote server host:
 #     =>  set RHOST="" to disable this function...
@@ -64,6 +51,9 @@ export cdo="cdo"
 
 #convert
 export convert="/usr/bin/convert"
+
+# Are the output hiresclim levels "lev" or "plev" ? (older version cdo: lev)
+export LEV="plev"    # MARCONI: cdo 1.6.4 (plev) - rhbuild outputs in plev
 
 ######################################################
 # List of stuffs needed for script NCARIZE_b4_AMWG.sh

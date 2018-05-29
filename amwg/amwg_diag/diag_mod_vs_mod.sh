@@ -1,15 +1,7 @@
 #!/bin/bash
 
-#######
-#SBATCH -N 1
-#SBATCH -J MODvsMOD
-#SBATCH -t 23:50:00
-#SBATCH -o out_mod_vs_mod_%J.out
-#SBATCH -e err_mod_vs_mod_%J.out
-#######
-
 # Getting list of available confs:
-list_confs=`\ls ../conf_*.bash | sed -e "s|../conf_||g" -e "s|.bash||g"`
+#list_confs=`\ls ../conf_*.bash | sed -e "s|../conf_||g" -e "s|.bash||g"`
 
 usage()
 {
@@ -48,9 +40,13 @@ done
 
 if [ "${MY_SETUP}" = "" -o "${LRUN}" = "" -o "${LPERIOD}" = "" ]; then usage ; fi
 
-fconfig="../conf_${MY_SETUP}.bash"
+#fconfig="../conf_${MY_SETUP}.bash"
+fconfig="$ECE3_POSTPROC_TOPDIR/conf/$ECE3_POSTPROC_MACHINE/conf_amwg_${ECE3_POSTPROC_MACHINE}.sh"
 if [ ! -f ${fconfig} ]; then echo " ERROR: no configuration file found: ${fconfig}"; exit; fi
 . ${fconfig}
+
+echo "LRUN is ${LRUN}"
+echo "LPERIOD is ${LPERIOD}"
 
 export TEST_RUN=`echo ${LRUN} | cut -d , -f1`
 export CNTL_RUN=`echo ${LRUN} | cut -d , -f2`
@@ -58,6 +54,8 @@ export CNTL_RUN=`echo ${LRUN} | cut -d , -f2`
 export TEST_PERIOD=`echo ${LPERIOD} | cut -d , -f1`
 export CNTL_PERIOD=`echo ${LPERIOD} | cut -d , -f2`
 
+echo "test run is ${TEST_RUN}"
+echo "EMOP_CLIM_DIR is  ${EMOP_CLIM_DIR}"
 export EMOP_CLIM_DIR=`echo ${EMOP_CLIM_DIR} | sed -e "s|<RUN>|${TEST_RUN}|g"`
 
 

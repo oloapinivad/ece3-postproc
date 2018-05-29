@@ -41,6 +41,7 @@ FILTERSH="if ( ((dataTime == 0000) || (dataTime == 0600) || (dataTime == 1200)  
 
 #scheduler
 submit_cmd="sbatch"
+queue_cmd="squeue -u $USER  -o %.16j"
 
 # required programs, including compression options
 module unload netcdf hdf5
@@ -91,8 +92,12 @@ export MESHDIR_TOP=/marconi_work/Pra13_3311/ecearth3/nemo
 
 # ---------- NEMO VAR/FILES MANGLING ----------------------
 
+# NEMO 'wfo' variable can be in the SBC files instead of T files, then
+# set this flag to 1
+export use_SBC=0
+
 # NEMO files
-export NEMO_SAVED_FILES="grid_T grid_U grid_V icemod grid_W" ; # which files are saved / we care for?
+export NEMO_SAVED_FILES="grid_T grid_U grid_V icemod" ; # which files are saved / we care for?
 
 # NEMO variables
 export nm_wfo="wfo"        ; # water flux 
