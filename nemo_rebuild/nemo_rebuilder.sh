@@ -98,7 +98,7 @@ for freq in $freqs ; do
             echo $t $freq exists!
 	    #echo "find $NEMORESULTS -maxdepth 1 -type f -name "${frootmask}_${t}*nc" -exec find {} -not -name "${frootyear}_${t}*nc"  \;"
 	    mvfiles=$(find $NEMORESULTS -maxdepth 1 -type f -name "${frootmask}_${t}*nc" -exec find {} -not -name "${frootyear}_${t}*nc"  \;  )
-	    if [ ! -z $mvfiles ] 
+	    if [ ! -z "$mvfiles" ] 
 	    then 
 	    #echo $mvfiles
 	    	mv $mvfiles $NEMORESULTS_ORG 
