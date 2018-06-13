@@ -8,13 +8,10 @@
 # 
 # Must include ${EXPID} and be single-quoted
 #
-# optional variable are $USERexp/$USER, $LEGNB, $year
+# optional variable are $USERexp/$USER, $year
 export ${USERexp:=$USER}
 export IFSRESULTS0='/scratch/ms/it/${USERexp}/ece3/${EXPID}/output/Output_${year}/IFS'
 export NEMORESULTS0='/scratch/ms/it/${USERexp}/ece3/${EXPID}/output/Output_${year}/NEMO'
-# optional variables: $USER, $LEGNB, $year
-#export IFSRESULTS0='/scratch/ms/nl/${USER}/ECEARTH-RUNS/${EXPID}/output/ifs/${LEGNB}'
-#export NEMORESULTS0='/scratch/ms/nl/${USER}/ECEARTH-RUNS/${EXPID}/output/nemo/${LEGNB}'
 
 # --- PATTERN TO DEFINE WHERE TO SAVE POST-PROCESSED DATA
 # 
@@ -33,27 +30,20 @@ export ECE3_POSTPROC_POSTDIR='/scratch/ms/it/${USER}/ece3/${EXPID}/post'
 # --- Filter IFS output (to be applied through a grib_filter call)
 # Useful when there are output with different timestep.
 # Comment if no filtering/change for different output
-#FILTERGG2D="if ( (!(typeOfLevel is \"isobaricInhPa\") && !(typeOfLevel is \"isobaricInPa\") && !(typeOfLevel is \"potentialVorticity\" ))) { write; }"
-#FILTERGG3D="if ( ((typeOfLevel is \"isobaricInhPa\") || (typeOfLevel is \"isobaricInPa\") )) { write; }"
-#FILTERSH="if ( ((dataTime == 0000) || (dataTime == 0600) || (dataTime == 1200)  || (dataTime == 1800) )) { write; }"
+FILTERGG2D="if ( (!(typeOfLevel is \"isobaricInhPa\") && !(typeOfLevel is \"isobaricInPa\") && !(typeOfLevel is \"potentialVorticity\" ))) { write; }"
+FILTERGG3D="if ( ((typeOfLevel is \"isobaricInhPa\") || (typeOfLevel is \"isobaricInPa\") )) { write; }"
+FILTERSH="if ( ((dataTime == 0000) || (dataTime == 0600) || (dataTime == 1200)  || (dataTime == 1800) )) { write; }"
 
 # --- TOOLS (required programs, including compression options) -----
 submit_cmd="qsub"
 queue_cmd="qstat -u $USER"
 
-#Ale----segmentation fault (nemo_post.sh line 372)
-#module unload cdo 
-#module load cdo/1.8.2
-
-#module unload cray-hdf5-parallel/1.8.14
-#module load hdf5/1.8.13
-#Ale----------------------------------------------
-
+#unload cdo due to issues with 1.8.2
 module unload netcdf4/4.3.2
-module unload cdo     #unload cdo 1.8.2 (>>> WARNINGS)
+#module unload cdo     #unload cdo 1.8.2 (>>> WARNINGS)
 
 
-for soft in nco netcdf cdo/1.6.1 python cdftools
+for soft in nco netcdf python cdftools cdo #cdo/1.6.1
 do
     if ! module -t list 2>&1 | grep -q $soft
     then
@@ -63,8 +53,11 @@ done
 
 cdo=cdo
 cdozip="$cdo -f nc4c -z zip"
-rbld="$PERM/ecearth3/revisions/trunk/sources/nemo-3.6/TOOLS/REBUILD_NEMO/rebuild_nemo"
 
+# useless for CNR due to nemo_rebuilder
+rbld="$PERM/ecearth3/revisions/primavera/sources/utils/rebuild_nemo/rebuild_nemo"
+
+# cdftools are loaded by modules
 cdftoolsbin="${CDFTOOLS_DIR}/bin"
 python=python
 
@@ -80,7 +73,7 @@ rh_build=1
 IFS_NPROCS=12; NEMO_NPROCS=12
 
 # where to find mesh and mask files for NEMO. Files are expected in $MESHDIR_TOP/$NEMOCONFIG.
-export MESHDIR_TOP=$PERM/ecearth3/nemo
+export MESHDIR_TOP="/perm/ms/nl/nm6/ECE3-DATA/post-proc"
 
 # Base dir to archive (ie just make a copy of) the monthly results. Daily results, if any, are left behind. 
 STOREDIR=$PERM/ecearth3/post_hiresclim/
@@ -100,7 +93,7 @@ export nm_sst="tos"        ; # SST (2D)
 export nm_sss="sos"        ; # SS salinity (2D)
 export nm_ssh="zos"        ; # sea surface height (2D)
 export nm_iceconc="siconc" ; # Ice concentration as in icemod file (2D)
-export nm_icethic="sithic" ; # Ice thickness as in icemod file (2D)
+export nm_icethic="sithick" ; # Ice thickness as in icemod file (2D)
 export nm_tpot="thetao"    ; # pot. temperature (3D)
 export nm_s="so"           ; # salinity (3D)
 export nm_u="uo"           ; # X current (3D)

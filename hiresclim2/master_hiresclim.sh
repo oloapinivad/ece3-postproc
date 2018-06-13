@@ -62,13 +62,13 @@ export months_per_leg
 . ${ECE3_POSTPROC_TOPDIR}/functions.sh
 check_environment
 
-echo "which cdo? echo $CDO_VERSION"
-echo "which netcdf? echo $NETCDF_DIR"
-echo "which netcdf4? echo $NETCDF4_DIR"
+#echo "which cdo? echo $CDO_VERSION"
+#echo "which netcdf? echo $NETCDF_DIR"
+#echo "which netcdf4? echo $NETCDF4_DIR"
 # load user and machine specifics
 . $ECE3_POSTPROC_TOPDIR/conf/$ECE3_POSTPROC_MACHINE/conf_hiresclim_$ECE3_POSTPROC_MACHINE.sh
-echo "which cdo? echo $CDO_VERSION"
-echo "which netcdf? echo $CRAY_NETCDF_DIR"
+#echo "which cdo? echo $CDO_VERSION"
+#echo "which netcdf? echo $CRAY_NETCDF_DIR"
 
 ########## POST-PROCESSING OPTIONS ###############
 
