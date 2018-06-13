@@ -2,11 +2,10 @@
 
 usage()
 {
-   echo "Usage: .sh [-a account] [-u user] exp year1 year2"
+   echo "Usage: .sh [-a account] exp year1 year2"
    echo "Rebuild Nemo data at all time frequencies for experiment exp of user (optional)"
    echo "Options are:"
    echo "-a account    : specify a different special project for accounting (default: ${ECE3_POSTPROC_ACCOUNT-})"
-   echo "-u user       : analyse experiment of a different user (default: $USER)"
 }
 
 set -ue
@@ -20,8 +19,6 @@ while getopts "h?u:a:" opt; do
     h|\?)
         usage
         exit 0
-        ;;
-    u)  USERexp=$OPTARG
         ;;
     a)  account=$OPTARG
         ;;
@@ -47,18 +44,16 @@ mkdir -p $OUT/log
 # -- submit script
 tgt_script=$OUT/rbld_$1_$2_$3.job
 
-echo "Launched timeseries analysis for experiment $1 of user $USERexp"
+echo "Launched nemo rebuild for experiment $1 of user $USER"
 
 sed "s/<EXPID>/$1/" < ${CONFDIR}/rb_$ECE3_POSTPROC_MACHINE.tmpl > $tgt_script 
 sed -i "s/<ACCOUNT>/$account/"  $tgt_script
 sed -i "s/<USER>/$USER/"  $tgt_script
 sed -i "s/<JOBID>/rbld/"  $tgt_script
 sed -i "s/<MEM>/24GB/"  $tgt_script
-sed -i "s/<IFS_PROCS>/$IFS_NPROCS/"   $tgt_script
 sed -i "s/<NEMO_PROCS>/$NEMO_NPROCS/"   $tgt_script
 sed -i "s|<OUT>|$OUT|" $tgt_script
 
 echo ../nemo_rebuild/nemo_rebuilder.sh $1 $2 $3 >> $tgt_script
 
-
-#${submit_cmd} $tgt_script
+${submit_cmd} $tgt_script

@@ -31,16 +31,16 @@ echo "Rebuilding year ${year} ..."
 . $ECE3_POSTPROC_TOPDIR/conf/$ECE3_POSTPROC_MACHINE/conf_nemorbld_$ECE3_POSTPROC_MACHINE.sh
 # check environment
 export NEMORESULTS=$(eval echo $NEMORESULTS)
-export NEMORESULTS0=$(eval echo ${NEMORESULTS})/old
-mkdir -p $NEMORESULTS0
-
-#echo "$USER $USERexp"
-#echo "results are in $NEMORESULTS"
-#echo "results are in $NEMORESULTS0"
+export NEMORESULTS_ORG=$(eval echo ${NEMORESULTS})/org
+mkdir -p $NEMORESULTS_ORG
 
 #various details
-export TMPDIR=$SCRATCH/tmp_rbld/nemo_rbld_$1_$RANDOM
+export TMPDIR=$(eval echo $TMPDIR)
 mkdir -p $TMPDIR || exit -1; cd $TMPDIR
+
+echo "results are in $NEMORESULTS"
+echo "results are in $NEMORESULTS_ORG"
+echo "temp dir is $TMPDIR"
 
 #loop on different time frequencies
 for freq in $freqs ; do
@@ -70,7 +70,7 @@ for freq in $freqs ; do
                fi
            else
 	       echo "$t $freq multi proc, launching nemo_rebuild..."
-               ln -s $NEMORESULTS/${frootmask}_${t}_????.nc . #yes, so link all the file and do nemo_rebuild on each chunk 
+               ln -s $NEMORESULTS/${frootmask}_${t}_????.nc .  #yes, so link all the file and do nemo_rebuild on each chunk 
                filelist=$(ls ${frootmask}_${t}_0000.nc)       #evalute how many chunks you have: a single chunk will be ok!
                for file in $filelist ; do                    #loop on the chunks
                     echo ${file%????????}
@@ -89,18 +89,31 @@ for freq in $freqs ; do
     done
 
     #create old directory for multiproc files
+    
     for t in $grids ; do
 	
 	# Final move multiprocs files: check again that complete file exists
 	if [ -f $NEMORESULTS/${frootyear}_${t}.nc ] 
 	then
-	#echo $t $freq exists!
-	    #do we have multi proc files?
-	    if [ -f $NEMORESULTS/${froot}_${t}_0000.nc ] 
-	    then
-		echo "Move multi proc files!" 
-		mv $NEMORESULTS/${frootmask}_${t}_????.nc $NEMORESULTS0
+            echo $t $freq exists!
+	    #echo "find $NEMORESULTS -maxdepth 1 -type f -name "${frootmask}_${t}*nc" -exec find {} -not -name "${frootyear}_${t}*nc"  \;"
+	    mvfiles=$(find $NEMORESULTS -maxdepth 1 -type f -name "${frootmask}_${t}*nc" -exec find {} -not -name "${frootyear}_${t}*nc"  \;  )
+	    if [ ! -z $mvfiles ] 
+	    then 
+	    #echo $mvfiles
+	    	mv $mvfiles $NEMORESULTS_ORG 
 	    fi
+
+	    # old move, deprecated
+	    #echo $t $freq exists!
+	    #do we have multi proc files?
+	    #if [ -f $NEMORESULTS/${froot}_${t}_0000.nc ] 
+	    #then
+		#echo "Move multi proc files!" 
+		#mv $NEMORESULTS/${frootmask}_${t}_????.nc $NEMORESULTS_ORG
+	    #else
+		
+	    #fi
 	fi
     done
 done
