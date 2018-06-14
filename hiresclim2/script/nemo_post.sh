@@ -157,6 +157,10 @@ if [ ${ivf} -eq 1 ]; then
     if [ "${nm_v}"   != "vomecrty" ];  then ncrename -v ${nm_v},vomecrty    ${froot}_grid_V.nc ; fi
 fi
 
+if [ ${itf} -eq 1 ]; then
+    if [ "${nm_e3t}"   != "e3t" ];  then ncrename -v ${nm_e3t},e3t    ${froot}_grid_T.nc ; fi
+fi
+
 # ICE
 if (( $newercdftools ))         # auxilliary file for newer CDFtools (4.0 master retrieved on 06-09-2017)
 then

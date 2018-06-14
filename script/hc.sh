@@ -16,6 +16,7 @@ usage()
    echo "   -c          : check for success"
    echo "   -u USERexp  : alternative user owner of the experiment, default $USER"
    echo "   -m months_per_leg : run was performed with months_per_leg legs (yearly legs expected by default)"
+   echo "   -p                : filter PRIMAVERA output"
    echo "   -n numprocs       : set number of processors to use (default is 12)"
 }
 
@@ -27,8 +28,11 @@ checkit=0
 options=""
 nprocs=12
 
+lprimavera=0
+echo "lprimavera is $lprimavera"
+
 # -- options
-while getopts "hcu:a:m:n:" opt; do
+while getopts "hcu:a:m:pn:" opt; do
     case "$opt" in
         h)
             usage
@@ -44,6 +48,8 @@ while getopts "hcu:a:m:n:" opt; do
             ;;
         a)  account=$OPTARG
             ;;
+        p)  lprimavera=1
+            ;;
         *)  usage
             exit 1
     esac
@@ -54,6 +60,8 @@ if [ $# -ne 4 ]; then
    usage
    exit 1
 fi
+
+echo "lprimavera is $lprimavera"
 
 # check environment
 [[ -z "${ECE3_POSTPROC_TOPDIR:-}" ]] && echo "User environment not set. See ../README." && exit 1
@@ -100,6 +108,18 @@ do
     sed -i "s/<YEAR>/$YEAR/" $tgt_script
     sed -i "s|<YREF>|$4|" $tgt_script
     sed -i "s|<OUT>|$OUT|" $tgt_script
+
+######------primavera filter--------------
+        if [[ $lprimavera == 0 ]]; then
+cat << EOF >>  $tgt_script
+         unset FILTERGG2D
+         unset FILTERGG3D
+         unset FILTERSH
+EOF
+        fi
+######------primavera filter--------------
+        echo "lprimavera is $lprimavera"
+
     sed -i "s|<OPTIONS>|${options}|" $tgt_script
     ${submit_cmd} $tgt_script
 done

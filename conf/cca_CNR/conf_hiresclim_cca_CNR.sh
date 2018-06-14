@@ -25,7 +25,8 @@ export ECE3_POSTPROC_POSTDIR='/scratch/ms/it/${USER}/ece3/${EXPID}/post'
 # ECE3_POSTPROC_HC_IFS_DAILY=0
 # ECE3_POSTPROC_HC_IFS_6HRS=0
 # ECE3_POSTPROC_HC_NEMO=1         # applied only if available
-# ECE3_POSTPROC_HC_NEMO_EXTRA=0   # require nco
+ ECE3_POSTPROC_HC_NEMO_EXTRA=0   # require nco
+                                 # set 0 due to issues with NEMO variables named in PRIMAVERA (i.e. thkcello)
 
 # --- Filter IFS output (to be applied through a grib_filter call)
 # Useful when there are output with different timestep.
@@ -98,3 +99,4 @@ export nm_tpot="thetao"    ; # pot. temperature (3D)
 export nm_s="so"           ; # salinity (3D)
 export nm_u="uo"           ; # X current (3D)
 export nm_v="vo"           ; # Y current (3D)
+export nm_e3t="thkcello"   ; # T-cell thickness 
