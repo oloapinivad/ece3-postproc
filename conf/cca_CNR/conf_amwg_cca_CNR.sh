@@ -55,8 +55,10 @@ export PYTHON=python
 export cdo=cdo
 export convert=convert
 
-# Are the output hiresclim levels "lev" or "plev" ? (older version cdo: lev)
-export LEV="lev"   # CCA: cdo 1.6.1 (lev) - rhbuild outputs in plev
+# Are the output hiresclim levels "lev" or "plev" ? (older cdo version: "lev"; new cdo version: "plev")
+# Set LEV on cdo version which you are using.
+export LEV="plev"   # rhbuild outputs in plev
+                    # CCA: default cdo version 1.8.2 (plev)
 
 # About web page, on remote server host:
 #     =>  set RHOST="" to disable this function...
