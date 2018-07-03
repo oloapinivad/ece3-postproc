@@ -27,7 +27,8 @@ submit_cmd="qsub"
 
 # required programs
 ncrcat="ncrcat"
-rbld="$PERM/ecearth3/revisions/primavera/sources/utils/rebuild_nemo/rebuild_nemo"
+#rbld="$PERM/ecearth3/revisions/primavera/sources/utils/rebuild_nemo/rebuild_nemo"
+rbld="$PERM/ecearth3/revisions/primavera/sources/nemo-3.6/TOOLS/REBUILD_NEMO/rebuild_nemo"
 
 # number of parallel procs for NEMO rebuild
 NEMO_NPROCS=4
