@@ -17,10 +17,10 @@ usage()
    echo "                   check if modmod is ON"
 }
 
-set -e
+set -ue
 
 # -- default option
-account=$ECE3_POSTPROC_ACCOUNT
+account=${ECE3_POSTPROC_ACCOUNT-}
 ALT_RUNDIR=""
 modmodcheck=0
 options=""
@@ -31,94 +31,123 @@ while getopts "h?a:ury:" opt; do
             usage
             exit 0
             ;;
-        u)  USERexp=$OPTARG
-            ;;
-        a)  account=$OPTARG
-            ;;
         y)  options="${options} -y $OPTARG"
             EXP2=$OPTARG
             modmodcheck=1
+	    ;;
+        r)  options="${options} -r $OPTARG"
+            ALT_RUNDIR=$OPTARG
             ;;
-        r)  ALT_RUNDIR=$OPTARG
+        u)  options="${options} -u $OPTARG"
+            USERexp=$OPTARG
             ;;
+        a)  account=$OPTARG
+            ;;
+        *)  usage
+            exit 1
     esac
 done
 shift $((OPTIND-1))
 
 if [ "$#" -ne 3 ]; then
-   echo; echo "*EE* missing arguments"; echo
-   usage
-   exit 1
+    echo; echo "*EE* missing arguments"; echo
+    usage
+    exit 1
 fi
 
 echo "exp2 $EXP2" 
 
 # -- Sanity check (from amwg_modobs.sh, repeated here for "before submission" error catch) 
 [[ -z $ECE3_POSTPROC_TOPDIR  ]] && echo "User environment not set. See ../README." && exit 1 
-#[[ -z $ECE3_POSTPROC_RUNDIR  ]] && echo "User environment not set. See ../README." && exit 1 
 [[ -z $ECE3_POSTPROC_DATADIR ]] && echo "User environment not set. See ../README." && exit 1 
 [[ -z $ECE3_POSTPROC_MACHINE ]] && echo "User environment not set. See ../README." && exit 1 
 
+# check that we have a 4-digit number for the year input
+if [[ ! $2 =~ ^[0-9]{4}$ ]]
+then
+    echo ;echo "*EE* argument YEAR1 (=$2) should be a 4-digit integer"; echo
+    usage
+    exit 1
+fi
+if [[ ! $3 =~ ^[0-9]{4}$ ]]
+then
+    echo; echo "*EE* argument YEAR2 (=$3) should be a 4-digit integer"; echo
+    usage
+    exit 1
+fi
+
+# check we have a 4-letter experiment
+if [[ ! $1 =~ ^[a-zA-Z0-9_]{4}$ ]]
+then
+    echo; echo "*EE* argument EXP (=$1) should be a 4-letter string"; echo
+    usage
+    exit 1
+fi
+
+# set variables which can be eval'd
+EXPID=$1
+
 # -- Scratch dir (logs end up there)
 OUT=$SCRATCH/tmp_ecearth3
-mkdir -p $OUT
-
-CONFDIR=${ECE3_POSTPROC_TOPDIR}/conf/${ECE3_POSTPROC_MACHINE}
-
-# -- check options for amwg_modobs.sh
-#if [[ -n $ALT_RUNDIR ]]
-#then
-    # test alternate dir (from amwg_modobs.sh, repeated here for "before submission" error catch) 
-#    outdir=$ALT_RUNDIR/$1/post
-#    [[ ! -d $outdir ]] && echo "User experiment output $outdir does not exist!" && exit1
-#    amwg_opt="-r $ALT_RUNDIR"
-#fi
+mkdir -p $OUT/log
 
 # -- get OUTDIR, submit command
+CONFDIR=${ECE3_POSTPROC_TOPDIR}/conf/${ECE3_POSTPROC_MACHINE}
 . ${CONFDIR}/conf_amwg_${ECE3_POSTPROC_MACHINE}.sh
+
+# -- check input dir exists
+if [[ -n $ALT_RUNDIR ]]
+then
+    outdir=$ALT_RUNDIR/mon
+else
+    outdir=$(eval echo ${ECE3_POSTPROC_POSTDIR})/mon
+fi
+[[ ! -d $outdir ]] && echo "*EE* Experiment HiresClim2 output dir $outdir does not exist!" && exit 1
+
 
 # -- check amwg_modmod on
 if (( modmodcheck ))
 then
-# -- submit script
-Y1=$2
-Y2=$3
+	# -- submit script
+	Y1=$2
+	Y2=$3
 
-tgt_script=$OUT/amwg_$1_${EXP2}_$2_$3.job
+	tgt_script=$OUT/amwg_$1_${EXP2}_$2_$3.job
 
-echo "$1"
-echo "$2"
-echo "$3"
-echo "$EXP2"
+	echo "$1"
+	echo "$2"
+	echo "$3"
+	echo "$EXP2"
 
-sed "s/<EXPID>/$1$EXP2/" < ${CONFDIR}/header_$ECE3_POSTPROC_MACHINE.tmpl > $tgt_script
-sed -i "s/<Y1>/$3/" $tgt_script
-[[ -n $account ]] && \
-    sed -i "s/<ACCOUNT>/$account/" $tgt_script || \
-    sed -i "/<ACCOUNT>/ d" $tgt_script
-sed -i "s/<JOBID>/amwg/" $tgt_script
-sed -i "s|<OUT>|$OUT|" $tgt_script
+	sed "s/<EXPID>/$1$EXP2/" < ${CONFDIR}/header_$ECE3_POSTPROC_MACHINE.tmpl > $tgt_script
+	sed -i "s/<Y1>/$3/" $tgt_script
+	[[ -n $account ]] && \
+	    sed -i "s/<ACCOUNT>/$account/" $tgt_script || \
+	    sed -i "/<ACCOUNT>/ d" $tgt_script
+	sed -i "s/<JOBID>/amwg/" $tgt_script
+	sed -i "s|<OUT>|$OUT|" $tgt_script
    
-    echo ../amwg/amwg_modmod.sh $1 $EXP2 $2 $3 >>  $tgt_script
-    echo "*EE* check modmod is ON"
+	echo ../amwg/amwg_modmod.sh ${options} $1 $2 $3 >>  $tgt_script
+	echo "*EE* check modmod is ON"
 
 else
 
-# -- submit script
-Y1=$2
+	# -- submit script
+	Y1=$2
 
-tgt_script=$OUT/amwg_$1_$2_$3.job
+	tgt_script=$OUT/amwg_$1_$2_$3.job
 
-sed "s/<EXPID>/$1/" < ${CONFDIR}/header_$ECE3_POSTPROC_MACHINE.tmpl > $tgt_script
-sed -i "s/<Y1>/$2/" $tgt_script
-[[ -n $account ]] && \
-    sed -i "s/<ACCOUNT>/$account/" $tgt_script || \
-    sed -i "/<ACCOUNT>/ d" $tgt_script
-sed -i "s/<JOBID>/amwg/" $tgt_script
-sed -i "s|<OUT>|$OUT|" $tgt_script
+	sed "s/<EXPID>/$1/" < ${CONFDIR}/header_$ECE3_POSTPROC_MACHINE.tmpl > $tgt_script
+	sed -i "s/<Y1>/$2/" $tgt_script
+	[[ -n $account ]] && \
+	    sed -i "s/<ACCOUNT>/$account/" $tgt_script || \
+	    sed -i "/<ACCOUNT>/ d" $tgt_script
+	sed -i "s/<JOBID>/amwg/" $tgt_script
+	sed -i "s/<Y1>/$2/" $tgt_script
+	sed -i "s|<OUT>|$OUT|" $tgt_script
 
-    echo ../amwg/amwg_modobs.sh $1 $2 $3 >>  $tgt_script
-    echo "*EE* check modobs is ON"
+	echo ../amwg/amwg_modobs.sh ${options} $1 $2 $3 >>  $tgt_script
+	echo "*EE* check modobs is ON"
 
 fi
 

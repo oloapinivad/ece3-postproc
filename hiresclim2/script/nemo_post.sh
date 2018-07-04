@@ -35,7 +35,7 @@ cd $WRKDIR
 NOMP=${NEMO_NPROCS}
 
 # Check on use of SBC file - can be set in your ../../../conf/conf_hiresclim_<MACHINE-NAME>.sh
-echo "SBC file used: ${use_SBC:=0}"
+echo "SBC file used: ${use_SBC:=1}"
 (( $use_SBC )) && SBC='SBC' || SBC='grid_T'
 
 # Check if new or old version of CDFtools is used - can be set in
@@ -176,6 +176,17 @@ fi
 if [ "${nm_iceconc}" != "iiceconc" ]; then ncrename -v ${nm_iceconc},iiceconc  ${froot}_icemod.nc ; fi
 if [ "${nm_icethic}" != "iicethic" ]; then ncrename -v ${nm_icethic},iicethic  ${froot}_icemod.nc ; fi
 
+# SHACONEMO update (april 2018) changes dimension names in the icemod file
+if (( $newercdftools ))
+then
+    ncks -3 ${froot}_icemod_cdfnew.nc ${froot}_icemod_tmp.nc
+    ncrename -O -d .x_grid_T,x -d .y_grid_T,y ${froot}_icemod_tmp.nc ${froot}_icemod_cdfnew.nc
+    rm -f ${froot}_icemod_tmp1.nc
+fi
+ncks -3 ${froot}_icemod.nc ${froot}_icemod_tmp.nc
+ncrename -O -d .x_grid_T,x -d .y_grid_T,y ${froot}_icemod_tmp.nc ${froot}_icemod.nc
+rm -f ${froot}_icemod_tmp.nc
+
 
 # create time axis
 $cdo showdate ${froot}_icemod.nc | tr '[:blank:]' '\n' | \
@@ -221,6 +232,7 @@ done
 # ** ice diagnostics
 
 tempf=$(mktemp $SCRATCH/tmp_ecearth3/tmp/hireclim2_nemo_XXXXXX)
+
 $cdo selvar,iiceconc,iicethic ${froot}_icemod.nc $tempf
 $cdozip splitvar $tempf ${out}_
 rm -f $tempf

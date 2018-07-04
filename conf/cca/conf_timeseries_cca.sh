@@ -6,12 +6,12 @@
 
 # --- INPUT -----
 #
-# Where to find monthly averages from hireclim (i.e. data are in $ECE3_POSTPROC_POSTDIR/mon)
+# Where to find monthly averages from hiresclim (i.e. data are in $ECE3_POSTPROC_POSTDIR/mon)
 # 
 # Token ${USERexp} can be used (and set through -u option at the command line).
 # Provide default if using it. 
 # 
-export ECE3_POSTPROC_POSTDIR='/scratch/ms/nl/${USER}/ECEARTH-RUNS/${EXPID}/post'
+[[ -z ${ECE3_POSTPROC_POSTDIR:-} ]] && export ECE3_POSTPROC_POSTDIR='$SCRATCH/ECEARTH-RUNS/${EXPID}/post'
 #
 # Where to find mesh and mask files for NEMO.
 # Files are expected in $MESHDIR_TOP/$NEMOCONFIG.
@@ -27,7 +27,7 @@ export MESHDIR_TOP="/perm/ms/nl/nm6/ECE3-DATA/post-proc"
 #     
 #     (See also ./conf_ecmean_rhino.sh for a similar 'diagdir')
 #     
-export ECE3_POSTPROC_DIAGDIR='$HOME/ecearth3/diag/'
+[[ -z ${ECE3_POSTPROC_DIAGDIR:-} ]] && export ECE3_POSTPROC_DIAGDIR='$HOME/ecearth3/diag/'
 #
 #  [2] The output can be put on a remote machine RHOST (login: RUSER)
 #      in the WWW_DIR_ROOT/time_series/${EXPID} directory, using ssh and scp.
@@ -37,9 +37,9 @@ export RUSER=sager
 export WWW_DIR_ROOT="/usr/people/sager/ECEARTH/diag"
 
 
-############################
+#######################
 # Required software   #
-############################
+#######################
 
 for soft in nco netcdf python cdo cdftools
 do

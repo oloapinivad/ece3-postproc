@@ -1,11 +1,19 @@
 #!/bin/bash
 
-# --- PATTERN TO FIND POST-PROCESSED DATA FROM HIRESCLIM2
+########################################
+# Configuration file for ECMEAN script #
+########################################
+
+# --- INPUT -----
+#
+# Where to find monthly averages from hiresclim (i.e. data are in $ECE3_POSTPROC_POSTDIR/mon)
 # 
 # Must include ${EXPID} and be single-quoted
 #
-export ECE3_POSTPROC_POSTDIR='/scratch/ms/nl/${USER}/ECEARTH-RUNS/${EXPID}/post'
-
+# Token ${USERexp} can be used (and set through -u option at the command line).
+# Provide default if using it. 
+# 
+[[ -z ${ECE3_POSTPROC_POSTDIR:-} ]] && export ECE3_POSTPROC_POSTDIR='$SCRATCH/ECEARTH-RUNS/${EXPID}/post'
 
 # --- TOOLS -----
 # Required programs, including compression options
@@ -37,7 +45,7 @@ export do_3d_vars=1
 #     Tables for one simulation will be in ${ECE3_POSTPROC_DIAGDIR}/table/${EXPID}
 #     Summary tables for several simulations will be in ${ECE3_POSTPROC_DIAGDIR}/table/
 #     
-export ECE3_POSTPROC_DIAGDIR='$HOME/ecearth3/diag/'
+[[ -z ${ECE3_POSTPROC_DIAGDIR:-} ]] && export ECE3_POSTPROC_DIAGDIR='$HOME/ecearth3/diag/'
 
 # [2] Where to save the climatology (769M IFS, 799M IFS+NEMO). 
 #
@@ -54,6 +62,7 @@ export ECE3_POSTPROC_DIAGDIR='$HOME/ecearth3/diag/'
 #
 #     Can include ${STEMID} as ensemble ID.
 #     Must be single-quoted if to be evaluated later.
+#     This is used only by the reproducibility/collect_ens.sh script
 #
 export ECE3_POSTPROC_PI4REPRO='$HOME/ecearth3/diag/${STEMID}'
 

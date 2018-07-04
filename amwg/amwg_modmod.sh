@@ -41,22 +41,21 @@ if [ "$#" -ne 4 ]; then
    exit 0
 fi
 
-expname=$1
-expname2=$2
+EXPID=$1
+EXPID2=$2
 year1=$3
 year2=$4
 
-EXPID=$expname
+EXPID=$EXPID
 
 # -- Sanity check
 [[ -z $ECE3_POSTPROC_TOPDIR  ]] && echo "User environment not set. See ../README." && exit 1 
-#[[ -z $ECE3_POSTPROC_RUNDIR  ]] && echo "User environment not set. See ../README." && exit 1 
 [[ -z $ECE3_POSTPROC_DATADIR ]] && echo "User environment not set. See ../README." && exit 1 
 [[ -z $ECE3_POSTPROC_MACHINE ]] && echo "User environment not set. See ../README." && exit 1 
 
 
 # -- User configuration
-. $ECE3_POSTPROC_TOPDIR/conf/$ECE3_POSTPROC_MACHINE/conf_amwg_${ECE3_POSTPROC_MACHINE}.sh
+. ${ECE3_POSTPROC_TOPDIR}/conf/${ECE3_POSTPROC_MACHINE}/conf_amwg_${ECE3_POSTPROC_MACHINE}.sh
 
 # - installation params
 export EMOP_DIR=$ECE3_POSTPROC_TOPDIR/amwg
@@ -65,14 +64,13 @@ export DIR_EXTRA="${EMOP_DIR}/data"
 # - HiresClim2 post-processed files loc 
 if [[ -n $ALT_RUNDIR ]]
 then
-#    export POST_DIR=$ALT_RUNDIR/mon
-    export POST_DIR=$ALT_RUNDIR
+    POST_DIR=$ALT_RUNDIR
 else
-#    export POST_DIR=$(eval echo ${ECE3_POSTPROC_POSTDIR})/mon
-    export POST_DIR=$(eval echo ${ECE3_POSTPROC_POSTDIR})
+    POST_DIR=$(eval echo ${ECE3_POSTPROC_POSTDIR})
 fi
-[[ ! -d $POST_DIR ]] && echo "*EE* Experiment output dir $POST_DIR does not exist!" && exit 1
 
+[[ ! -d $POST_DIR ]] && echo "*EE* Experiment output dir $POST_DIR does not exist!" && exit 1
+export POST_DIR
 echo "$POST_DIR"
 
 # test if it was a coupled run, and find resolution
@@ -110,50 +108,45 @@ export NEMO_MESH_DIR=${MESHDIR_TOP}/$NEMOCONFIG
 echo "$NEMO_MESH_DIR"
 
 # -- get to work
-if [[ ! -d "$EMOP_CLIM_DIR/clim_${expname}_${year1}-${year2}" ]] 
+if [[ ! -d "$EMOP_CLIM_DIR/clim_${EXPID}_${year1}-${year2}" ]] 
 then
 
-  echo "get to work ncarize $expname $year1 $year2"
+  echo "get to work ncarize $EXPID $year1 $year2"
   cd $EMOP_DIR/ncarize
-  ./ncarize_pd.sh -C ${ECE3_POSTPROC_MACHINE} -R $expname -i ${year1} -e ${year2}
+  ./ncarize_pd.sh ${EXPID} ${year1} ${year2}
 
 else
-  echo "bye bye $expname has already been postprocessed!"
+  echo "bye bye $EXPID has already been postprocessed!"
 fi
 
-if [[ ! -d "$EMOP_CLIM_DIR/clim_${expname2}_${year1}-${year2}" ]] 
+if [[ ! -d "$EMOP_CLIM_DIR/clim_${EXPID2}_${year1}-${year2}" ]] 
 then
 
-  echo "get to work ncarize $expname2 $year1 $year2"
+  echo "get to work ncarize $EXPID2 $year1 $year2"
   cd $EMOP_DIR/ncarize
-  ./ncarize_pd.sh -C ${ECE3_POSTPROC_MACHINE} -R $expname2 -i ${year1} -e ${year2}
+  ./ncarize_pd.sh ${EXPID2} ${year1} ${year2}
 
 else
-  echo "bye bye $expname2 has already been postprocessed!"
+  echo "bye bye $EXPID2 has already been postprocessed!"
 fi
-
-######----prova-------
-#if [[  -d "$EMOP_CLIM_DIR/diag_${expname}_${expname2}_${year1}-${year2}" ]]
-#then
-
-#  echo "bye bye all has already been postprocessed!"
-
-#else
 
 #  echo "get to work..."
 cd $EMOP_DIR/amwg_diag
-./diag_mod_vs_mod.sh -C ${ECE3_POSTPROC_MACHINE} -R $expname,$expname2 -P ${year1}-${year2},${year1}-${year2}
 
-#fi
-######----prova-------
+# use env variables from diag mod vs mod
+export TEST_RUN=$EXPID
+export CNTL_RUN=$EXPID2
+export TEST_PERIOD=${year1}-${year2}
+export CNTL_PERIOD=${year1}-${year2}
+csh ./csh/diag_mod_vs_mod.csh
 
 # -- Store
-DIAGS=$EMOP_CLIM_DIR/diag_${expname}_${expname2}_${year1}-${year2}
+DIAGS=$EMOP_CLIM_DIR/diag_${EXPID}_${EXPID2}_${year1}-${year2}
 cd $DIAGS
-rm -r -f diag_mod_${expname}-${expname2}.tar
-mv ${expname}_${year1}-${year2}-mod_${expname2}_${year1}-${year2} ${expname}-${expname2}-mod_${year1}-${year2}   #Ale
-tar cvf diag_${expname}-${expname2}_mod.tar ${expname}-${expname2}-mod_${year1}-${year2} 
-#tar cvf diag_mod_${expname}-${expname2}.tar ${expname}_${year1}-${year2}-mod_${expname2}_${year1}-${year2}
-ectrans -remote sansone -source diag_${expname}-${expname2}_mod.tar -verbose -overwrite
+rm -r -f diag_mod_${EXPID}-${EXPID2}.tar
+mv ${EXPID}_${year1}-${year2}-mod_${EXPID2}_${year1}-${year2} ${EXPID}-${EXPID2}-mod_${year1}-${year2}   #Ale
+tar cvf diag_${EXPID}-${EXPID2}_mod.tar ${EXPID}-${EXPID2}-mod_${year1}-${year2} 
+#tar cvf diag_mod_${EXPID}-${EXPID2}.tar ${EXPID}_${year1}-${year2}-mod_${EXPID2}_${year1}-${year2}
+ectrans -remote sansone -source diag_${EXPID}-${EXPID2}_mod.tar -verbose -overwrite
 ectrans -remote sansone -source ~/EXPERIMENTS.cca.$USER.dat -verbose -overwrite
 #ectrans -remote sansone -source ~/EXPERIMENTS.${ECE3_POSTPROC_MACHINE}.$USER.dat -verbose -overwrite
