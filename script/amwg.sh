@@ -22,6 +22,7 @@ set -ue
 # -- default option
 account=${ECE3_POSTPROC_ACCOUNT-}
 ALT_RUNDIR=""
+EXPID2=""
 modmodcheck=0
 options=""
 
@@ -31,8 +32,7 @@ while getopts "h?a:ury:" opt; do
             usage
             exit 0
             ;;
-        y)  options="${options} -y $OPTARG"
-            EXP2=$OPTARG
+        y)  EXPID2=$OPTARG
             modmodcheck=1
 	    ;;
         r)  options="${options} -r $OPTARG"
@@ -55,7 +55,7 @@ if [ "$#" -ne 3 ]; then
     exit 1
 fi
 
-echo "exp2 $EXP2" 
+echo "exp2 $EXPID2" 
 
 # -- Sanity check (from amwg_modobs.sh, repeated here for "before submission" error catch) 
 [[ -z $ECE3_POSTPROC_TOPDIR  ]] && echo "User environment not set. See ../README." && exit 1 
@@ -112,14 +112,14 @@ then
 	Y1=$2
 	Y2=$3
 
-	tgt_script=$OUT/amwg_$1_${EXP2}_$2_$3.job
+	tgt_script=$OUT/amwg_$1_${EXPID2}_$2_$3.job
 
 	echo "$1"
 	echo "$2"
 	echo "$3"
-	echo "$EXP2"
+	echo "$EXPID2"
 
-	sed "s/<EXPID>/$1$EXP2/" < ${CONFDIR}/header_$ECE3_POSTPROC_MACHINE.tmpl > $tgt_script
+	sed "s/<EXPID>/$1-$EXPID2/" < ${CONFDIR}/header_$ECE3_POSTPROC_MACHINE.tmpl > $tgt_script
 	sed -i "s/<Y1>/$3/" $tgt_script
 	[[ -n $account ]] && \
 	    sed -i "s/<ACCOUNT>/$account/" $tgt_script || \
@@ -127,7 +127,7 @@ then
 	sed -i "s/<JOBID>/amwg/" $tgt_script
 	sed -i "s|<OUT>|$OUT|" $tgt_script
    
-	echo ../amwg/amwg_modmod.sh ${options} $1 $2 $3 >>  $tgt_script
+	echo ../amwg/amwg_modmod.sh ${options} $1 $EXPID2 $2 $3 >>  $tgt_script
 	echo "*EE* check modmod is ON"
 
 else

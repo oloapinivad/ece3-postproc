@@ -31,7 +31,7 @@ queue_cmd="qstat -u $USER"
 
 module unload ncl     #unload ncl 6.4.0 (>>> WARNINGS)
 
-for soft in nco netcdf netcdf4 cdo ncl/6.2.0 python cdftools
+for soft in netcdf4 cdo ncl/6.2.0 nco python cdftools
 do
     if ! module -t list 2>&1 | grep -q $soft
     then
