@@ -40,7 +40,7 @@
 # Author: Laurent Brodeau (laurent@misu.su.se), 2014
 #==========================================================================================
 
-set -eu
+set -e
 
 usage() {
     echo "Usage:  ${0##*/} EXP YEAR1 YEAR2"
@@ -168,15 +168,6 @@ for var in ${LIST_V_3D_ATM}; do
                     mv -f tmp.nc ${fo}
                 fi
 
-####MOD
-                  cb=`ncdump -h ${fo} | grep " plev"`
-                  if [ ! "${cb}" = "" ]; then
-                    echo "ncrename -h -O -d plev,lev -v plev,lev ${fo} -o ${fo}"
-                    ncrename -h -O -d plev,lev -v plev,lev ${fo} -o ${fo}
-                  echo " => done!"
-                  fi
-####MOD
-
             done
             jy=`expr ${jy} + 1`
         done
@@ -271,7 +262,7 @@ for var in ${LIST_V_2D_ATM}; do
                 # Testing if no degenerate level dimension and variable of length 1:
                 ca=`ncdump -h tmp.nc | grep " ${var}("`
                 #for ctest in depth $LEV alt; do :AB
-                for ctest in depth lev plev alt; do 
+                for ctest in depth plev lev alt; do 
                     if [[ "${ca}" =~ "${ctest}, lat" ]]; then
                         echo "Need to remove degenerate dimension ${ctest} from ${var}"
                         ncwa -O -h    -a ${ctest} tmp.nc  -o tmp2.nc ; rm -f tmp.nc  ; # removes lev dimension
@@ -358,11 +349,9 @@ if [ ${i_ocean} -eq 1 ]; then
                     echo
                 fi
 
-                # Need to interpolate on gaussian grid ${GAUSS_RES}:
+		 # Need to interpolate on gaussian grid ${GAUSS_RES}:
                 echo "cdo remapbil,${GAUSS_RES_lc} -selvar,${var} ${cf} tmp1.nc"
                 $cdo remapbil,${GAUSS_RES_lc}       -selvar,${var} ${cf} tmp1.nc
-
-#A                echo "fattooooo remap"
                 
                 rm -f tmp.nc; echo
 
@@ -376,21 +365,8 @@ if [ ${i_ocean} -eq 1 ]; then
                 fi
                 
                 for cm in ${LM}; do
-#A                echo "${cm}"
-    
-#A                # If time-record is called "time_counter", renaming to "time"
-                ca=`ncdump -h ${cf} | grep UNLIMITED | grep time_counter`
-                if [ ! "${ca}" = "" ]; then            
-                  echo "ncrename -d time_counter,time ${cf}"
-#org                    ncrename -O -d time_counter,time ${cf} -o ./tmp1.nc
-                    ncrename -O -d time_counter,time tmp1.nc -o ./tmp3.nc
-                fi
-
-#org                    ncks -h -a -F -O -d time,${cm} tmp1.nc -o tmp2.nc
-                    ncks -h -a -F -O -d time,${cm} tmp3.nc -o tmp2.nc
+                    ncks -h -a -F -O -d time,${cm} tmp1.nc -o tmp2.nc
                     ncatted -h -O -a history,global,d,, tmp2.nc ; # removing global attribute history
-
-#A                echo "fattooooo ncks!"
                     
                     fo=./${varncar}_${expname}_${jy}${cm}.tmp
                     if [ ! "${var}" = "${varncar}" ]; then
@@ -399,7 +375,7 @@ if [ ${i_ocean} -eq 1 ]; then
                         mv -f tmp2.nc ${fo}
                     fi
                 done
-                rm -f tmp1.nc copy.tmp tmp3.nc  #A tmp3.nc
+                rm -f tmp1.nc copy.tmp
                 jy=`expr ${jy} + 1`
             done
 

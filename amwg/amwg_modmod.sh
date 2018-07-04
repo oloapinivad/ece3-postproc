@@ -18,7 +18,7 @@ usage()
 }
 
 ALT_RUNDIR=""
-set -ue
+set -e
 
 # -- options
 
