@@ -150,18 +150,28 @@ for vv in $var3d ; do
     
     #axis correction, Pa to hPa
     $cdo zaxisdes $clim > $TMPDIR/axis.txt
-    $cdo setzaxis,$TMPDIR/axis.txt -invertlev -zonmean $field $TMPDIR/new_${vv}.nc
+
+    #PD: fixing previous primavera flag
+    if [[ ${primavera} == 1 ]]; then
+	$cdo setzaxis,$TMPDIR/axis.txt -invertlev -zonmean -sellevel,1000,5000,10000,20000,30000,40000,50000,70000,85000,92500,100000  $field $TMPDIR/new_${vv}.nc
+    else
+    	$cdo setzaxis,$TMPDIR/axis.txt -invertlev -zonmean $field $TMPDIR/new_${vv}.nc
+    fi
 
     #computing PIs
-    if [[ ${primavera} == 1 ]]; then
-        #Dei 44 lev, seleziono solo gli 11 da confrontare con OBS-dataset_ERA40 
-        $cdo div -sqr -sub -sellevel,1000,5000,10000,20000,30000,40000,50000,70000,85000,92500,100000 $TMPDIR/new_${vv}.nc $clim $var $TMPDIR/tempp_$vv.nc
+    $cdo div -sqr -sub $TMPDIR/new_${vv}.nc $clim $var $TMPDIR/temp_$vv.nc
 
-        #Converto da Pa (file tempp_$vv.nc) a mbar/hPa (file temp_$vv.nc) in accordo con file pressure.nc 
-        $cdo setzaxis,$TMPDIR/axis.txt $TMPDIR/tempp_$vv.nc $TMPDIR/temp_$vv.nc
-    else
-        $cdo div -sqr -sub $TMPDIR/new_${vv}.nc $clim $var $TMPDIR/temp_$vv.nc
-    fi        
+    #computing PIs
+    #if [[ ${primavera} == 1 ]]; then
+    #    #Dei 44 lev, seleziono solo gli 11 da confrontare con OBS-dataset_ERA40 
+    #	$cdo invertlev -zonmean $field $TMPDIR/new_${vv}.nc
+    #       $cdo div -sqr -sub -sellevel,1000,5000,10000,20000,30000,40000,50000,70000,85000,92500,100000 $TMPDIR/new_${vv}.nc $clim $var $TMPDIR/tempp_$vv.nc
+#
+ #       #Converto da Pa (file tempp_$vv.nc) a mbar/hPa (file temp_$vv.nc) in accordo con file pressure.nc 
+  #      $cdo setzaxis,$TMPDIR/axis.txt $TMPDIR/tempp_$vv.nc $TMPDIR/temp_$vv.nc
+   # else
+        #$cdo div -sqr -sub $TMPDIR/new_${vv}.nc $clim $var $TMPDIR/temp_$vv.nc
+#    fi        
 
     pivalue=$( $cdo outputf,%8.4f,1 -fldmean -vertsum -sellevel,100,200,300,400,500,700,850,925,1000 -mul $TMPDIR/pressure.nc $TMPDIR/temp_$vv.nc )
     piratio=$( echo "scale=2; $pivalue/${cmip3}" | bc | xargs printf "%4.2f\n" )

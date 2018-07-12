@@ -3,7 +3,13 @@
 # --- TOOLS -----
 # Required programs, including compression options
 module unload cdo hdf5 netcdf python numpy
-module load  hdf5/1.8.17--intel--pe-xe-2017--binary netcdf/4.4.1--intel--pe-xe-2017--binary cdo  python/2.7.12 numpy/1.11.2--python--2.7.12 nco/4.6.7
+module load  mkl/2017--binary
+module load  hdf5/1.8.17--intel--pe-xe-2017--binary 
+module load netcdf/4.4.1--intel--pe-xe-2017--binary 
+module load cdo 
+module load python/2.7.12 
+module load numpy/1.11.2--python--2.7.12 
+module load nco/4.6.7
 
 # --- PATTERN TO FIND POST-PROCESSED DATA FROM HIRESCLIM2
 # 

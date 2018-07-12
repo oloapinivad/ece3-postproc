@@ -58,6 +58,8 @@ exp=$1
 year1=$2
 year2=$3
 
+echo $lp
+
 # check environment
 [[ -z "${ECE3_POSTPROC_TOPDIR:-}" ]] && echo "User environment not set. See ../README." && exit 1
 . ${ECE3_POSTPROC_TOPDIR}/functions.sh

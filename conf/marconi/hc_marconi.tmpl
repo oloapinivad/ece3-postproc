@@ -5,6 +5,8 @@
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=<NPROCS>
 #SBATCH --share
+#SBATCH --mem=110GB 
+#SBATCH --time=06:00:00
 #SBATCH --output=<OUT>/log/hiresclim_<EXPID>_<YEAR>.out
 
 set -e
