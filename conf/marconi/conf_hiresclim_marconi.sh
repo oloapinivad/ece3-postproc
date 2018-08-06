@@ -24,7 +24,7 @@ export NEMORESULTS0='/marconi_scratch/userexternal/${USERexp}/ece3/${EXPID}/outp
 export ECE3_POSTPROC_POSTDIR='/marconi_scratch/userexternal/${USER}/ece3/${EXPID}/post'
 
 # --- PROCESSING TO PERFORM (uncomment to change default)
-# ECE3_POSTPROC_HC_IFS_MONTHLY=1
+ ECE3_POSTPROC_HC_IFS_MONTHLY=0
 # ECE3_POSTPROC_HC_IFS_MONTHLY_MMA=0
 # ECE3_POSTPROC_HC_IFS_DAILY=0
 # ECE3_POSTPROC_HC_IFS_6HRS=0
@@ -44,12 +44,13 @@ submit_cmd="sbatch"
 queue_cmd="squeue -u $USER  -o %.16j"
 
 # required programs, including compression options
-module unload netcdf hdf5
-
-for soft in hdf5/1.8.17--intel--pe-xe-2017--binary netcdf/4.4.1--intel--pe-xe-2017--binary nco python cdo
+module purge
+module_list="intel/pe-xe-2017--binary netcdf/4.4.1--intel--pe-xe-2017--binary szip/2.1--gnu--6.1.0 zlib/1.2.8--gnu--6.1.0 hdf5/1.8.17--intel--pe-xe-2017--binary python/2.7.12 cdo"
+for soft in ${module_list}
 do
     if ! module -t list 2>&1 | grep -q $soft
     then
+	echo $soft
         module load $soft
     fi
 done
@@ -68,7 +69,7 @@ cdftools4=0
 cdftools301=0
 
 # Set to 0 for not to rebuild 3D relative humidity
-rh_build=1
+rh_build=0
 
 # number of parallel procs for IFS (max 12) and NEMO rebuild
 #if [[ -z $IFS_NPROCS ]] ; then

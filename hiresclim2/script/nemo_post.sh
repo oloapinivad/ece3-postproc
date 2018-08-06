@@ -149,6 +149,10 @@ if [ "${nm_ssh}"  != "sossheig" ];  then rename_str=$rename_str" -v ${nm_ssh},so
 if [ "${nm_tpot}" != "votemper" ];  then rename_str=$rename_str" -v ${nm_tpot},votemper"; fi
 if [ "${nm_s}"    != "vosaline" ];  then rename_str=$rename_str" -v ${nm_s},vosaline"   ; fi
 
+echo $rename_str
+ncrename --version
+which ncrename
+
 if [ "${rename_str}" != "" ];  then ncrename $rename_str ${froot}_grid_T.nc ; fi
 
 if [ "${nm_wfo}"  != "sowaflup" ];  then ncrename -v ${nm_wfo},sowaflup  ${froot}_${SBC}.nc ; fi
