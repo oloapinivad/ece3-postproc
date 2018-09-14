@@ -4,14 +4,15 @@ verbose=1
 
 for table in CMIP6 PRIMAVERA ; do
 
-#DIRFILE=/marconi/home/userexternal/pdavini0/scratch/newtest_23mar/$table/CMIP/EC-Earth-Consortium/EC-Earth3-HR/historical/r1i1p1f1
-DIRFILE=/marconi/home/userexternal/pdavini0/scratch/newtest_03mag/$table/CMIP/EC-Earth-Consortium/EC-Earth3-HR/piControl/r1i1p1f1
-#DIRFILE=/marconi/home/userexternal/pdavini0/scratch/newtest_30mar/$table/CMIP/EC-Earth-Consortium/EC-Earth3-HR/piControl/r1i1p1f1
+#folder=cmor_test_180808
+folder=cmor_test_180912
+expname=qctr
+DIRFILE=/marconi/home/userexternal/pdavini0/scratch/$folder/$table/HighResMIP/EC-Earth-Consortium/EC-Earth3P-HR/control-1950/r1i1p1f1
 
 if [[ $table == CMIP6 ]] ; then
-	varlist=$HOME/ecearth3/ece3-postproc/ece2cmor3_support/varlist/varlist-cmip6-paolo.json
+	varlist=$HOME/ecearth3/ece3-postproc/ece2cmor3_support/varlist/varlist-cmip6-${expname}.json
 elif [[ $table == PRIMAVERA ]] ; then
-	varlist=$HOME/ecearth3/ece3-postproc/ece2cmor3_support/varlist/varlist-primavera-paolo.json
+	varlist=$HOME/ecearth3/ece3-postproc/ece2cmor3_support/varlist/varlist-primavera-${expname}.json
 fi
 
 echo "----------------------------------------------"
@@ -40,6 +41,7 @@ for t in $(seq 0 $((${#s0[@]}-1))) ; do
 				if [ "${var: -2}" -eq "27" ] 2> /dev/null ; then var=${var::-2} ; fi
 				if [ ${var: -2} == 7h ] 2> /dev/null ; then var=${var::-2} ; fi
 				if [ ${var: -1} == 4 ] 2> /dev/null ; then var=${var::-1} ; fi
+				if [ ${var: -2} == "2d" ] 2> /dev/null ; then var=${var::-2} ; fi
 				#echo ${var: -2} 
 			fi
 			check=$(ls $DIRFILE/$categ/*/*/*/* 2> /dev/null | grep "/${var}_" | wc -l)
