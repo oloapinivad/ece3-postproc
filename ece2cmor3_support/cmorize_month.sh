@@ -18,7 +18,7 @@ MON=${MON:-1}
 ATM=${ATM:-1}
 OCE=${OCE:-1}
 USEREXP=${USEREXP:-pdavini0}
-NCORESATM=${NCORESATM:-1}
+NCORESATM=${NCORESATM:-8}
 NCORESOCE=${NCORESOCE:-1}
 DO_PRIMA=true #extra flag for primavera tables
 

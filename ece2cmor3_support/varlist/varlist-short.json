@@ -1,22 +1,20 @@
 {
-  "Emon": [
-        "wap",
-        "u2",
-        "v2",
-        "uv",
-        "uwap",
-        "vwap",
-        "ut",
-        "vt",
-        "twap",
-        "mrsol",
-        "ta27",
-        "ua27",
-        "va27",
-        "zg27",
-        "hus27"
-    ],
-  "3hr": [
-        "tos"
+   "6hrPlevPt": [
+        "huss",
+        "mrsos",
+        "psl",
+        "sfcWind",
+        "snw",
+        "tas",
+        "ts",
+        "tsl",
+        "uas",
+        "vas",
+        "vortmean",
+        "hus7h",
+        "ta7h",
+        "va7h",
+        "ua7h",
+        "zg7h"
     ]
 }

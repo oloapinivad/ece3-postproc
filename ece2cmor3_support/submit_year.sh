@@ -28,9 +28,12 @@ EXP=${EXP:-det4}
 YEAR=${YEAR:-1950}
 RESO=${RESO:-T255}
 INDEX=${INDEX:-1}
-ATM=${ATM:-0}
+ATM=${ATM:-1}
 OCE=${OCE:-0}
 USEREXP=${USEREXP:-pdavini0}  #extra by P. davini: allows analysis of experiment owned by different user
+MONTH=0 #if month=0, then loop on all months
+NCORESATM=8
+NCORESOCE=1
 
 # options controller 
 OPTIND=1
@@ -50,8 +53,6 @@ done
 shift $((OPTIND-1))
 
 #----machine dependent argument----#
-NCORESATM=8
-NCORESOCE=1
 ACCOUNT=IscrC_C2HEClim
 if [[ $RESO == T511 ]] ; then 
 	MEMORY=50GB
@@ -64,6 +65,11 @@ SUBMIT="sbatch"
 PARTITION=bdw_usr_prod
 
 #-----------------------#
+if [[ $MONTH -eq 0 ]] ; then
+	MONS=$(seq 1 12)
+else
+	MONS=$MONTH
+fi
 
 # define folder for logfile
 LOGFILE=/marconi_scratch/userexternal/$USER/log/cmorize
@@ -97,8 +103,7 @@ MACHINE_OPT="--account=$ACCOUNT --time $TLIMIT --partition=$PARTITION --mem=$MEM
 if [ "$ATM" -eq 1 ] ; then
 
     # Loop on months
-    for MON in $(seq 1 12); do
-    #for MON in 1 ; do
+    for MON in $MONS ; do
 	    OPT_ATM="$BASE_OPT,ATM=$ATM,OCE=0,NCORESATM=$NCORESATM,MON=$MON"
 	    #echo OPT_ATM=${OPT_ATM}
 	    JOBID=$($SUBMIT $MACHINE_OPT -n $NCORESATM --job-name=proc_ifs-${YEAR}-${MON} --output=$LOGFILE/cmor_${EXP}_${YEAR}_${MON}_ifs_%j.out --error=$LOGFILE/cmor_${EXP}_${YEAR}_${MON}_ifs_%j.err --export=${OPT_ATM} ./cmorize_month.sh)

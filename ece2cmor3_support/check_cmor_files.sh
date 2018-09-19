@@ -1,18 +1,19 @@
 #!/bin/bash
 
-verbose=1
+verbose=0
+oce=0
+expname=det4
+year=1950
 
 for table in CMIP6 PRIMAVERA ; do
 
-#folder=cmor_test_180808
-folder=cmor_test_180912
-expname=qctr
-DIRFILE=/marconi/home/userexternal/pdavini0/scratch/$folder/$table/HighResMIP/EC-Earth-Consortium/EC-Earth3P-HR/control-1950/r1i1p1f1
+DIRFILE=$SCRATCH/ece3/$expname/cmorized/Year_${year}/$table/*/EC-Earth-Consortium/*/*/*
+echo $DIRFILE
 
 if [[ $table == CMIP6 ]] ; then
-	varlist=$HOME/ecearth3/ece3-postproc/ece2cmor3_support/varlist/varlist-cmip6-${expname}.json
+	varlist=$HOME/ecearth3/ece3-postproc/ece2cmor3_support/varlist/varlist-cmip6-stream2.json
 elif [[ $table == PRIMAVERA ]] ; then
-	varlist=$HOME/ecearth3/ece3-postproc/ece2cmor3_support/varlist/varlist-primavera-${expname}.json
+	varlist=$HOME/ecearth3/ece3-postproc/ece2cmor3_support/varlist/varlist-primavera-stream2.json
 fi
 
 echo "----------------------------------------------"
@@ -30,7 +31,12 @@ totvars=0; totfiles=0
 for t in $(seq 0 $((${#s0[@]}-1))) ; do
 #for t in 16 ; do
 	categ=$(sed "${s0[$t]},${s0[$t]}!d" $varlist | cut -f 2 -d '"')
-	nfiles=$(ls $DIRFILE/$categ/*/*/*/* 2> /dev/null | wc -l)
+	if [[ $categ == "Omon" ]] || [[ $categ == "SImon" ]] || [[ $categ == "SIday" ]] || [[ $categ == "Oday" ]] || [[ $categ == "PrimOday" ]] || [[ $categ == "PrimOmon" ]] ; then
+		if [[ $oce -eq 0 ]] ; then
+			continue 
+		fi
+	fi
+	nfiles=$(ls $DIRFILE/$categ/*/*/*/*${year}01* 2> /dev/null | wc -l)
 	nvars=$((${f0[$t]}-${s0[$t]}-1))
 	echo "$categ -> Theory:" $nvars "Actual:" $nfiles
 	if [ $verbose -eq 1 ] ; then

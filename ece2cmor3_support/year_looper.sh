@@ -3,8 +3,8 @@
 #rough scheme for looping on years, it produces 13 jobs for each year so beware
 
 EXP=det4
-YEAR1=1961
-YEAR2=1980
+YEAR1=1950
+YEAR2=1951
 INDEX=1
 ATM=1
 OCE=0

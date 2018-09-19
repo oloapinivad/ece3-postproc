@@ -16,8 +16,12 @@ EXP=${EXP:-det4}
 YEAR=${YEAR:-1950}
 VERBOSE=${VERBOSE:-0}
 
-cdozip="cdo -f nc4 -z zip"
+#module load nco
+
+cdozip="cdo -f nc4c -z zip"
 ncrcat="ncrcat -h" 
+
+#$ncrcat --version
 
 OPTIND=1
 while getopts "h?e:l:s:r:v" OPT; do
@@ -43,7 +47,7 @@ if ! [[ $YEAR =~ ^[0-9]+$ ]]; then
 fi
 
 INPUTDIR=$SCRATCH/ece3/$EXP/cmorized/Year_${YEAR}
-OUTPUTDIR=$SCRATCH/ece3/$EXP/cmorized/Year_${YEAR}_concat_test
+OUTPUTDIR=$SCRATCH/ece3/$EXP/cmorized/Year_${YEAR}_CDO2
 #INPUTDIR=$SCRATCH/merge_test_180912
 #OUTPUTDIR=$SCRATCH/merge_test_180912_CDO
 
@@ -93,8 +97,9 @@ for dir in `find $INPUTDIR -name *.nc -print0 | xargs -0 -n 1 dirname | xargs -n
     echo "Merging files in $dir..."
     echo "Merged file name: $fname"
     orderedpaths=$(printf "%s\n" "${farray[@]}" | xargs -i find $dir -name {} -print)
+    #echo $orderedpaths
     $cdozip mergetime $orderedpaths $OUTPUTDIR/$fname &
-    #$ncrcat $orderedpaths $OUTPUTDIR/$fname &
+    #$ncrcat $orderedpaths $OUTPUTDIR/$fname
 done
 wait
 
