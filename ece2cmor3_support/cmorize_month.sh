@@ -20,6 +20,7 @@ OCE=${OCE:-1}
 USEREXP=${USEREXP:-pdavini0}
 NCORESATM=${NCORESATM:-8}
 NCORESOCE=${NCORESOCE:-1}
+STARTTIME=${STARTTIME:-1950-01-01}
 DO_PRIMA=true #extra flag for primavera tables
 
 # options controller 
@@ -166,7 +167,7 @@ function runece2cmor_atm {
     echo "  Using $PREFIX tables"
     echo "================================================================" 
     #$ece2cmor $ATMDIR $YEAR-$(printf %02g $MON)-01 --exp $EXP --conf $CONFIGFILE --vars $VARLIST --npp $THREADS --tmpdir $TMPDIR --ifspar $IFSPAR --tabid $PREFIX --tabdir $TABDIR  --mode append --atm --filter
-    $ece2cmor $ATMDIR $YEAR-$(printf %02g $MON)-01 --exp $EXP --conf $CONFIGFILE --vars $VARLIST --npp $THREADS --tmpdir $TMPDIR --ifspar $IFSPAR --tabid $PREFIX --tabdir $TABDIR  --mode append --atm
+    $ece2cmor $ATMDIR $YEAR-$(printf %02g $MON)-01 --exp $EXP --conf $CONFIGFILE --vars $VARLIST --npp $THREADS --tmpdir $TMPDIR --ifspar $IFSPAR --tabid $PREFIX --tabdir $TABDIR  --mode append --atm --refd $STARTTIME
     
     # Removing tmp directory
     if [ -d "${TMPDIR}" ] ; then

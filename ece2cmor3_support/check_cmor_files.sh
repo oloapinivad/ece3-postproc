@@ -3,7 +3,7 @@
 verbose=0
 oce=0
 expname=det4
-year=1950
+year=1951
 
 for table in CMIP6 PRIMAVERA ; do
 

@@ -4,18 +4,20 @@
 #
 # Filter and CMORize one year of EC-Earth output: uses CMIP6 tables only.
 # This script submits 12+1 jobs, each filtering/cmorizing one month of data.
-#
+# In a delayed framework provides also data merging and validation.
 #
 # Note that for NEMO processing, all files in the output folder will be
 # processed irrespective of the MON variable, so this is only useful for IFS.
 #
 # ATM=1 means process IFS data.
 # OCE=1 means process NEMO data (default is 0).
-# RESO is used to set machine dependent properties for job submission
-# INDEX change the relization_index in the metadata file
-# NCORESATM/OCE is used for parallel computation. Oceanic part is still serial
+# MERGE=1 means that IFS files will be merged into yearly files.
+# VALID=1 means that data validation by Jon Seddon will be run.
+# RESO is used to set machine dependent properties for job submission.
+# INDEX change the relization_index in the metadata file.
+# STARTTIME is used for IFS reference date (fundamental for concatenation).
+# NCORESATM/OCE/MERGE/VALID is used for parallel computation.
 #
-# Other choices of output (output/tmp dirs etc.) are set in cmor_mon_filter.sh.
 #
 # Paolo Davini (Apr 2018) - based on a script by Gijs van Oord and Kristian Strommen
 #
@@ -23,46 +25,68 @@
 
 set -ue
 
-#---input argument----#
-EXP=${EXP:-det4}
-YEAR=${YEAR:-1950}
-RESO=${RESO:-T255}
-INDEX=${INDEX:-1}
-ATM=${ATM:-1}
-OCE=${OCE:-0}
+#---REQUIRED ARGUMENTS----#
+#EXP=det4
+#YEAR=1950
+#YEAR0=$YEAR
+
+#---DEFAULT INPUT ARGUMENT----#
+RESO=T255 # resolition, to set accorindgly machine dependent requirements
+INDEX=1 #realization index, to change metadata
 USEREXP=${USEREXP:-pdavini0}  #extra by P. davini: allows analysis of experiment owned by different user
-MONTH=0 #if month=0, then loop on all months
-NCORESATM=8
+MONTH=0 #if month=0, then loop on all months (IFS only)
+ATM=0
+OCE=0
+MERGE=0 #flag for merging
+VALID=0 #flag for validation
+STARTTIME=1950-01-01 #very important to allow correct merging
+
+#---PARALLELIZATION OPTIONS---#
+NCORESATM=8 #parallelization is available
 NCORESOCE=1
+NCORESMERGE=24 #parallelization is available
+NCORESVALID=1
 
 # options controller 
 OPTIND=1
-while getopts "h:e:y:u:a:o:i:" OPT; do
+while getopts "h:e:y:j:u:a:o:m:v:i:r:s:" OPT; do
     case "$OPT" in
-    h|\?) echo "Usage: submit_year.sh -e <experiment name> -y <yr> -i <realization index> \
-                -a <process atmosphere (0,1): default 0> -o <process ocean (0,1): default 0> -u <userexp>"
+    h|\?) echo "Usage: submit_year.sh -e <experiment name> -y <year> -i <realization index: default 1> \
+                -a <process atmosphere (0,1): default 0> -o <process ocean (0,1): default 0> -u <userexp> \
+		-m <merge into yearly (0,1): default 0> -v <validate data (0,1): default 0> \
+		-j <initial year for lagged merging and validation (default: year) > \
+		-r <resolution (T255,T511): default T255> -s <reference time for NetCDF (YYYY-MM-DD): default 1950-01-01>"
           exit 0 ;;
     e)    EXP=$OPTARG ;;
     y)    YEAR=$OPTARG ;;
+    j)    YEAR0=$OPTARG ;;
     a)    ATM=$OPTARG ;;
     o)    OCE=$OPTARG ;;
+    m)    MERGE=$OPTARG ;;
+    v) 	  VALID=$OPTARG ;;
     u)    USEREXP=$OPTARG ;;
     i)    INDEX=$OPTARG ;;
+    r)	  RESO=$OPTARG ;;
+    s)    STARTTIME=$OPTARG ;;
     esac
 done
 shift $((OPTIND-1))
 
 #----machine dependent argument----#
 ACCOUNT=IscrC_C2HEClim
+SUBMIT="sbatch"
+PARTITION=bdw_usr_prod
 if [[ $RESO == T511 ]] ; then 
 	MEMORY=50GB
 	TLIMIT="02:59:00"
+	DELTA=270
+	TCHECK="05:59:00"
 else
-	MEMORY=10GB
+	MEMORY=20GB
 	TLIMIT="00:59:00"
+	DELTA=40
+	TCHECK="01:59:00"
 fi
-SUBMIT="sbatch"
-PARTITION=bdw_usr_prod
 
 #-----------------------#
 if [[ $MONTH -eq 0 ]] ; then
@@ -92,7 +116,19 @@ else
     echo "NEMO processing: no"
 fi
 
-echo "Submitting jobs via Slurm..."
+if [ "$MERGE" -eq 1 ]; then
+    echo "Merging in yearly files: yes"
+else
+    echo "Merging in yearly files: no"
+fi
+
+if [ "$VALID" -eq 1 ]; then
+    echo "Validating files: yes"
+else
+    echo "Validating files: no"
+fi
+
+echo "Submitting jobs via $SUBMIT..."
 
 # Define basic options for slurm submission
 BASE_OPT="EXP=$EXP,YEAR=$YEAR,USEREXP=$USEREXP,INDEX=$INDEX"
@@ -104,9 +140,9 @@ if [ "$ATM" -eq 1 ] ; then
 
     # Loop on months
     for MON in $MONS ; do
-	    OPT_ATM="$BASE_OPT,ATM=$ATM,OCE=0,NCORESATM=$NCORESATM,MON=$MON"
+	    OPT_ATM="$BASE_OPT,ATM=$ATM,OCE=0,NCORESATM=$NCORESATM,MON=$MON,STARTTIME=$STARTTIME"
 	    #echo OPT_ATM=${OPT_ATM}
-	    JOBID=$($SUBMIT $MACHINE_OPT -n $NCORESATM --job-name=proc_ifs-${YEAR}-${MON} --output=$LOGFILE/cmor_${EXP}_${YEAR}_${MON}_ifs_%j.out --error=$LOGFILE/cmor_${EXP}_${YEAR}_${MON}_ifs_%j.err --export=${OPT_ATM} ./cmorize_month.sh)
+	    JOBID=$($SUBMIT $MACHINE_OPT -n $NCORESATM --job-name=ifs-${EXP}-${YEAR}-${MON} --output=$LOGFILE/cmor_${EXP}_${YEAR}_${MON}_ifs_%j.out --error=$LOGFILE/cmor_${EXP}_${YEAR}_${MON}_ifs_%j.err --export=${OPT_ATM} ./cmorize_month.sh)
     done
 
 fi
@@ -116,8 +152,24 @@ fi
 if [ "$OCE" -eq 1 ]; then
     OPT_OCE="$BASE_OPT,ATM=0,OCE=$OCE,NCORESOCE=$NCORESOCE"
     #echo OPT_OCE=${OPT_OCE}
-    JOBID=$($SUBMIT $MACHINE_OPT -n $NCORESOCE --job-name=proc_nemo-${YEAR} --output=$LOGFILE/cmor_${EXP}_${YEAR}_nemo_%j.out --error=$LOGFILE/cmor_${EXP}_${YEAR}_nemo_%j.err --export=${OPT_OCE} ./cmorize_month.sh)
+    JOBID=$($SUBMIT $MACHINE_OPT -n $NCORESOCE --job-name=nemo-${EXP}-${YEAR} --output=$LOGFILE/cmor_${EXP}_${YEAR}_nemo_%j.out --error=$LOGFILE/cmor_${EXP}_${YEAR}_nemo_%j.err --export=${OPT_OCE} ./cmorize_month.sh)
 fi
+
+# Merger submission, delayed by $DELTA time per year
+if [ "$MERGE" -eq 1 ] ; then
+    DELTAMIN1=$(( (YEAR-YEAR0+1)* $DELTA ))
+    OPT_MERGE="YEAR=${YEAR},EXP=${EXP}"
+    JOBID=$($SUBMIT $MACHINE_OPT -n $NCORESMERGE --begin=now+${DELTAMIN1}minutes --job-name=merge-${EXP}-${YEAR} --output=$LOGFILE/merge_${YEAR}_%j.out --error=$LOGFILE/merge_${YEAR}_%j.err --export=${OPT_MERGE} ./merge_month.sh)
+fi
+
+# Validator submission, delayed
+if [ "$VALID" -eq 1 ] ; then
+    DELTAMIN2=$(( (YEAR-YEAR0+1)* $DELTA + $DELTA ))
+    OPT_VALID="YEAR1=${YEAR},YEAR2=${YEAR},EXP=${EXP},MONTHS=13"
+    JOBID=$($SUBMIT --account=$ACCOUNT --time $TCHECK --partition=$PARTITION --mem=$MEMORY -n $NCORESVALID --begin=now+${DELTAMIN2}minutes --job-name=validate-${EXP}-${YEAR} --output=$LOGFILE/validate_ifs_${YEAR}_%j.out --error=$LOGFILE/validate_ifs_${YEAR}_%j.err --export=${OPT_VALID} ./validate_ifs.sh)
+fi
+
+
 
 echo "Jobs submitted!"
 echo "========================================================="

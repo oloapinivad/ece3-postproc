@@ -2,15 +2,15 @@
 #
 # Merging cmorized monthly means to yearly files
 #
-#SBATCH --job-name=cmor_mon
-#SBATCH -n24
-#SBATCH --mem=50GB
-#SBATCH --job-name monthly_merger
-#SBATCH --time=01:59:00
-#SBATCH --account=IscrC_C2HEClim
-#SBATCH --output /marconi_scratch/userexternal/pdavini0/log/cmorize/merge_month_%j.out
-#SBATCH --error /marconi_scratch/userexternal/pdavini0/log/cmorize/merge_month_%j.err
-#SBATCH --partition=bdw_usr_prod
+##SBATCH --job-name=cmor_mon
+##SBATCH -n24
+##SBATCH --mem=50GB
+##SBATCH --job-name monthly_merger
+##SBATCH --time=01:59:00
+##SBATCH --account=IscrC_C2HEClim
+##SBATCH --output /marconi_scratch/userexternal/pdavini0/log/cmorize/merge_month_%j.out
+##SBATCH --error /marconi_scratch/userexternal/pdavini0/log/cmorize/merge_month_%j.err
+##SBATCH --partition=bdw_usr_prod
 
 EXP=${EXP:-det4}
 YEAR=${YEAR:-1950}
@@ -47,7 +47,7 @@ if ! [[ $YEAR =~ ^[0-9]+$ ]]; then
 fi
 
 INPUTDIR=$SCRATCH/ece3/$EXP/cmorized/Year_${YEAR}
-OUTPUTDIR=$SCRATCH/ece3/$EXP/cmorized/Year_${YEAR}_CDO2
+OUTPUTDIR=$SCRATCH/ece3/$EXP/cmorized/Year_${YEAR}_NCO
 #INPUTDIR=$SCRATCH/merge_test_180912
 #OUTPUTDIR=$SCRATCH/merge_test_180912_CDO
 
@@ -60,7 +60,7 @@ mkdir -p $OUTPUTDIR
 
 #clean double tos
 rm -rf $INPUTDIR/*/*/*/*/*/r1i1p1f1/Omon/tos/gr
-#rm -rf $INPUTDIR/*/*/*/*/*/r1i1p1f1/Oday/tos/gr
+rm -rf $INPUTDIR/*/*/*/*/*/r1i1p1f1/Oday/tos/gr
 
 source activate ece2cmor3
 
@@ -98,8 +98,8 @@ for dir in `find $INPUTDIR -name *.nc -print0 | xargs -0 -n 1 dirname | xargs -n
     echo "Merged file name: $fname"
     orderedpaths=$(printf "%s\n" "${farray[@]}" | xargs -i find $dir -name {} -print)
     #echo $orderedpaths
-    $cdozip mergetime $orderedpaths $OUTPUTDIR/$fname &
-    #$ncrcat $orderedpaths $OUTPUTDIR/$fname
+    #$cdozip mergetime $orderedpaths $OUTPUTDIR/$fname &
+    $ncrcat $orderedpaths $OUTPUTDIR/$fname & 
 done
 wait
 
@@ -141,8 +141,8 @@ done
 	
 
 # Do this after testing...
-#rm -rf $INPUTDIR
-#mv $OUTPUTDIR $INPUTDIR
+rm -rf $INPUTDIR
+mv $OUTPUTDIR $INPUTDIR
 
 exit 0
 

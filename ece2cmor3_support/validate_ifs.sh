@@ -3,7 +3,7 @@
 #SBATCH -n1
 #SBATCH --mem=50GB
 #SBATCH --job-name validate_ifs
-#SBATCH --time=01:59:00
+#SBATCH --time=02:59:00
 #SBATCH --account=IscrC_C2HEClim
 #SBATCH --output /marconi_scratch/userexternal/pdavini0/log/cmorize/validate_ifs_%j.out
 #SBATCH --error /marconi_scratch/userexternal/pdavini0/log/cmorize/validate_ifs_%j.err
@@ -15,9 +15,9 @@ set -e
 #Uses Jon Seddon's primavera-val python tool.
 
 #Will validate all years between YEAR1 and YEAR2 of experiment with name EXP
-EXP=det4
-YEAR1=1950
-YEAR2=1950
+EXP=${EXP:-det4}
+YEAR1=${YEAR1:-1950}
+YEAR2=${YEAR2:-1950}
 
 #If 0, will do all months. Otherwise choose a specific month (1-12)
 #If 13, will run over full year chunk
@@ -68,12 +68,11 @@ do
     #Looping over months
     for month in $(seq $FIRSTMON $LASTMON)
     do
-        echo "------------------------------------------------------------------"
-        echo "                      MONTH = ${month}" 
-        echo "------------------------------------------------------------------"
-
-        #Move to base of this year
         if [[ $month != 13 ]] ; then
+		echo "------------------------------------------------------------------"
+		echo "                      MONTH = ${month}" 
+        	echo "------------------------------------------------------------------"
+		checkfile=$ROOTPATH/validate_${year}${month}.txt
 		folder=${ROOTPATH}/Year_${year}
 		# Create tmp dir
         	tmpdir=${folder}/tmp
@@ -82,10 +81,13 @@ do
 		#Find all files that correspond to the correct year/month and link in this folder
         	find .. -name "*${year}$(printf %02g ${month})*" -exec ln -vs "{}" . ';'  
 	else
-		folder=${ROOTPATH}/Year_${year}_CDO
+		folder=${ROOTPATH}/Year_${year}
 		cd ${folder}
+		checkfile=$ROOTPATH/validate_${year}.txt
 	fi
 
+	rm -f $checkfile
+	nfiles=$(ls | wc -l)
 	echo $(pwd)
 
         #Validate all the (symbolic link) files
@@ -94,6 +96,11 @@ do
         cd ${folder}
         if [ "$?" = "0" ]; then
             echo "...successfully validated month!"
+	if [ $month == 13 ] ; then
+		echo "... Year $year, $nfiles files successfully validated!" > $checkfile
+	else 
+		echo "... Year $year Month $month, $nfiles files successfully validated!" > $checkfile
+	fi
         else
             echo "=================================================================="
             echo "Validation failed for year ${year}, month ${month}"
