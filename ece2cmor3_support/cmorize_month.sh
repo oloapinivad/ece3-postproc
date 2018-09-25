@@ -17,7 +17,7 @@ INDEX=${INDEX:-1}
 MON=${MON:-1}
 ATM=${ATM:-1}
 OCE=${OCE:-0}
-USEREXP=${USEREXP:-pdavini0}
+USEREXP=${USEREXP:-$USER}
 NCORESATM=${NCORESATM:-1}
 NCORESOCE=${NCORESOCE:-1}
 STARTTIME=${STARTTIME:-1950-01-01}
@@ -41,8 +41,8 @@ done
 shift $((OPTIND-1))
 
 #--------config file-----
-config=marconi
-. ./config/config_${config}.sh
+config=${ECE3_POSTPROC_MACHINE}
+. ${ECE3_POSTPROC_TOPDIR}/ece2cmor3_support/config/config_${config}.sh
 
 #create folders
 mkdir -p $CMORDIR $BASETMPDIR
@@ -70,7 +70,7 @@ NEMOPAR=$PARAMDIR/nemopar-stream2.json
 #-------preliminary setup------------------#
 
 #clean up modules
-module unload hdf5 netcdf cdo netcdff szip zlib python intel
+#module unload hdf5 netcdf cdo netcdff szip zlib python intel
 
 #diagnostics (marconi stuff)
 module list

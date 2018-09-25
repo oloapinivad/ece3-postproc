@@ -1,14 +1,14 @@
 #!/bin/bash
 
-verbose=1
+verbose=0
 oce=1
-EXP=qctr
-YEAR=1956
+EXP=cccc
+YEAR=1950
 
 
 #--------config file-----
-config=marconi
-. ./config/config_${config}.sh
+config=${ECE3_POSTPROC_MACHINE}
+. ${ECE3_POSTPROC_TOPDIR}/ece2cmor3_support/config/config_${config}.sh
 
 for table in CMIP6 PRIMAVERA ; do
 

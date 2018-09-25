@@ -6,7 +6,7 @@
 #----program folder definition ------- #
 
 # Location of cmorization tool
-SRCDIR=${WORK}/ecearth3/cmorization
+SRCDIR=${PERM}/ecearth3/cmorization
 
 #source code of ece2cmor3
 ECE2CMOR3DIR=${SRCDIR}/ece2cmor3/ece2cmor3
@@ -18,10 +18,10 @@ TABDIR=${SRCDIR}/jon-seddon-tables/Tables
 VALDIR=${SRCDIR}/primavera-val
 
 #locaton of the ece2cmor3_support (this folder)
-SCRIPTDIR=${HOME}/ecearth3/ece3-postproc/ece2cmor3_support
+SCRIPTDIR=${ECE3_POSTPROC_TOPDIR}/ece2cmor3_support
 
 #anaconda location
-CONDADIR=${WORK}/opt/anaconda2/bin
+CONDADIR=${SCRATCH}/PRIMAVERA/anaconda2/bin
 
 #---------user configuration ---------#
 
@@ -41,18 +41,18 @@ mkdir -p $LOGFILE || exit 1
 
 # Location of the experiment output (-u flag)
 if [[ $USEREXP != $USER ]] ; then
-   WORKDIR=/marconi_scratch/userexternal/$USEREXP/ece3/${EXP}/output
+   WORKDIR=/lus/snx11062/scratch/ms/it/$USEREXP/ece3/${EXP}/output
 else
-   WORKDIR=/marconi_scratch/userexternal/$USER/ece3/${EXP}/output
+   WORKDIR=$SCRATCH/ece3/${EXP}/output
 fi
 
 # Temporary directories: cmor and linkdata
 BASETMPDIR=$SCRATCH/tmp_cmor/${EXP}_${RANDOM}
 
 #----machine dependent argument----#
-ACCOUNT=IscrC_C2HEClim
-SUBMIT="sbatch"
-PARTITION=bdw_usr_prod
+ACCOUNT=spitdavi
+SUBMIT="qsub"
+PARTITION=nf
 if [[ $RESO == T511 ]] ; then
         MEMORY=50GB
         MEMORY2=100GB
