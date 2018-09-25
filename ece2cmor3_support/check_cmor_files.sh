@@ -1,25 +1,30 @@
 #!/bin/bash
 
-verbose=0
-oce=0
-expname=det4
-year=1951
+verbose=1
+oce=1
+EXP=qctr
+YEAR=1956
+
+
+#--------config file-----
+config=marconi
+. ./config/config_${config}.sh
 
 for table in CMIP6 PRIMAVERA ; do
 
-DIRFILE=$SCRATCH/ece3/$expname/cmorized/Year_${year}/$table/*/EC-Earth-Consortium/*/*/*
+DIRFILE=$CMORDIR/$table/*/EC-Earth-Consortium/*/*/*
 echo $DIRFILE
 
 if [[ $table == CMIP6 ]] ; then
-	varlist=$HOME/ecearth3/ece3-postproc/ece2cmor3_support/varlist/varlist-cmip6-stream2.json
+	varlist=$SCRIPTDIR/varlist/varlist-cmip6-stream2.json
 elif [[ $table == PRIMAVERA ]] ; then
-	varlist=$HOME/ecearth3/ece3-postproc/ece2cmor3_support/varlist/varlist-primavera-stream2.json
+	varlist=$SCRIPTDIR/varlist/varlist-primavera-stream2.json
 fi
 
 echo "----------------------------------------------"
 echo "Variables from varlist vs. Variables CMORIZED!"
 echo "-------- Table $table ------------------------"
-#echo "Experiment $exp ------------------ Year $year "
+#echo "Experiment $exp ------------------ Year $YEAR "
 echo "----------------------------------------------"
 
 categories=$(ls $DIRFILE)
@@ -36,7 +41,7 @@ for t in $(seq 0 $((${#s0[@]}-1))) ; do
 			continue 
 		fi
 	fi
-	nfiles=$(ls $DIRFILE/$categ/*/*/*/*${year}01* 2> /dev/null | wc -l)
+	nfiles=$(ls $DIRFILE/$categ/*/*/*/*${YEAR}01* 2> /dev/null | wc -l)
 	nvars=$((${f0[$t]}-${s0[$t]}-1))
 	echo "$categ -> Theory:" $nvars "Actual:" $nfiles
 	if [ $verbose -eq 1 ] ; then
@@ -50,7 +55,7 @@ for t in $(seq 0 $((${#s0[@]}-1))) ; do
 				if [ ${var: -2} == "2d" ] 2> /dev/null ; then var=${var::-2} ; fi
 				#echo ${var: -2} 
 			fi
-			check=$(ls $DIRFILE/$categ/*/*/*/* 2> /dev/null | grep "/${var}_" | wc -l)
+			check=$(ls $DIRFILE/$categ/*/*/*//*${YEAR}01* 2> /dev/null | grep "/${var}_" | wc -l)
 			if [ $check -eq 0 ] ; then
 				echo "$var missing"
 				nn=$((nn+1))
@@ -71,7 +76,7 @@ echo
 perc=$(bc <<< "scale=2; 100*$totfiles/$totvars")
 echo "TOTAL -> Theory:" $totvars "Actual:" $totfiles "i.e. $perc % "
 space=$(du -sh $DIRFILE | cut -f 1)
-#echo "Total space occupied by one year of exp $exp is: $space"
+#echo "Total space occupied by one YEAR of exp $exp is: $space"
 echo
 
 done

@@ -1,20 +1,9 @@
 {
-   "6hrPlevPt": [
-        "huss",
-        "mrsos",
-        "psl",
-        "sfcWind",
-        "snw",
-        "tas",
-        "ts",
-        "tsl",
-        "uas",
-        "vas",
-        "vortmean",
-        "hus7h",
-        "ta7h",
-        "va7h",
-        "ua7h",
-        "zg7h"
+   "Oday": [
+        "tos"
+    ],
+   "Omon": [
+        "tos"
     ]
+
 }

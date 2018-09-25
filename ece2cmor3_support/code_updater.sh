@@ -1,14 +1,18 @@
 #!/bin/bash
 
-#simple updater of the cmor code
-CODEDIR=/marconi/home/userexternal/pdavini0/work/ecearth3/cmorization
+# simple updater of the cmor code
 
-module unload netcdf netcdff hdf5 cdo
-cd $CODEDIR/ece2cmor3
+
+#--------config file-----
+config=marconi
+. ./config/config_${config}.sh
+#-----------------------
+
+cd $ECE2CMOR3DIR
 git fetch
 git pull
 git submodule update --init --recursive
-export PATH="/marconi/home/userexternal/pdavini0/work/opt/anaconda2/bin:$PATH"
+export PATH="$CONDADIR:$PATH"
 source activate ece2cmor3
 python setup.py install
 source deactivate ece2cmor3

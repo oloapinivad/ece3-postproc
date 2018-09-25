@@ -24,7 +24,7 @@ Other companion scripts are present:
 
 - ./check_cmor_files.sh
 
-wich evalutes the difference between the data obtained by the cmorization and the request you made in your varlist.
+It evalutes the difference between the data obtained by the cmorization and the request you made in your varlist.
 
 - ./code_updater.sh
 
@@ -32,7 +32,11 @@ It is a trivial script aimed at pulling and installing a newer version of the ec
 
 - ./merge_month.sh
 
-It breaks the directory structure but it concatenates the IFS data into a single one year file. 
+It breaks the directory structure but it concatenates the IFS data into a single one year file using NCO
+
+- ./validate.sh
+
+It uses the Jon Seddon validation tool to check data integrity
 
 - ./year_looper.sh
 

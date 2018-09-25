@@ -11,17 +11,17 @@
 set -ex
 # Required arguments
 
-EXP=${EXP:-det6}
+EXP=${EXP:-qctr}
 YEAR=${YEAR:-1950}
 INDEX=${INDEX:-1}
 MON=${MON:-1}
 ATM=${ATM:-1}
 OCE=${OCE:-0}
 USEREXP=${USEREXP:-pdavini0}
-NCORESATM=${NCORESATM:-1}
+NCORESATM=${NCORESATM:-8}
 NCORESOCE=${NCORESOCE:-1}
 STARTTIME=${STARTTIME:-1950-01-01}
-DO_PRIMA=true #extra flag for primavera tables
+DO_PRIMA=false #extra flag for primavera tables
 
 # options controller 
 OPTIND=1
@@ -40,14 +40,28 @@ while getopts ":h:l:m:y:u:a:o" OPT; do
 done
 shift $((OPTIND-1))
 
-#--------config file-----
-config=marconi
-. ./config/config_${config}.sh
+#----program folder definition ------- #
 
-#create folders
-mkdir -p $CMORDIR $BASETMPDIR
+# Location of cmorization tool
+SRCDIR=${WORK}/ecearth3/cmorization
+
+#source code of ece2cmor3
+ECE2CMOR3DIR=${SRCDIR}/ece2cmor3/ece2cmor3
+
+#Jon Seddon tables
+TABDIR=${SRCDIR}/jon-seddon-tables/Tables
+
+#locaton of the ece2cmor3_support (this folder)
+SCRIPTDIR=${HOME}/ecearth3/ece3-postproc/ece2cmor3_support
+
+#anaconda location
+CONDADIR=${WORK}/opt/anaconda2/bin
 
 #---------user configuration ---------#
+
+# Output directory for the cmorized data
+CMORDIR=$SCRATCH/ece3/${EXP}/cmorized2/Year_${YEAR}
+#CMORDIR=${SCRATCH}/cmor_test_180912
 
 # Metadata directory and file
 METADATADIR=${SCRIPTDIR}/metadata
@@ -57,8 +71,8 @@ METADATAFILEOCE=${METADATADIR}/metadata-primavera-${EXP}-oce.json
 # Variable list directory and files
 VARLISTDIR=$SCRIPTDIR/varlist
 cmip6_var=$VARLISTDIR/varlist-cmip6-stream2.json
-prim_var=$VARLISTDIR/varlist-primavera-stream2.json
-#cmip6_var=$VARLISTDIR/varlist-short.json
+#prim_var=$VARLISTDIR/varlist-primavera-stream2.json
+cmip6_var=$VARLISTDIR/varlist-short.json
 
 # Parameter table directory and files
 PARAMDIR=$SCRIPTDIR/paramtable
@@ -66,6 +80,18 @@ PARAMDIR=$SCRIPTDIR/paramtable
 IFSPAR=$PARAMDIR/ifspar-stream2.json
 NEMOPAR=$PARAMDIR/nemopar-stream2.json
 
+
+#--------output and tmpdir definition------#
+
+# Location of the experiment output (-u flag)
+if [[ $USEREXP != $USER ]] ; then 
+   WORKDIR=/marconi_scratch/userexternal/$USEREXP/ece3/${EXP}/output
+else
+   WORKDIR=/marconi_scratch/userexternal/$USER/ece3/${EXP}/output
+fi
+
+# Temporary directories: cmor and linkdata
+BASETMPDIR=$SCRATCH/tmp_cmor/${EXP}_${RANDOM}
 
 #-------preliminary setup------------------#
 
@@ -76,6 +102,9 @@ module unload hdf5 netcdf cdo netcdff szip zlib python intel
 module list
 echo $PATH
 echo $LD_LIBRARY_PATH
+
+#create folders
+mkdir -p $CMORDIR $BASETMPDIR 
 
 #conda activation
 export PATH="$CONDADIR:$PATH"

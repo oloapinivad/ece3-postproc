@@ -2,12 +2,12 @@
 
 #rough scheme for looping on years, it produces 13 jobs for each year so beware
 
-EXP=det4
-YEAR1=1981
-YEAR2=2014
-INDEX=1
+EXP=det2
+YEAR1=1950
+YEAR2=1950
+INDEX=2
 ATM=1
-OCE=1
+OCE=0
 MERGE=1
 VALID=1
 RESO=T255
