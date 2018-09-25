@@ -254,5 +254,20 @@
         "source": "tso",
         "grid": "grid_T",
         "target": "tso"
+    },
+    {
+        "source": "u2o",
+        "grid": "grid_U",
+        "target": "u2o"
+    },
+    {
+        "source": "v2o",
+        "grid": "grid_V",
+        "target": "v2o"
+    },
+    {
+        "source": "w2o",
+        "grid": "grid_W",
+        "target": "w2o"
     }
 ]

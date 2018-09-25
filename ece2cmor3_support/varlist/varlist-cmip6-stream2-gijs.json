@@ -83,7 +83,10 @@
         "hus",
         "hur",
         "wap",
-        "zg"
+        "zg",
+	"cl",
+	"clw",
+	"cli"
     ],
     "Omon": [
         "tauuo",
@@ -134,23 +137,34 @@
         "psl",
         "wap4"
     ],
+    "Emon": [
+        "wap",
+        "u2",
+        "v2",
+	"uv",
+        "uwap",
+        "vwap",
+        "ut",
+        "vt",
+        "twap",
+	"mrsol",
+        "ta27",
+        "ua27",
+        "va27",
+        "zg27",
+        "hus27",
+    ],
     "Eday": [
         "tauu",
         "tauv",
         "mrros",
+	"mrsol",
         "snd",
         "lwsnl",
         "snm"
     ],
     "AERmon": [
 	"ps"
-    ],
-    "Emon": [
-        "ta27",
-        "ua27",
-        "va27",
-        "zg27",
-        "hus27"
     ],
     "CFday": [
         "ps",
@@ -164,7 +178,18 @@
         "clwvi",
         "clivi",
         "wap500",
-        "ta700"
+        "ta700",
+        "ua",
+        "va",
+        "ta",
+        "hus",
+        "wap",
+        "zg",
+        "hur",
+        "cl",
+        "clw",
+        "cli",
+        "pfull"
     ],
     "Oday": [
         "tossq",
@@ -205,7 +230,10 @@
         "ta7h",
         "va7h",
         "ua7h",
-        "zg7h"
+        "zg7h",
+        "hus27",
+        "zg27",
+        "ta27"
     ],
     "day": [
         "huss",

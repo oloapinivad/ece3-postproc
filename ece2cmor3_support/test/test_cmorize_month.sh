@@ -13,16 +13,19 @@ set -ex
 
 EXP=${EXP:-qctr}
 YEAR=${YEAR:-1950}
+INDEX=${INDEX:-1}
 MON=${MON:-1}
 ATM=${ATM:-1}
-OCE=${OCE:-1}
-USEREXP=${USEREXP:-imavilia}
-NCORES=${NCORES:-1}
-DO_PRIMA=true #extra flag for primavera tables
+OCE=${OCE:-0}
+USEREXP=${USEREXP:-pdavini0}
+NCORESATM=${NCORESATM:-8}
+NCORESOCE=${NCORESOCE:-1}
+STARTTIME=${STARTTIME:-1950-01-01}
+DO_PRIMA=false #extra flag for primavera tables
 
 # options controller 
 OPTIND=1
-while getopts ":h:l:m:y:u:" OPT; do
+while getopts ":h:l:m:y:u:a:o" OPT; do
     case "$OPT" in
     h|\?) echo "Usage: cmor_mon_filter.sh -e <experiment name> -y <yr> -m <month (1-12)> \
                 -a <process atmosphere (0,1): default 1> -o <process ocean (0,1): default 0> -u <userexp>"
@@ -57,24 +60,25 @@ CONDADIR=${WORK}/opt/anaconda2/bin
 #---------user configuration ---------#
 
 # Output directory for the cmorized data
-#CMORDIR=$SCRATCH/ece3/${EXP}/cmorized/Year_${YEAR}/Month_${MON}
-CMORDIR=${SCRATCH}/newtest_24apr
+CMORDIR=$SCRATCH/ece3/${EXP}/cmorized2/Year_${YEAR}
+#CMORDIR=${SCRATCH}/cmor_test_180912
 
 # Metadata directory and file
-METADATADIR=${SCRIPTDIR}/metadata/
-METADATAFILE=${METADATADIR}/metadata-primavera-${EXP}.json
+METADATADIR=${SCRIPTDIR}/metadata
+METADATAFILEATM=${METADATADIR}/metadata-primavera-${EXP}-atm.json
+METADATAFILEOCE=${METADATADIR}/metadata-primavera-${EXP}-oce.json
 
 # Variable list directory and files
 VARLISTDIR=$SCRIPTDIR/varlist
-cmip6_var=$VARLISTDIR/varlist-cmip6-paolo.json
-prim_var=$VARLISTDIR/varlist-primavera-paolo.json
-#cmip6_var=$VARLISTDIR/varlist-short.json
+cmip6_var=$VARLISTDIR/varlist-cmip6-stream2.json
+#prim_var=$VARLISTDIR/varlist-primavera-stream2.json
+cmip6_var=$VARLISTDIR/varlist-short.json
 
 # Parameter table directory and files
 PARAMDIR=$SCRIPTDIR/paramtable
-IFSPAR=$PARAMDIR/ifspar.json
-#IFSPAR=/marconi_work/IscrB_DIXIT/ecearth3/cmorization/ece2cmor3/ece2cmor3/resources/ifspar.json
-NEMOPAR=$PARAMDIR/nemopar.json
+#PARAMDIR=/marconi_work/IscrB_DIXIT/ecearth3/cmorization/ece2cmor3/ece2cmor3/resources
+IFSPAR=$PARAMDIR/ifspar-stream2.json
+NEMOPAR=$PARAMDIR/nemopar-stream2.json
 
 
 #--------output and tmpdir definition------#
@@ -154,14 +158,16 @@ function runece2cmor_atm {
     
     #prepare metadata
     CONFIGFILE=$TMPDIR/metadata-${EXP}-year${YEAR}.json
-    sed -e 's,<OUTDIR>,'${CMORDIR}',g' $METADATAFILE > $CONFIGFILE
+    sed -s 's,<OUTDIR>,'${CMORDIR}',g' $METADATAFILEATM > $CONFIGFILE
+    sed -i 's,<INDEX>,'${INDEX}',g' $CONFIGFILE
 
     # Launching ece2cmor3
     echo "================================================================"
     echo "  Processing and CMORizing filtered IFS data with ece2cmor3"
     echo "  Using $PREFIX tables"
     echo "================================================================" 
-    $ece2cmor $ATMDIR $YEAR-$(printf %02g $MON)-01 --exp $EXP --conf $CONFIGFILE --vars $VARLIST --npp $THREADS --tmpdir $TMPDIR --ifspar $IFSPAR --tabid $PREFIX --tabdir $TABDIR  --mode append --atm --filter
+    #$ece2cmor $ATMDIR $YEAR-$(printf %02g $MON)-01 --exp $EXP --conf $CONFIGFILE --vars $VARLIST --npp $THREADS --tmpdir $TMPDIR --ifspar $IFSPAR --tabid $PREFIX --tabdir $TABDIR  --mode append --atm --filter
+    $ece2cmor $ATMDIR $YEAR-$(printf %02g $MON)-01 --exp $EXP --conf $CONFIGFILE --vars $VARLIST --npp $THREADS --tmpdir $TMPDIR --ifspar $IFSPAR --tabid $PREFIX --tabdir $TABDIR  --mode append --atm --refd $STARTTIME
     
     # Removing tmp directory
     if [ -d "${TMPDIR}" ] ; then
@@ -214,7 +220,8 @@ function runece2cmor_oce {
 	
     #preparing metadata
     CONFIGFILE=$TMPDIR/metadata-${EXP}-year${YEAR}.json
-    sed -e 's,<OUTDIR>,'${CMORDIR}',g' $METADATAFILE > $CONFIGFILE
+    sed -s 's,<OUTDIR>,'${CMORDIR}',g' $METADATAFILEOCE > $CONFIGFILE
+    sed -i 's,<INDEX>,'${INDEX}',g' $CONFIGFILE 
 
     # Launching ece2cmor3
     echo "================================================================"
@@ -222,6 +229,7 @@ function runece2cmor_oce {
     echo "  Using $PREFIX tables"
     echo "================================================================" 
     $ece2cmor $OCEDIR $YEAR-$(printf %02g $MON)-01 --exp $EXP --conf $CONFIGFILE --vars $VARLIST --npp $THREADS --tmpdir $TMPDIR --nemopar $NEMOPAR --tabid $PREFIX --tabdir $TABDIR --mode append --oce    
+    #$ece2cmor $OCEDIR $YEAR-$(printf %02g $MON)-01 --exp $EXP --conf $CONFIGFILE --vars $VARLIST --npp $THREADS --tmpdir $TMPDIR --tabid $PREFIX --tabdir $TABDIR --mode append --oce 
     
     # Removing tmp directory
     if [ -d "${TMPDIR}" ] ; then
@@ -259,13 +267,13 @@ echo "========================================================="
 
 # Currently set up to run everything that works!
 if [ "$ATM" -eq 1 ]; then
-    #runece2cmor_atm CMIP6 $NCORES $YEAR $MON
-    if [[ ${DO_PRIMA} == true ]] ; then runece2cmor_atm PRIMAVERA $NCORES $YEAR $MON ; fi
+    runece2cmor_atm CMIP6 $NCORESATM $YEAR $MON
+    if [[ ${DO_PRIMA} == true ]] ; then runece2cmor_atm PRIMAVERA $NCORESATM $YEAR $MON ; fi
 fi
 
 if [ "$OCE" -eq 1 ]; then
-    runece2cmor_oce CMIP6 $NCORES $YEAR
-    #if [[ ${DO_PRIMA} == true ]] ; then runece2cmor_oce PRIMAVERA $NCORES $YEAR ; fi
+    runece2cmor_oce CMIP6 $NCORESOCE $YEAR
+    if [[ ${DO_PRIMA} == true ]] ; then runece2cmor_oce PRIMAVERA $NCORESOCE $YEAR ; fi
 fi
 
 # Removing linked directory

@@ -13,7 +13,7 @@
         "huss",
         "mrsos",
         "tslsi",
-        "tso",
+        "tos",
         "prc",
         "prsn",
         "mrro",
@@ -24,7 +24,6 @@
         "clt"
     ],
     "SImon": [
-        "siprn",
         "siconc",
         "sisnthick",
         "sispeed",
@@ -34,7 +33,6 @@
         "siv",
         "sivol",
         "siage",
-        "sidivvel",
         "sicompstren",
         "sidmassevapsubl",
         "siflswdtop",
@@ -79,9 +77,6 @@
         "clt",
         "clwvi",
         "clivi",
-        "cl",
-        "clw",
-        "cli",
         "ta",
         "ua",
         "va",
@@ -89,11 +84,6 @@
         "hur",
         "wap",
         "zg"
-    ],
-    "CFmon": [
-        "ta",
-        "hur",
-        "hus"
     ],
     "Omon": [
         "tauuo",
@@ -103,7 +93,6 @@
         "volo",
         "zos",
         "zossq",
-        "masscello",
         "thkcello",
         "thetao",
         "thetaoga",
@@ -118,28 +107,17 @@
         "wmo",
         "umo",
         "vmo",
-        "hfbasin",
-        "hfx",
-        "hfy",
         "friver",
         "ficeberg2d",
         "wfo",
         "rsntds",
         "rsdo",
-        "hfds",
-        "zfullo",
-        "zhalfo",
-        "msftyrho",
-        "precip",
-        "tosga",
-        "bigthetaoga"
+        "hfds"
     ],
     "SIday": [
         "sithick",
         "siu",
         "siv",
-        "sistrxdtop",
-        "sistrydtop",
         "siconc"
     ],
     "E3hr": [
@@ -156,37 +134,25 @@
         "psl",
         "wap4"
     ],
+    "Emon": [
+	"mrsol",
+        "ta27",
+        "ua27",
+        "va27",
+        "zg27",
+        "hus27"
+    ],
     "Eday": [
         "tauu",
         "tauv",
-        "snw",
-        "mrro",
         "mrros",
+	"mrsol",
         "snd",
         "lwsnl",
         "snm"
     ],
     "AERmon": [
-        "orog",
-        "ps"
-    ],
-    "Emon": [
-        "ta27",
-        "ua27",
-        "va27",
-        "zg27",
-        "hus27",
-        "wap",
-        "u2",
-        "v2",
-        "wap2",
-        "t2",
-        "uv",
-        "uwap",
-        "vwap",
-        "ut",
-        "vt",
-        "twap"
+	"ps"
     ],
     "CFday": [
         "ps",
@@ -200,28 +166,12 @@
         "clwvi",
         "clivi",
         "wap500",
-        "ta700",
-        "ua",
-        "va",
-        "ta",
-        "hus",
-        "wap",
-        "zg",
-        "hur",
-        "cl",
-        "clw",
-        "cli",
-        "pfull"
+        "ta700"
     ],
     "Oday": [
         "tossq",
         "tos",
         "sos"
-    ],
-    "E3hrPt": [
-        "ua850",
-        "va850",
-        "psl"
     ],
     "Lmon": [
         "mrsos",
@@ -229,7 +179,6 @@
         "mrros",
         "mrro",
         "evspsblsoi",
-        "mrlsl",
         "tsl"
     ],
     "LImon": [
@@ -243,21 +192,17 @@
         "hfdsn"
     ],
     "6hrPlevPt": [
-        "hus27",
         "huss",
-        "mrlsl",
         "mrsos",
         "psl",
         "sfcWind",
         "snw",
-        "ta27",
         "tas",
         "ts",
         "tsl",
         "uas",
         "vas",
         "vortmean",
-        "zg27",
         "hus7h",
         "ta7h",
         "va7h",
