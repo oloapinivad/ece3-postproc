@@ -1,10 +1,9 @@
 #!/bin/bash
 
 verbose=0
-oce=1
-EXP=cccc
-YEAR=1950
-
+oce=0
+EXP=qctr
+YEAR=1970
 
 #--------config file-----
 config=${ECE3_POSTPROC_MACHINE}
@@ -12,7 +11,7 @@ config=${ECE3_POSTPROC_MACHINE}
 
 for table in CMIP6 PRIMAVERA ; do
 
-DIRFILE=$CMORDIR/$table/*/EC-Earth-Consortium/*/*/*
+DIRFILE=${ROOTPATH}/Year_${YEAR}/$table/*/EC-Earth-Consortium/*/*/*
 echo $DIRFILE
 
 if [[ $table == CMIP6 ]] ; then
