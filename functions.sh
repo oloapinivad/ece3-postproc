@@ -35,4 +35,7 @@ eval_dirs() {
     # hiresclim2 output, and also default climatology ouput from EC-mean
     OUTDIR0=$(eval echo ${ECE3_POSTPROC_POSTDIR})
 
+    # easy2cmor3 output
+    CMORDIR=$(eval echo ${ECE3_POSTPROC_CMORDIR})
+
 }
