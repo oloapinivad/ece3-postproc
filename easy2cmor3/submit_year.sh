@@ -26,13 +26,12 @@
 set -ue
 
 #---REQUIRED ARGUMENTS----#
-#expname=det4
-#year=1950
-#year0=$year
+expname=det4
+year=1950
+year0=$year
 
 #---DEFAULT INPUT ARGUMENT----#
 RESO=T255 # resolition, to set accorindgly machine dependent requirements
-INDEX=1 #realization index, to change metadata
 USERexp=${USERexp:-$USER}  #extra: allows analysis of experiment owned by different user
 MONTH=0 #if month=0, then loop on all months (IFS only)
 ATM=0
@@ -41,17 +40,11 @@ MERGE=0 #flag for merging
 VALID=0 #flag for validation
 STARTTIME=1950-01-01 #very important to allow correct merging
 
-#---PARALLELIZATION OPTIONS---#
-NCORESATM=8 #parallelization is available
-NCORESOCE=1
-NCORESMERGE=24 #parallelization is available
-NCORESVALID=1
-
 # options controller 
 OPTIND=1
 while getopts "h:e:y:j:u:a:o:m:v:i:r:s:" OPT; do
     case "$OPT" in
-    h|\?) echo "Usage: submit_year.sh -e <experiment name> -y <year> -i <realization index: default 1> \
+    h|\?) echo "Usage: submit_year.sh -e <experiment name> -y <year> -i \
                 -a <process atmosphere (0,1): default 0> -o <process ocean (0,1): default 0> -u <userexp> \
 		-m <merge into yearly (0,1): default 0> -v <validate data (0,1): default 0> \
 		-j <initial year for lagged merging and validation (default: year) > \
@@ -65,7 +58,6 @@ while getopts "h:e:y:j:u:a:o:m:v:i:r:s:" OPT; do
     m)    MERGE=$OPTARG ;;
     v) 	  VALID=$OPTARG ;;
     u)    USERexp=$OPTARG ;;
-    i)    INDEX=$OPTARG ;;
     r)	  RESO=$OPTARG ;;
     s)    STARTTIME=$OPTARG ;;
     esac
@@ -83,9 +75,6 @@ check_environment
 # load user and machine specifics
 . ${ECE3_POSTPROC_TOPDIR}/conf/${ECE3_POSTPROC_MACHINE}/conf_easy2cmor3_${ECE3_POSTPROC_MACHINE}.sh
 cd ${EASYDIR}
-
-# set input and output directories
-eval_dirs 1
 
 #-----------------------#
 if [[ $MONTH -eq 0 ]] ; then
@@ -126,7 +115,7 @@ fi
 echo "Submitting jobs via $SUBMIT..."
 
 # Machine and process options
-BASE_OPT="expname=$expname,year=$year,USERexp=$USERexp,INDEX=$INDEX"
+BASE_OPT="expname=$expname,year=$year,USERexp=$USERexp"
 OPT_ATM="$BASE_OPT,ATM=$ATM,OCE=0,NCORESATM=$NCORESATM,STARTTIME=$STARTTIME"
 OPT_OCE="$BASE_OPT,ATM=0,OCE=$OCE,NCORESOCE=$NCORESOCE"
 DELTAMIN=$(( (year-year0+1) * $DELTA ))
@@ -134,7 +123,7 @@ OPT_MERGE="year=${year},expname=${expname}"
 OPT_VALID="year1=${year},year2=${year},expname=${expname},MONTHS=13"
 
 
-# Define basic options for slurm submission
+# Define basic options for SLURM sbatch submission
 if [[ "$SUBMIT" == "sbatch" ]] ; then
 	MACHINE_OPT="--account=$ACCOUNT --time $TLIMIT --partition=$PARTITION --mem=$MEMORY"
 	JOB_ATM='$SUBMIT ${MACHINE_OPT} --export=MON=${MON},${OPT_ATM} -n $NCORESATM --job-name=ifs-${expname}-${year}-${MON}
@@ -143,14 +132,16 @@ if [[ "$SUBMIT" == "sbatch" ]] ; then
 	JOB_OCE='$SUBMIT ${MACHINE_OPT} --export=${OPT_OCE} -n $NCORESOCE --job-name=nemo-${expname}-${year}
                 --output=$LOGFILE/cmor_${expname}_${year}_nemo_%j.out --error=$LOGFILE/cmor_${expname}_${year}_nemo_%j.err
                 ./cmorize_month.sh'
-	JOB_MER='$SUBMIT ${MACHINE_OPT} --export=${OPT_MERGE} -n $NCORESMERGE --begin=now+${DELTAMIN}minutes
-                 --job-name=merge-${expname}-${year} --output=$LOGFILE/merge_${expname}_${year}_%j.out --error=$LOGFILE/merge_${expname}_${year}_%j.err
+	JOB_MER='$SUBMIT ${MACHINE_OPT} --export=${OPT_MERGE} -n $NCORESMERGE 
+                --begin=now+${DELTAMIN}minutes  --job-name=merge-${expname}-${year}
+                --output=$LOGFILE/merge_${expname}_${year}_%j.out --error=$LOGFILE/merge_${expname}_${year}_%j.err
                 ./merge_month.sh'
 	JOB_VAL='$SUBMIT --account=$ACCOUNT --time $TCHECK --partition=$PARTITION --mem=${MEMORY2} -n $NCORESVALID
                 --export=${OPT_VALID} --dependency=afterok:$JOBIDMERGE --job-name=validate-${expname}-${year}
                 --output=$LOGFILE/validate_${expname}_${year}_%j.out --error=$LOGFILE/validate_${expname}_${year}_%j.err
                 ./validate.sh'
 
+# define options for PBS qsub submission
 elif [[ "$SUBMIT" == "qsub" ]] ; then
 	MACHINE_OPT="-l EC_billing_account=$ACCOUNT -l walltime=$TLIMIT -q $PARTITION -l EC_memory_per_task=$MEMORY -l EC_total_tasks=1"
 	JOB_ATM='$SUBMIT ${MACHINE_OPT} -v MON=${MON},${OPT_ATM} -l EC_threads_per_task=$NCORESATM -N ifs-${expname}-${year}-${MON}
@@ -199,7 +190,6 @@ if [ "$MERGE" -eq 1 ] ; then
 	elif [[  $SUBMIT == "qsub" ]] ; then 
 		JOBIDMERGE=$JOBID
 	fi
-	echo $JOBIDMERGE
 fi
 
 # Validator submission, delayed with dependency
@@ -207,13 +197,9 @@ if [ "$VALID" -eq 1 ] ; then
 	eval ${JOB_VAL}
 fi
 
-
-
 echo "Jobs submitted!"
 echo "========================================================="
 
 # End of script
 exit 0
-
-
 

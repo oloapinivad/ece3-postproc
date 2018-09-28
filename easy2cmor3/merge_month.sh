@@ -1,48 +1,24 @@
 #!/bin/bash
 
+set -e
+
+# Script to merge monthly IFS files into a single yearly file. 
+# Adapted from Gijs van der Oord.
+
 expname=${expname:-det4}
 year=${year:-1950}
-VERBOSE=${VERBOSE:-0}
-
-OPTIND=1
-while getopts "h?e:l:s:r:v" OPT; do
-    case "$OPT" in
-    h|\?) echo "Usage: merge_leg.sh -e <Experiment Name> -r <Res (L/S/H)> -y <yr> (-v: verbose)"
-	  exit 0 ;;
-    e)    expname=$OPTARG ;;
-    r)    RES=$OPTARG ;;
-    y)    year=$OPTARG ;;
-    v)    VERBOSE=1 ;;
-    esac
-done
-shift $((OPTIND-1))
-
-if [ $VERBOSE == 1 ]; then
-    set -x
-fi
-if [ -z "$expname" ]; then
-    echo "Error: experiment name is empty, aborting" >&2; exit 1
-fi
-if ! [[ $year =~ ^[0-9]+$ ]]; then
-    echo "Error: start year argument is not numeric, aborting" >&2; exit 1
-fi
 
 #--------config file-----
 
 # check environment
 [[ -z "${ECE3_POSTPROC_TOPDIR:-}" ]] && echo "User environment ECE3_POSTPROC_TOPDIR not set. See ../README." && exit 1
 
- # load utilities
-. ${ECE3_POSTPROC_TOPDIR}/functions.sh
-check_environment
-
 # load user and machine specifics
 . ${ECE3_POSTPROC_TOPDIR}/conf/${ECE3_POSTPROC_MACHINE}/conf_easy2cmor3_${ECE3_POSTPROC_MACHINE}.sh
 cd ${EASYDIR}
 
-# set input and output directories
-eval_dirs 1
-
+# setting directory
+CMORDIR=$(eval echo ${ECE3_POSTPROC_CMORDIR})
 
 #--------run the code----------
 
@@ -50,7 +26,7 @@ eval_dirs 1
 export PATH="$CONDADIR:$PATH"
 
 #create merging directory
-MERGEDIR=${BASETMPDIR}/Merge_year_${year}_NCO
+MERGEDIR=${BASETMPDIR}/merge_${year}_NCO
 mkdir -p $MERGEDIR
 
 #clean double tos (do we need it?)

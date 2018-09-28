@@ -18,4 +18,4 @@ echo $PATH
 source activate ece2cmor3
 python setup.py install
 source deactivate ece2cmor3
-cd ${SCRIPTDIR}
+cd ${EASYDIR}

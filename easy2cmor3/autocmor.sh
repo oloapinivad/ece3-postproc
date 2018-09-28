@@ -3,7 +3,7 @@
 usage()
 {
    echo "Usage:"
-   echo "       autocmor.sh [-a account] [-u USERexp] EXP -r RESO"
+   echo "       autocmor.sh [-a account] [-u USERexp] expname -r RESO"
    echo
    echo "Options are:"
    echo "   -a ACCOUNT  : specify a different special project for accounting (default: ${ECE3_POSTPROC_ACCOUNT:-unknown})"
@@ -13,12 +13,10 @@ usage()
 
 set -ue
 
-INDEX=1
-RESO=${RESO:-T255}
-
 # -- default options
 account="${ECE3_POSTPROC_ACCOUNT-}"
 options=""
+RESO=${RESO:-T255}
 
 # -- options
 while getopts "hu:a:r:" opt; do
@@ -28,7 +26,7 @@ while getopts "hu:a:r:" opt; do
             exit 0
             ;;
         u)  options="${options} -u $OPTARG"
-            USEREXP=$OPTARG
+            USERexp=$OPTARG
             ;;
         a)  account=$OPTARG
             ;;
@@ -45,66 +43,59 @@ if [ $# -ne 1 ]; then
    exit 1
 fi
 
-EXP=$1
+#setting expname
+expname=$1
+echo "$expname"
 
-echo "$EXP"
-USEREXP=${USEREXP:-$USER}
-queue_cmd="qstat -f"
-
-config=${ECE3_POSTPROC_MACHINE}
-. ${ECE3_POSTPROC_TOPDIR}/ece2cmor3_support/config/config_${config}.sh
-cd ${ECE3_POSTPROC_TOPDIR}/ece2cmor3_support
-
-
-# check environment
-[[ -z "${ECE3_POSTPROC_TOPDIR:-}" ]] && echo "User environment not set. See ../README." && exit 1
-. ${ECE3_POSTPROC_TOPDIR}/functions.sh
-check_environment
-
-echo "$USEREXP"
-
-IFSRESULTS0='$WORKDIR/Output_${year}/IFS'
+# load user and machine specifics
+. ${ECE3_POSTPROC_TOPDIR}/conf/${ECE3_POSTPROC_MACHINE}/conf_easy2cmor3_${ECE3_POSTPROC_MACHINE}.sh
+cd ${EASYDIR}
 
 # -- Find first and last year
 year="*"
-YEAR_LAST=$( basename $(eval echo $IFSRESULTS0/ICMSH${EXP}+????12 | rev | cut -f1 -d" " | rev) | cut -c11-14)
-YEAR_ZERO=$( basename $(eval echo $IFSRESULTS0/ICMSH${EXP}+????12 | cut -f1 -d" ") | cut -c11-14)
+YEAR_LAST=$( basename $(eval echo $IFSRESULTS0/ICMSH${expname}+????12 | rev | cut -f1 -d" " | rev) | cut -c11-14)
+YEAR_ZERO=$( basename $(eval echo $IFSRESULTS0/ICMSH${expname}+????12 | cut -f1 -d" ") | cut -c11-14)
 
 # -- exit if no years are found
 if [[ ${YEAR_ZERO} == "????" ]] || [[ ${YEAR_ZERO} == "????" ]] ; then 
-   echo "Experiment $EXP not found in $IFSRESULTS0! Exiting!"
+   echo "Experiment $expname not found in $IFSRESULTS0! Exiting!"
    exit
 fi
 
 # -- on which years are we running
 echo "First year is ${YEAR_ZERO}"
-echo "First year will be skipped"
+echo "First year will be skipped due to new folder structure"
 echo "Last year is ${YEAR_LAST}"
+
+YEAR_LAST=1950 #wrong to checks
 
 # -- Write and submit one script per year
 for YEAR in $(seq $(( YEAR_ZERO + 1 )) ${YEAR_LAST})
 do 
     echo; echo ---- $YEAR -----
     # -- If postcheck exists plot it, then exit! 
-    if [ -f  $(eval echo ${ROOTPATH}/validate_$YEAR.txt ) ] 
+    CMORDIR=$( eval echo $ECE3_POSTPROC_CMORDIR )    
+    cd $CMORDIR
+    if [ -f  ../validate_$YEAR.txt  ] 
     then
-	cat $(eval echo ${ROOTPATH}/validate_$YEAR.txt )
+	cat ../validate_$YEAR.txt
     else
 	echo "POSTPROC"
 	 #-- check if postproc is already, the exit
-	ll=$(echo $(${queue_cmd} | grep "ifs-${EXP}-${YEAR}\|nemo-${EXP}-${YEAR}\|merge-${EXP}-${YEAR}\|validate-${EXP}-${YEAR}"))
+	ll=$(echo $(${QUEUE_CMD} | grep "ifs-${expname}-${YEAR}\|nemo-${expname}-${YEAR}\|merge-${expname}-${YEAR}\|validate-${expname}-${YEAR}"))
 	if [[ ! -z $ll ]] ; then
             echo "CMOR postprocessing for year $YEAR already going on..."
             continue
         fi
-	ll=$(echo $(${queue_cmd} | grep "rbld-${EXP}"))
+	ll=$(echo $(${QUEUE_CMD} | grep "rbld-${expname}"))
         if [[ ! -z $ll ]] ; then
             echo "NEMO Rebuild is running, unsafe running CMORization..."
             continue
         fi
 
-	./submit_year.sh -e $EXP -y $YEAR -j $YEAR_ZERO -i $INDEX -r $RESO  \
-                        -a 1 -o 1 -m 1 -v 1
+	#submitting command	
+	$EASYDIR/submit_year.sh -e $expname -y $YEAR -j $(( YEAR_ZERO + 1 )) -r $RESO  \
+                                 -a 1 -o 1 -m 1 -v 1
 	
     fi
 done

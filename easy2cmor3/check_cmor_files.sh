@@ -1,9 +1,23 @@
 #!/bin/bash
 
+
+usage()
+{
+   echo "Usage:"
+   echo "       ./check_cmor_files.sh expname year"
+   echo
+}
+
+
 verbose=0
-oce=0
+oce=1
 expname=$1
 year=$2
+
+if [ $# -ne 2 ]; then
+   usage
+   exit 2
+fi
 
 #--------config file-----
 
@@ -17,13 +31,14 @@ check_environment
 # conf file and directories
 . ${ECE3_POSTPROC_TOPDIR}/conf/${ECE3_POSTPROC_MACHINE}/conf_easy2cmor3_${ECE3_POSTPROC_MACHINE}.sh
 
-eval_dirs 1
+# set cmordir
+CMORDIR=$(eval echo ${ECE3_POSTPROC_CMORDIR})
 
 #--------loop on tables -------
 
 for table in CMIP6 PRIMAVERA ; do
 
-DIRFILE=${CMORDIR}/Year_${year}/$table/*/EC-Earth-Consortium/*/*/*
+DIRFILE=${CMORDIR}/$table/*/EC-Earth-Consortium/*/*/*
 echo $DIRFILE
 
 if [[ $table == CMIP6 ]] ; then

@@ -13,32 +13,14 @@ set -ex
 
 expname=${expname:-cccc}
 year=${year:-1950}
-INDEX=${INDEX:-1}
 MON=${MON:-1}
-ATM=${ATM:-1}
+ATM=${ATM:-0}
 OCE=${OCE:-0}
 USERexp=${USERexp:-$USER}
 NCORESATM=${NCORESATM:-1}
 NCORESOCE=${NCORESOCE:-1}
 STARTTIME=${STARTTIME:-1950-01-01}
-DO_PRIMA=true #extra flag for primavera tables
-
-# options controller 
-OPTIND=1
-while getopts ":h:l:m:y:u:a:o" OPT; do
-    case "$OPT" in
-    h|\?) echo "Usage: cmor_mon_filter.sh -e <experiment name> -y <yr> -m <month (1-12)> \
-                -a <process atmosphere (0,1): default 1> -o <process ocean (0,1): default 0> -u <userexp>"
-          exit 0 ;;
-    e)    expname=$OPTARG ;;
-    m)    MON=$OPTARG ;;
-    y)    year=$OPTARG ;;
-    a)    ATM=$OPTARG ;;
-    o)    OCE=$OPTARG ;;
-    u)    USERexp=$OPTARG ;;
-    esac
-done
-shift $((OPTIND-1))
+DO_PRIMA=${DO_PRIMA:-true} #extra flag for primavera tables
 
 #--------config file-----
 # check environment
@@ -51,17 +33,19 @@ check_environment
 # load user and machine specifics
 . ${ECE3_POSTPROC_TOPDIR}/conf/${ECE3_POSTPROC_MACHINE}/conf_easy2cmor3_${ECE3_POSTPROC_MACHINE}.sh
 
-# set input and output directories
-eval_dirs 1
+# setting directories 
+NEMORESULTS=$(eval echo $NEMORESULTS0)
+IFSRESULTS=$(eval echo $IFSRESULTS0)
+CMORDIR=$(eval echo ${ECE3_POSTPROC_CMORDIR})
 
 TMPDIR=$BASETMPDIR/${expname}_${year}_${RANDOM}
 mkdir -p $CMORDIR $TMPDIR
 
 echo "Main folders..."
-echo $IFSRESULTS
-echo $NEMORESULTS
-echo $CMORDIR
-echo $TMPDIR
+echo "Looking for IFS data in: $IFSRESULTS"
+echo "Looking for NEMO data in: $NEMORESULTS"
+echo "Putting CMORized data in: $CMORDIR"
+echo "Temprary directory is: $TMPDIR"
 
 #---------user configuration ---------#
 
@@ -92,7 +76,6 @@ export PATH="$CONDADIR:$PATH"
 echo $PATH
 source activate ece2cmor3
 export PYTHONNOUSERSITE=True
-#export PYTHONPATH=/marconi_work/Pra13_3311/opt/anaconda/envs/ece2cmor3/lib/python2.7/site-packages
 #export HDF5_DISABLE_VERSION_CHECK=1
 ece2cmor=$ECE2CMOR3DIR/ece2cmor.py
 
@@ -140,7 +123,7 @@ function runece2cmor_atm {
     #prepare metadata
     CONFIGFILE=$FLDDIR/metadata-${expname}-year${year}.json
     sed -s 's,<OUTDIR>,'${CMORDIR}',g' $METADATAFILEATM > $CONFIGFILE
-    sed -i 's,<INDEX>,'${INDEX}',g' $CONFIGFILE
+    #sed -i 's,<INDEX>,'${INDEX}',g' $CONFIGFILE
 
     # Launching ece2cmor3
     echo "================================================================"
@@ -200,7 +183,7 @@ function runece2cmor_oce {
     #preparing metadata
     CONFIGFILE=$FLDDIR/metadata-${expname}-year${year}.json
     sed -s 's,<OUTDIR>,'${CMORDIR}',g' $METADATAFILEOCE > $CONFIGFILE
-    sed -i 's,<INDEX>,'${INDEX}',g' $CONFIGFILE 
+    #sed -i 's,<INDEX>,'${INDEX}',g' $CONFIGFILE 
 
     # Launching ece2cmor3
     echo "================================================================"
@@ -246,12 +229,12 @@ echo "========================================================="
 # Currently set up to run everything that works!
 if [ "$ATM" -eq 1 ]; then
     runece2cmor_atm CMIP6 $NCORESATM $year $MON
-    if [[ ${DO_PRIMA} == true ]] ; then runece2cmor_atm PRIMAVERA $NCORESATM $year $MON ; fi
+    if ${DO_PRIMA} ; then runece2cmor_atm PRIMAVERA $NCORESATM $year $MON ; fi
 fi
 
 if [ "$OCE" -eq 1 ]; then
     runece2cmor_oce CMIP6 $NCORESOCE $year
-    if [[ ${DO_PRIMA} == true ]] ; then runece2cmor_oce PRIMAVERA $NCORESOCE $year ; fi
+    if ${DO_PRIMA} ; then runece2cmor_oce PRIMAVERA $NCORESOCE $year ; fi
 fi
 
 # Removing linked directory
