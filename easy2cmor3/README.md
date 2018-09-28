@@ -1,27 +1,25 @@
-By P. Davini from K. Strommen script (Sep 2018)
+# EASY2CMOR3 package
 
-- EASY2CMOR package
-These files are thought to provide wrapper scripts to run ECE2CMOR3 (https://github.com/goord/ece2cmor3)
-They are added here in order to keep track of them. Clearly, you will need to install all the ece2cmor3 tool separately
+By P. Davini (Sep 2018)
+adapted from K. Strommen and Gijs van der Oord scripts 
+
+These are series of scripts thought to provide a simplified and organized appraoch to run ECE2CMOR3 (https://github.com/goord/ece2cmor3).
 
 There is one main script which is meant to handle the whole cmorization:
 
-./cmorize_month.sh
+**./submit_year.sh**: This is a wrapper of a series of various scripts, which provides the cmorization of IFS and NEMO separately, the merging into yearly files and the validation of the results. If it's IFS only, it launches 12 jobs, one for each month, and if coupled, it launches 13, with all of NEMO handled in one job. Two other extra jobs are added, one for merging and one for validation. The two latter jobs are delayed in order to account for the termination of the other jobs.
+It is meant to work with SLURM and PBS since it has been developed on Marconi and on CCA, so that data structure too is following CNR requirements.
 
-This aims at cmorizing 1 month of IFS data and/or 1 year of NEMO data. 
-You can specify in there easily where your experiment is, where the output should go, the required varlist and parameter tables, the metadata, etc...
-Metadata, varlist and parameter tables used to cmorize PRIMAVERA data are in the subdirectories.
-The script can be  run directly from terminal or launched via the other main script:
+The 3 scripts calle by the wrapper are: 
+1.  **./cmorize_month.sh**: this aims at cmorizing 1 month of IFS data and/or 1 year of NEMO data. 
+You can specify in there easily where your experiment is, where the output should go, the required varlist and parameter tables, the metadata, etc... Metadata, varlist and parameter tables used to cmorize PRIMAVERA data are in the subdirectories.
+Testing indicates 1 month of low-res (T255ORCA1) IFS takes around 35-40 minutes, and 1 year of low-res NEMO takes around 15 minutes. For hi-res (T511ORCA025) 1 month IFS takes around 2h30 min hours and NEMO around 1h30. However, IFS can be parallized considerably reducing the time (15 minutes with 8 cores at T255).
 
-./submit_year.sh
+2. **/merge_month.sh** : It breaks the directory structure but it concatenates the IFS data into a single one year file using NCO
 
-This is just basic wrapper for cmor_mon_filter.sh and is set up to easily launch enough jobs to process a full EC-Earth year. If it's IFS only, it launches 12 jobs, one for each month, and if coupled, it launches 13, with all of NEMO handled in one job. 
-It is meant to work with SLURM since it has been developed on Marconi, so that data structure too is following CNR requirements.
+3. **./validate.sh** : It uses the Jon Seddon validation tool (that should be installed separately) to check data integrity
 
-Testing indicates 1 month of low-res (T255ORCA1) IFS takes around 35-40 minutes, and 1 year of low-res NEMO takes around 15 minutes.
-For hi-res (T511ORCA025) 1 month IFS takes around 2h30 min hours and NEMO around 1h30. However, IFS can be parallized considerably reducing the time (15 minutes with 8 cores at T255).
-
-Other companion scripts are present:
+Finally, Other companion perhaps useful scripts are present:
 
 - ./check_cmor_files.sh
 
@@ -31,18 +29,13 @@ It evalutes the difference between the data obtained by the cmorization and the 
 
 It is a trivial script aimed at pulling and installing a newer version of the ece2cmor3 tool.
 
-- ./merge_month.sh
-
-It breaks the directory structure but it concatenates the IFS data into a single one year file using NCO
-
-- ./validate.sh
-
-It uses the Jon Seddon validation tool to check data integrity
-
 - ./year_looper.sh
 
 Zero-order looper to launch several years (using ./submit_year.sh)
 
+- ./autocmor.sh
+
+Tries to diagnose if cmorization has been completed for a single experiments and launch missing years. Useful for automation into running simulations. 
 
 
 
