@@ -25,8 +25,8 @@ YEAR2=${YEAR2:-2011}
 MONTHS=13
 
 #--------config file-----
-config=marconi
-. ./config/config_${config}.sh
+config=${ECE3_POSTPROC_MACHINE}
+. ${ECE3_POSTPROC_TOPDIR}/ece2cmor3_support/config/config_${config}.sh
 
 #####################################################################################################
 

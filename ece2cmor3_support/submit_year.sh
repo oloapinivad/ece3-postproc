@@ -33,7 +33,7 @@ set -ue
 #---DEFAULT INPUT ARGUMENT----#
 RESO=T255 # resolition, to set accorindgly machine dependent requirements
 INDEX=1 #realization index, to change metadata
-USEREXP=${USEREXP:-pdavini0}  #extra by P. davini: allows analysis of experiment owned by different user
+USEREXP=${USEREXP:-$USER}  #extra: allows analysis of experiment owned by different user
 MONTH=0 #if month=0, then loop on all months (IFS only)
 ATM=0
 OCE=0
@@ -73,8 +73,8 @@ done
 shift $((OPTIND-1))
 
 #--------config file-----
-config=marconi
-. ./config/config_${config}.sh
+config=${ECE3_POSTPROC_MACHINE}
+. ${ECE3_POSTPROC_TOPDIR}/ece2cmor3_support/config/config_${config}.sh
 
 #-----------------------#
 if [[ $MONTH -eq 0 ]] ; then
@@ -142,17 +142,20 @@ if [[ "$SUBMIT" == "sbatch" ]] ; then
 
 elif [[ "$SUBMIT" == "qsub" ]] ; then
 	MACHINE_OPT="-l EC_billing_account=$ACCOUNT -l walltime=$TLIMIT -q $PARTITION -l EC_memory_per_task=$MEMORY -l EC_total_tasks=1"
-	JOB_ATM='$SUBMIT -v=MON=${MON},${OPT_ATM} -l EC_threads_per_task=$NCORESATM -N=ifs-${EXP}-${YEAR}-${MON}
-                 -o=$LOGFILE/cmor_${EXP}_${YEAR}_${MON}_ifs.out -e=$LOGFILE/cmor_${EXP}_${YEAR}_${MON}_ifs.err
+	JOB_ATM='$SUBMIT ${MACHINE_OPT} -v MON=${MON},${OPT_ATM} -l EC_threads_per_task=$NCORESATM -N ifs-${EXP}-${YEAR}-${MON}
+                 -o $LOGFILE/cmor_${EXP}_${YEAR}_${MON}_ifs.out -e $LOGFILE/cmor_${EXP}_${YEAR}_${MON}_ifs.err
+                 ./cmorize_month.sh'
+	JOB_OCE='$SUBMIT ${MACHINE_OPT} -v ${OPT_OCE} -l EC_threads_per_task=$NCORESOCE -N nemo-${EXP}-${YEAR}
+                 -o $LOGFILE/cmor_${EXP}_${YEAR}_nemo.out -e $LOGFILE/cmor_${EXP}_${YEAR}_nemo.err
                  ./cmorize_month.sh'
 	hhmm=$(date +"%H%m")
-	DELTAMIN=$((DELTAMIN + hhmm))
-	JOB_MER='$SUBMIT ${MACHINE_OPT} -v=${OPT_MERGE} -l EC_threads_per_task=$NCORESMERGE -a=$DELTAMIN
-                 -N=merge-${EXP}-${YEAR} -o=$LOGFILE/merge_${EXP}_${YEAR}_%j.out -e=$LOGFILE/merge_${EXP}_${YEAR}.err
+	DELTAMIN=$((DELTAMIN + hhmm)) # -a $DELTAMIN
+	JOB_MER='$SUBMIT ${MACHINE_OPT} -v ${OPT_MERGE} -l EC_threads_per_task=$NCORESMERGE
+                 -N merge-${EXP}-${YEAR} -o $LOGFILE/merge_${EXP}_${YEAR}_%j.out -e $LOGFILE/merge_${EXP}_${YEAR}.err
                 ./merge_month.sh'
-	JOB_VAL='$SUBMIT -l EC_billing_account=$ACCOUNT -l=walltime $TCHECK -q $PARTITION -l EC_memory_per_task=${MEMORY2}
-                -l EC_threads_per_task=$NCORESVALID -v=${OPT_VALID} -W=afterok:$JOBIDMERGE -N=validate-${EXP}-${YEAR}
-                -o=$LOGFILE/validate_${EXP}_${YEAR}.out  -e=$LOGFILE/validate_${EXP}_${YEAR}.err
+	JOB_VAL='$SUBMIT -l EC_billing_account=$ACCOUNT -l walltime=$TCHECK -q $PARTITION -l EC_memory_per_task=${MEMORY2}
+                -l EC_threads_per_task=$NCORESVALID -v ${OPT_VALID} -W depend=afterok:$JOBIDMERGE -N validate-${EXP}-${YEAR}
+                -o $LOGFILE/validate_${EXP}_${YEAR}.out  -e $LOGFILE/validate_${EXP}_${YEAR}.err
                 ./validate.sh'
 
 fi
@@ -162,10 +165,12 @@ fi
 # For IFS we submit one job for each month
 if [ "$ATM" -eq 1 ] ; then
 
-    # Loop on months
-    for MON in $MONS ; do
-	eval ${JOB_ATM}
-    done
+	# Loop on months
+    	#MONS=1
+    	for MON in $MONS ; do
+		#echo ${JOB_ATM}
+		eval ${JOB_ATM}
+	done
 
 fi
 
@@ -178,7 +183,11 @@ fi
 # Merger submission, delayed by $DELTA time per year
 if [ "$MERGE" -eq 1 ] ; then
     	JOBID=$(eval ${JOB_MER})
-	JOBIDMERGE=$(echo $JOBID | cut -f4 -d" ")
+	if [[ $SUBMIT == "sbatch" ]] ; then 
+		JOBIDMERGE=$(echo $JOBID | cut -f4 -d" ")
+	elif [[  $SUBMIT == "qsub" ]] ; then 
+		JOBIDMERGE=$JOBID
+	fi
 	echo $JOBIDMERGE
 fi
 

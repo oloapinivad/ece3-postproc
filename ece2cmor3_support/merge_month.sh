@@ -16,8 +16,6 @@ EXP=${EXP:-det4}
 YEAR=${YEAR:-1950}
 VERBOSE=${VERBOSE:-0}
 
-#$ncrcat --version
-
 OPTIND=1
 while getopts "h?e:l:s:r:v" OPT; do
     case "$OPT" in
@@ -42,8 +40,8 @@ if ! [[ $YEAR =~ ^[0-9]+$ ]]; then
 fi
 
 #--------config file-----
-config=marconi
-. ./config/config_${config}.sh
+config=${ECE3_POSTPROC_MACHINE}
+. ${ECE3_POSTPROC_TOPDIR}/ece2cmor3_support/config/config_${config}.sh
 
 #conda activation
 export PATH="$CONDADIR:$PATH"

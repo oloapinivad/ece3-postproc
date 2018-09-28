@@ -36,7 +36,7 @@ CMORDIR=${ROOTPATH}/Year_${YEAR}
 MERGEDIR=${ROOTPATH}/Year_${YEAR}_NCO
 
 # define folder for logfile
-LOGFILE=/marconi_scratch/userexternal/$USER/log/cmorize
+LOGFILE=$SCRATCH/log/cmorize
 mkdir -p $LOGFILE || exit 1
 
 # Location of the experiment output (-u flag)
