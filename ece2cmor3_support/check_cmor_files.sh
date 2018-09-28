@@ -1,18 +1,18 @@
 #!/bin/bash
 
-verbose=1
-oce=1
+verbose=0
+oce=0
 EXP=qctr
-YEAR=1956
+YEAR=1970
 
 
 #--------config file-----
-config=marconi
+config=knl
 . ./config/config_${config}.sh
 
 for table in CMIP6 PRIMAVERA ; do
 
-DIRFILE=$CMORDIR/$table/*/EC-Earth-Consortium/*/*/*
+DIRFILE=${ROOTPATH}/Year_${YEAR}/$table/*/EC-Earth-Consortium/*/*/*
 echo $DIRFILE
 
 if [[ $table == CMIP6 ]] ; then
