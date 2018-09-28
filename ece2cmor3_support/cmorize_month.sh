@@ -45,6 +45,7 @@ config=${ECE3_POSTPROC_MACHINE}
 . ${ECE3_POSTPROC_TOPDIR}/ece2cmor3_support/config/config_${config}.sh
 
 #create folders
+CMORDIR=${ROOTPATH}/Year_${YEAR}
 mkdir -p $CMORDIR $BASETMPDIR
 
 #---------user configuration ---------#

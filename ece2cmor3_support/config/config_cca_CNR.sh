@@ -28,13 +28,6 @@ CONDADIR=${SCRATCH}/PRIMAVERA/anaconda2/bin
 #Specify root location of experiment output
 ROOTPATH=$SCRATCH/ece3/${EXP}/cmorized/
 
-# Output directory for the cmorized data
-CMORDIR=${ROOTPATH}/Year_${YEAR}
-#CMORDIR=${SCRATCH}/cmor_test_180912
-
-# Folder for merging
-MERGEDIR=${ROOTPATH}/Year_${YEAR}_NCO
-
 # define folder for logfile
 LOGFILE=$SCRATCH/log/cmorize
 mkdir -p $LOGFILE || exit 1
@@ -63,7 +56,7 @@ else
         MEMORY=20GB
         MEMORY2=${MEMORY}
         TLIMIT="00:59:00"
-        DELTA=30
+        DELTA=100
         TCHECK="01:59:00"
 fi
 

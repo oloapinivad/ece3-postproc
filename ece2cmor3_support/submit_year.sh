@@ -19,7 +19,7 @@
 # NCORESATM/OCE/MERGE/VALID is used for parallel computation.
 #
 #
-# Paolo Davini (Apr 2018) - based on a script by Gijs van Oord and Kristian Strommen
+# Paolo Davini (Apr 2018) - based on a script by Gijs van den Oord and Kristian Strommen
 #
 ################################################################################
 
@@ -75,6 +75,7 @@ shift $((OPTIND-1))
 #--------config file-----
 config=${ECE3_POSTPROC_MACHINE}
 . ${ECE3_POSTPROC_TOPDIR}/ece2cmor3_support/config/config_${config}.sh
+cd ${ECE3_POSTPROC_TOPDIR}/ece2cmor3_support
 
 #-----------------------#
 if [[ $MONTH -eq 0 ]] ; then
@@ -137,7 +138,7 @@ if [[ "$SUBMIT" == "sbatch" ]] ; then
                 ./merge_month.sh'
 	JOB_VAL='$SUBMIT --account=$ACCOUNT --time $TCHECK --partition=$PARTITION --mem=${MEMORY2} -n $NCORESVALID
                 --export=${OPT_VALID} --dependency=afterok:$JOBIDMERGE --job-name=validate-${EXP}-${YEAR}
-                --output=$LOGFILE/validate_${EXP}_${YEAR}_%j.out   --error=$LOGFILE/validate_${EXP}_${YEAR}_%j.err
+                --output=$LOGFILE/validate_${EXP}_${YEAR}_%j.out --error=$LOGFILE/validate_${EXP}_${YEAR}_%j.err
                 ./validate.sh'
 
 elif [[ "$SUBMIT" == "qsub" ]] ; then
@@ -149,9 +150,11 @@ elif [[ "$SUBMIT" == "qsub" ]] ; then
                  -o $LOGFILE/cmor_${EXP}_${YEAR}_nemo.out -e $LOGFILE/cmor_${EXP}_${YEAR}_nemo.err
                  ./cmorize_month.sh'
 	hhmm=$(date +"%H%m")
-	DELTAMIN=$((DELTAMIN + hhmm)) # -a $DELTAMIN
-	JOB_MER='$SUBMIT ${MACHINE_OPT} -v ${OPT_MERGE} -l EC_threads_per_task=$NCORESMERGE
-                 -N merge-${EXP}-${YEAR} -o $LOGFILE/merge_${EXP}_${YEAR}_%j.out -e $LOGFILE/merge_${EXP}_${YEAR}.err
+	echo $hhmm
+	DELTAMIN=$((DELTAMIN + hhmm))
+	echo $DELTAMIN
+	JOB_MER='$SUBMIT ${MACHINE_OPT} -v ${OPT_MERGE} -l EC_threads_per_task=$NCORESMERGE -a $DELTAMIN
+                 -N merge-${EXP}-${YEAR} -o $LOGFILE/merge_${EXP}_${YEAR}.out -e $LOGFILE/merge_${EXP}_${YEAR}.err
                 ./merge_month.sh'
 	JOB_VAL='$SUBMIT -l EC_billing_account=$ACCOUNT -l walltime=$TCHECK -q $PARTITION -l EC_memory_per_task=${MEMORY2}
                 -l EC_threads_per_task=$NCORESVALID -v ${OPT_VALID} -W depend=afterok:$JOBIDMERGE -N validate-${EXP}-${YEAR}

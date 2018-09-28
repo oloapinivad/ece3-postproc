@@ -47,6 +47,7 @@ config=${ECE3_POSTPROC_MACHINE}
 export PATH="$CONDADIR:$PATH"
 
 #create merging directory
+MERGEDIR=${ROOTPATH}/Year_${YEAR}_NCO
 mkdir -p $MERGEDIR
 
 #clean double tos (do we need it?)
