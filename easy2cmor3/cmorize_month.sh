@@ -23,14 +23,6 @@ STARTTIME=${STARTTIME:-1950-01-01}
 DO_PRIMA=${DO_PRIMA:-true} #extra flag for primavera tables
 
 #--------config file-----
-# check environment
-[[ -z "${ECE3_POSTPROC_TOPDIR:-}" ]] && echo "User environment ECE3_POSTPROC_TOPDIR not set. See ../README." && exit 1
-
- # load utilities
-. ${ECE3_POSTPROC_TOPDIR}/functions.sh
-check_environment
-
-# load user and machine specifics
 . ${ECE3_POSTPROC_TOPDIR}/conf/${ECE3_POSTPROC_MACHINE}/conf_easy2cmor3_${ECE3_POSTPROC_MACHINE}.sh
 
 # setting directories 

@@ -67,7 +67,7 @@ echo "First year is ${YEAR_ZERO}"
 echo "First year will be skipped due to new folder structure"
 echo "Last year is ${YEAR_LAST}"
 
-YEAR_LAST=1950 #wrong to checks
+YEAR_LAST=1951 #wrong to run checks
 
 # -- Write and submit one script per year
 for YEAR in $(seq $(( YEAR_ZERO + 1 )) ${YEAR_LAST})

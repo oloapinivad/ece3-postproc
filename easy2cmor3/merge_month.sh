@@ -9,10 +9,6 @@ expname=${expname:-det4}
 year=${year:-1950}
 
 #--------config file-----
-
-# check environment
-[[ -z "${ECE3_POSTPROC_TOPDIR:-}" ]] && echo "User environment ECE3_POSTPROC_TOPDIR not set. See ../README." && exit 1
-
 # load user and machine specifics
 . ${ECE3_POSTPROC_TOPDIR}/conf/${ECE3_POSTPROC_MACHINE}/conf_easy2cmor3_${ECE3_POSTPROC_MACHINE}.sh
 cd ${EASYDIR}

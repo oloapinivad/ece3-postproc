@@ -9,15 +9,10 @@ set -e
 
 #Will validate all years between year1 and year2 of experiment with name expname
 expname=${expname:-cccc}
-year1=${year1:-1952}
-year2=${year2:-1952}
+year1=${year1:-1950}
+year2=${year2:-1950}
 
 #--------config file-----
-
-# check environment
-[[ -z "${ECE3_POSTPROC_TOPDIR:-}" ]] && echo "User environment ECE3_POSTPROC_TOPDIR not set. See ../README." && exit 1
-
-# load user and machine specifics
 . ${ECE3_POSTPROC_TOPDIR}/conf/${ECE3_POSTPROC_MACHINE}/conf_easy2cmor3_${ECE3_POSTPROC_MACHINE}.sh
 cd ${EASYDIR}
 

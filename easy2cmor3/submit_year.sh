@@ -34,10 +34,10 @@ year0=$year
 RESO=T255 # resolition, to set accorindgly machine dependent requirements
 USERexp=${USERexp:-$USER}  #extra: allows analysis of experiment owned by different user
 MONTH=0 #if month=0, then loop on all months (IFS only)
-ATM=0
-OCE=0
-MERGE=0 #flag for merging
-VALID=0 #flag for validation
+ATM=1
+OCE=1
+MERGE=1 #flag for merging
+VALID=1 #flag for validation
 STARTTIME=1950-01-01 #very important to allow correct merging
 
 # options controller 
