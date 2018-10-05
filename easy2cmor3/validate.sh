@@ -5,12 +5,11 @@ set -e
 # Script to validate output of ece2cmor3 for a Primavera experiment.
 # Uses Jon Seddon's primavera-val python tool.
 # a conda "validate" environment including iris has been installed
-# Adapted from Kristina Strommen
+# Adapted from Kristian Strommen
 
 #Will validate all years between year1 and year2 of experiment with name expname
 expname=${expname:-cccc}
-year1=${year1:-1950}
-year2=${year2:-1950}
+year=${year:-1950}
 
 #--------config file-----
 . ${ECE3_POSTPROC_TOPDIR}/conf/${ECE3_POSTPROC_MACHINE}/conf_easy2cmor3_${ECE3_POSTPROC_MACHINE}.sh
@@ -34,8 +33,6 @@ echo "=================================================================="
 echo "=================================================================="
 
 #Looping over years
-for year in $(seq ${year1} ${year2})
-do
     	echo "=================================================================="
     	echo "                      year = ${year}"
     	echo "=================================================================="
@@ -45,7 +42,7 @@ do
 	echo $CMORDIR
     
 	cd $CMORDIR
-	nfiles=$(ls | wc -l)
+	nfiles=$(ls *.nc | wc -l)
 	checkfile=../validate_${year}.txt
 
         #Validate all the (symbolic link) files
@@ -54,7 +51,7 @@ do
 
         if [ "$?" = "0" ]; then
             echo "...successfully validated month!"
-	    echo "... Year $year Month $month, $nfiles files successfully validated!" > $checkfile
+	    echo "... Year $year, $nfiles files successfully validated!" > $checkfile
         else
             echo "=================================================================="
 	    echo "Validation failed for year ${year}!!!" > $checkfile
@@ -63,7 +60,6 @@ do
 
 	cd ${EASYDIR}
 
-done
 
                 
 

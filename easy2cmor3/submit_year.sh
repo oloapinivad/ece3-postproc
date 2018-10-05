@@ -118,9 +118,10 @@ echo "Submitting jobs via $SUBMIT..."
 BASE_OPT="expname=$expname,year=$year,USERexp=$USERexp"
 OPT_ATM="$BASE_OPT,ATM=$ATM,OCE=0,NCORESATM=$NCORESATM,STARTTIME=$STARTTIME"
 OPT_OCE="$BASE_OPT,ATM=0,OCE=$OCE,NCORESOCE=$NCORESOCE"
-DELTAMIN=$(( (year-year0+1) * $DELTA ))
+#DELTAMIN=$(( (year-year0+1) * $DELTA ))
+DELTAMIN=$(( (year-year0+1) * 10 ))
 OPT_MERGE="year=${year},expname=${expname}"
-OPT_VALID="year1=${year},year2=${year},expname=${expname},MONTHS=13"
+OPT_VALID=${OPT_MERGE}
 
 
 # Define basic options for SLURM sbatch submission
@@ -137,7 +138,8 @@ if [[ "$SUBMIT" == "sbatch" ]] ; then
                 --output=$LOGFILE/merge_${expname}_${year}_%j.out --error=$LOGFILE/merge_${expname}_${year}_%j.err
                 ./merge_month.sh'
 	JOB_VAL='$SUBMIT --account=$ACCOUNT --time $TCHECK --partition=$PARTITION --mem=${MEMORY2} -n $NCORESVALID
-                --export=${OPT_VALID} --dependency=afterok:$JOBIDMERGE --job-name=validate-${expname}-${year}
+                --export=${OPT_VALID} --job-name=validate-${expname}-${year} 
+		--dependency=afterok:$JOBIDMERGE
                 --output=$LOGFILE/validate_${expname}_${year}_%j.out --error=$LOGFILE/validate_${expname}_${year}_%j.err
                 ./validate.sh'
 

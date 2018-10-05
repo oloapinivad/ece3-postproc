@@ -37,7 +37,7 @@ echo "Main folders..."
 echo "Looking for IFS data in: $IFSRESULTS"
 echo "Looking for NEMO data in: $NEMORESULTS"
 echo "Putting CMORized data in: $CMORDIR"
-echo "Temprary directory is: $TMPDIR"
+echo "Temporary directory is: $TMPDIR"
 
 #---------user configuration ---------#
 

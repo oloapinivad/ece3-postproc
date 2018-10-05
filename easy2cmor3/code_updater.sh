@@ -4,7 +4,7 @@
 
 
 #--------config file-----
-. ${ECE3_POSTPROC_TOPDIR}/conf/${ECE3_POSTPROC_MACHINE}/conf_hiresclim_${ECE3_POSTPROC_MACHINE}.sh
+. ${ECE3_POSTPROC_TOPDIR}/conf/${ECE3_POSTPROC_MACHINE}/conf_easy2cmor3_${ECE3_POSTPROC_MACHINE}.sh
 branch=${1:-master}
 #-----------------------
 

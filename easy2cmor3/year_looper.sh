@@ -2,14 +2,14 @@
 
 #rough scheme for looping on years, it produces 13 jobs for each year so beware
 
-EXP=cccc
-YEAR1=1950
-YEAR2=1950
-ATM=1
-OCE=1
+EXP=qctr
+YEAR1=1980
+YEAR2=1980
+ATM=0
+OCE=0
 MERGE=1
 VALID=1
-RESO=T255
+RESO=T511
 
 #simple loop
 for YEAR in $(seq $YEAR1 $YEAR2) ; do
