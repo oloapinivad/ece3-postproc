@@ -67,18 +67,18 @@ echo "First year is ${YEAR_ZERO}"
 echo "First year will be skipped due to new folder structure"
 echo "Last year is ${YEAR_LAST}"
 
-YEAR_LAST=1951 #wrong to run checks
+#YEAR_LAST=1951 #wrong to run checks
 
 # -- Write and submit one script per year
 for YEAR in $(seq $(( YEAR_ZERO + 1 )) ${YEAR_LAST})
 do 
     echo; echo ---- $YEAR -----
     # -- If postcheck exists plot it, then exit! 
-    CMORDIR=$( eval echo $ECE3_POSTPROC_CMORDIR )    
-    cd $CMORDIR
-    if [ -f  ../validate_$YEAR.txt  ] 
+    ROOTDIR=$( echo $( eval echo $ECE3_POSTPROC_CMORDIR )  | rev | cut -f2- -d"/" | rev)
+    mkdir -p $ROOTDIR
+    if [ -f  $ROOTDIR/validate_$YEAR.txt  ] 
     then
-	cat ../validate_$YEAR.txt
+	cat $ROOTDIR/validate_$YEAR.txt
     else
 	echo "POSTPROC"
 	 #-- check if postproc is already, the exit

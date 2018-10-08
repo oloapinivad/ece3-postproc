@@ -36,17 +36,19 @@ USERexp=${USERexp:-$USER}  #extra: allows analysis of experiment owned by differ
 MONTH=0 #if month=0, then loop on all months (IFS only)
 ATM=1
 OCE=1
-MERGE=1 #flag for merging
-VALID=1 #flag for validation
+MERGE=0 #flag for merging
+VALID=0 #flag for validation
+CORRECT=0 #flag for correction
 STARTTIME=1950-01-01 #very important to allow correct merging
 
 # options controller 
 OPTIND=1
-while getopts "h:e:y:j:u:a:o:m:v:i:r:s:" OPT; do
+while getopts "h:e:y:j:u:a:o:m:v:c:i:r:s:" OPT; do
     case "$OPT" in
     h|\?) echo "Usage: submit_year.sh -e <experiment name> -y <year> -i \
                 -a <process atmosphere (0,1): default 0> -o <process ocean (0,1): default 0> -u <userexp> \
 		-m <merge into yearly (0,1): default 0> -v <validate data (0,1): default 0> \
+		-c <launch data corrector (0,1): default 0> \
 		-j <initial year for lagged merging and validation (default: year) > \
 		-r <resolution (T255,T511): default T255> -s <reference time for NetCDF (YYYY-MM-DD): default 1950-01-01>"
           exit 0 ;;
@@ -57,6 +59,7 @@ while getopts "h:e:y:j:u:a:o:m:v:i:r:s:" OPT; do
     o)    OCE=$OPTARG ;;
     m)    MERGE=$OPTARG ;;
     v) 	  VALID=$OPTARG ;;
+    c)    CORRECT=$OPTARG ;;
     u)    USERexp=$OPTARG ;;
     r)	  RESO=$OPTARG ;;
     s)    STARTTIME=$OPTARG ;;
@@ -112,6 +115,14 @@ else
     echo "Validating files: no"
 fi
 
+if [ "$CORRECT" -eq 1 ]; then
+    echo "Correction metadata: yes"
+    echo "Disabling all the other options!"
+    VALID=0; ATM=0; OCE=0; MERGE=0
+else
+    echo "Correction metadata files: no"
+fi
+
 echo "Submitting jobs via $SUBMIT..."
 
 # Machine and process options
@@ -122,6 +133,7 @@ OPT_OCE="$BASE_OPT,ATM=0,OCE=$OCE,NCORESOCE=$NCORESOCE"
 DELTAMIN=$(( (year-year0+1) * 10 ))
 OPT_MERGE="year=${year},expname=${expname}"
 OPT_VALID=${OPT_MERGE}
+OPT_COR=${OPT_MERGE}
 
 
 # Define basic options for SLURM sbatch submission
@@ -142,28 +154,33 @@ if [[ "$SUBMIT" == "sbatch" ]] ; then
 		--dependency=afterok:$JOBIDMERGE
                 --output=$LOGFILE/validate_${expname}_${year}_%j.out --error=$LOGFILE/validate_${expname}_${year}_%j.err
                 ./validate.sh'
+	JOB_COR='$SUBMIT --account=$ACCOUNT --time 01:00:00 --partition=$PARTITION --mem=${MEMORY2} -n $NCORESCORRECT
+                --export=${OPT_COR} --job-name=correct-${expname}-${year} 
+                --output=$LOGFILE/correct_${expname}_${year}_%j.out --error=$LOGFILE/correct_${expname}_${year}_%j.err
+                ./correct_rename.sh'
 
 # define options for PBS qsub submission
 elif [[ "$SUBMIT" == "qsub" ]] ; then
-	MACHINE_OPT="-l EC_billing_account=$ACCOUNT -l walltime=$TLIMIT -q $PARTITION -l EC_memory_per_task=$MEMORY -l EC_total_tasks=1"
-	JOB_ATM='$SUBMIT ${MACHINE_OPT} -v MON=${MON},${OPT_ATM} -l EC_threads_per_task=$NCORESATM -N ifs-${expname}-${year}-${MON}
+        MACHINE_OPT="-l EC_billing_account=$ACCOUNT -l walltime=$TLIMIT -q $PARTITION -l EC_memory_per_task=$MEMORY -l EC_total_tasks=1"
+        JOB_ATM='$SUBMIT ${MACHINE_OPT} -v MON=${MON},${OPT_ATM} -l EC_threads_per_task=$NCORESATM -N ifs-${expname}-${year}-${MON}
                  -o $LOGFILE/cmor_${expname}_${year}_${MON}_ifs.out -e $LOGFILE/cmor_${expname}_${year}_${MON}_ifs.err
                  ./cmorize_month.sh'
-	JOB_OCE='$SUBMIT ${MACHINE_OPT} -v ${OPT_OCE} -l EC_threads_per_task=$NCORESOCE -N nemo-${expname}-${year}
+        JOB_OCE='$SUBMIT ${MACHINE_OPT} -v ${OPT_OCE} -l EC_threads_per_task=$NCORESOCE -N nemo-${expname}-${year}
                  -o $LOGFILE/cmor_${expname}_${year}_nemo.out -e $LOGFILE/cmor_${expname}_${year}_nemo.err
                  ./cmorize_month.sh'
-	hhmm=$(date +"%H%m")
-	echo $hhmm
-	DELTAMIN=$((DELTAMIN + hhmm))
-	echo $DELTAMIN
-	JOB_MER='$SUBMIT ${MACHINE_OPT} -v ${OPT_MERGE} -l EC_threads_per_task=$NCORESMERGE -a $DELTAMIN
+        DELTAMIN=$(date --date "now + $DELTA minutes" '+%H%M')
+        #echo $DELTAMIN
+        JOB_MER='$SUBMIT ${MACHINE_OPT} -v ${OPT_MERGE} -l EC_threads_per_task=$NCORESMERGE -a $DELTAMIN
                  -N merge-${expname}-${year} -o $LOGFILE/merge_${expname}_${year}.out -e $LOGFILE/merge_${expname}_${year}.err
                 ./merge_month.sh'
-	JOB_VAL='$SUBMIT -l EC_billing_account=$ACCOUNT -l walltime=$TCHECK -q $PARTITION -l EC_memory_per_task=${MEMORY2}
+        JOB_VAL='$SUBMIT -l EC_billing_account=$ACCOUNT -l walltime=$TCHECK -q $PARTITION -l EC_memory_per_task=${MEMORY2}
                 -l EC_threads_per_task=$NCORESVALID -v ${OPT_VALID} -W depend=afterok:$JOBIDMERGE -N validate-${expname}-${year}
                 -o $LOGFILE/validate_${expname}_${year}.out  -e $LOGFILE/validate_${expname}_${year}.err
                 ./validate.sh'
-
+	JOB_COR='$SUBMIT -l EC_billing_account=$ACCOUNT -l walltime=01:00:00 -q $PARTITION -l EC_memory_per_task=${MEMORY}
+                -l EC_threads_per_task=$NCORESCORRECT -v ${OPT_COR} -N correct-${expname}-${year}
+                -o $LOGFILE/correct_${expname}_${year}.out  -e $LOGFILE/correct_${expname}_${year}.err
+                ./correct_rename.sh'
 fi
 
 
@@ -197,6 +214,11 @@ fi
 # Validator submission, delayed with dependency
 if [ "$VALID" -eq 1 ] ; then
 	eval ${JOB_VAL}
+fi
+
+# Corrector submitting
+if [ "$CORRECT" -eq 1 ] ; then
+        eval ${JOB_COR}
 fi
 
 echo "Jobs submitted!"

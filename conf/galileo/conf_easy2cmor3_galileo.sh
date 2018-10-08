@@ -44,6 +44,7 @@ NCORESATM=8 #parallelization is available for IFS
 NCORESOCE=1
 NCORESMERGE=32 #parallelization is available for merger
 NCORESVALID=1
+NCORESCORRECT=1
 
 #----machine dependent argument----#
 ACCOUNT=$ECE3_POSTPROC_ACCOUNT 
@@ -69,3 +70,4 @@ fi
 
 #--------nco for merging---------------#
 ncrcat="ncrcat -h"
+ncatted="ncatted -hO"

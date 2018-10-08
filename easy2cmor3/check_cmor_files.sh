@@ -38,8 +38,13 @@ CMORDIR=$(eval echo ${ECE3_POSTPROC_CMORDIR})
 
 for table in CMIP6 PRIMAVERA ; do
 
-DIRFILE=${CMORDIR}/$table/*/EC-Earth-Consortium/*/*/*
-echo $DIRFILE
+if [[ -d ${CMORDIR}/$table ]] ; then
+	DIRFILE=${CMORDIR}/$table/*/EC-Earth-Consortium/*/*/*
+	echo "Single-month structure..."
+else 
+	DIRFILE=${CMORDIR}
+	echo "Merged structure..."
+fi
 
 if [[ $table == CMIP6 ]] ; then
 	varlist=$EASYDIR/varlist/varlist-cmip6-stream2.json
@@ -53,8 +58,6 @@ echo "-------- Table $table ------------------------"
 echo "Experiment $expname ------------------ Year $year "
 echo "----------------------------------------------"
 
-categories=$(ls $DIRFILE)
-
 s0=($(cat $varlist | grep -n ": " | cut -f 1 -d :))
 f0=($(cat $varlist | grep -n "]" | cut -f 1 -d :))
 totvars=0; totfiles=0
@@ -67,7 +70,13 @@ for t in $(seq 0 $((${#s0[@]}-1))) ; do
 			continue 
 		fi
 	fi
-	nfiles=$(ls $DIRFILE/$categ/*/*/*/*${year}01* 2> /dev/null | wc -l)
+
+	if [[ -d ${CMORDIR}/$table ]] ; then
+		nfiles=$(ls $DIRFILE/$categ/*/*/*/*${year}01* 2> /dev/null | wc -l)
+	else
+		nfiles=$(ls $DIRFILE/*_${categ}_* 2> /dev/null | wc -l)
+	fi
+
 	nvars=$((${f0[$t]}-${s0[$t]}-1))
 	echo "$categ -> Theory:" $nvars "Actual:" $nfiles
 	if [ $verbose -eq 1 ] ; then
@@ -81,7 +90,12 @@ for t in $(seq 0 $((${#s0[@]}-1))) ; do
 				if [ ${var: -2} == "2d" ] 2> /dev/null ; then var=${var::-2} ; fi
 				#echo ${var: -2} 
 			fi
-			check=$(ls $DIRFILE/$categ/*/*/*//*${year}01* 2> /dev/null | grep "/${var}_" | wc -l)
+			if [[ -d ${CMORDIR}/$table ]] ; then
+				check=$(ls $DIRFILE/$categ/*/*/*//*${year}01* 2> /dev/null | grep "/${var}_" | wc -l)
+			else
+				check=$(ls $DIRFILE/*_${categ}_* 2> /dev/null | grep "/${var}_" | wc -l)
+			fi
+
 			if [ $check -eq 0 ] ; then
 				echo "$var missing"
 				nn=$((nn+1))
@@ -101,8 +115,9 @@ done
 echo
 perc=$(bc <<< "scale=2; 100*$totfiles/$totvars")
 echo "TOTAL -> Theory:" $totvars "Actual:" $totfiles "i.e. $perc % "
-#space=$(du -sh $DIRFILE | cut -f 1)
-#echo "Total space occupied by one year of exp $exp is: $space"
+done
+
+space=$(du -sh $DIRFILE | cut -f 1)
+echo "Total space occupied by one year of exp $exp is: $space"
 echo
 
-done

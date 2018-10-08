@@ -42,8 +42,9 @@ mkdir -p $BASETMPDIR || exit 1
 #---PARALLELIZATION OPTIONS---#
 NCORESATM=8 #parallelization is available for IFS
 NCORESOCE=1
-NCORESMERGE=24 #parallelization is available for merger
+NCORESMERGE=32 #parallelization is available for merger
 NCORESVALID=1
+NCORESCORRECT=1
 
 #----machine dependent argument----#
 ACCOUNT=$ECE3_POSTPROC_ACCOUNT 
@@ -54,7 +55,7 @@ PARTITION=nf
 # as a function of the resolution change the memory and time requirements
 if [[ $RESO == T511 ]] ; then
         MEMORY=60GB
-        MEMORY2=100GB
+        MEMORY2=$MEMORY
         TLIMIT="03:59:00"
         DELTA=240
         TCHECK="07:59:00"
@@ -69,3 +70,4 @@ fi
 
 #--------nco for merging---------------#
 ncrcat="ncrcat -h"
+ncatted="ncatted -hO"
