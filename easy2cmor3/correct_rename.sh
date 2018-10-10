@@ -29,15 +29,30 @@ function rename_ripf {
                 cp $file ${newfile}
         fi
 
+	# 
+	ph_idx=1
+	
+	ripf=r1i1p${ph_idx}f1
+
         #operation to be performed
         echo "Correcting attributes..."
-        $ncatted -a variant_label,global,m,c,r1i1p1f1 $newfile
-        $ncatted -a parent_variant_label,global,m,c,r1i1p1f1 $newfile
-        $ncatted -a physics_index,global,m,i,1 $newfile
-        $ncatted -a further_info_url,global,m,c,https://furtherinfo.es-doc.org/CMIP6.EC-Earth-Consortium.EC-Earth3P-HR.primWP5-amv-pos.none.r1i1p1f1 $newfile
+        $ncatted -a variant_label,global,m,c,$ripf $newfile
+        $ncatted -a parent_variant_label,global,m,c,$ripf $newfile
+        $ncatted -a physics_index,global,m,i,$ph_idx $newfile
+        $ncatted -a further_info_url,global,m,c,https://furtherinfo.es-doc.org/CMIP6.EC-Earth-Consortium.EC-Earth3P-HR.control-1950.none.$ripf $newfile
         echo "Done!"
         rm $file
 }
+
+function fix_areacello { 
+	file=$1
+	cp --remove-destination "$(readlink $file)" $file
+	#operation to be performed
+        echo "Correcting attributes..."
+	$ncatted -a cell_measures,siage,m,c,"area: areacello" $file
+	echo "Done!"
+}
+
 
 	
 # find directory (should be integrated in easy2cmor3)	
@@ -66,8 +81,8 @@ echo "Obtained $nfileout files..."
 # if everything is fine, remove original file and replace with the new ones
 if [[ $nfilein -eq $nfileout ]] ; then
 	echo "Everything seems fine... Replacing directories"
-	#rm $CMORDIR/$delimeter
-	#mv $TMPDIR/$delimeter $CMORDIR
+	rm $CMORDIR/$delimeter
+	mv $TMPDIR/$delimeter $CMORDIR
 fi
 
 rmdir $TMPDIR

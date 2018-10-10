@@ -130,7 +130,7 @@ BASE_OPT="expname=$expname,year=$year,USERexp=$USERexp"
 OPT_ATM="$BASE_OPT,ATM=$ATM,OCE=0,NCORESATM=$NCORESATM,STARTTIME=$STARTTIME"
 OPT_OCE="$BASE_OPT,ATM=0,OCE=$OCE,NCORESOCE=$NCORESOCE"
 #DELTAMIN=$(( (year-year0+1) * $DELTA ))
-DELTAMIN=$(( (year-year0+1) * 10 ))
+DELTAMIN=$(( (year-year0) * 10 ))
 OPT_MERGE="year=${year},expname=${expname}"
 OPT_VALID=${OPT_MERGE}
 OPT_COR=${OPT_MERGE}
@@ -150,14 +150,14 @@ if [[ "$SUBMIT" == "sbatch" ]] ; then
                 --output=$LOGFILE/merge_${expname}_${year}_%j.out --error=$LOGFILE/merge_${expname}_${year}_%j.err
                 ./merge_month.sh'
 	JOB_VAL='$SUBMIT --account=$ACCOUNT --time $TCHECK --partition=$PARTITION --mem=${MEMORY2} -n $NCORESVALID
-                --export=${OPT_VALID} --job-name=validate-${expname}-${year} 
-		--dependency=afterok:$JOBIDMERGE
+                --export=${OPT_VALID} --job-name=validate-${expname}-${year}
                 --output=$LOGFILE/validate_${expname}_${year}_%j.out --error=$LOGFILE/validate_${expname}_${year}_%j.err
                 ./validate.sh'
 	JOB_COR='$SUBMIT --account=$ACCOUNT --time 01:00:00 --partition=$PARTITION --mem=${MEMORY2} -n $NCORESCORRECT
-                --export=${OPT_COR} --job-name=correct-${expname}-${year} 
+                --export=${OPT_COR} --job-name=correct-${expname}-${year} --begin=now+${DELTAMIN}minutes
                 --output=$LOGFILE/correct_${expname}_${year}_%j.out --error=$LOGFILE/correct_${expname}_${year}_%j.err
                 ./correct_rename.sh'
+	#--dependency=afterok:$JOBIDMERGE
 
 # define options for PBS qsub submission
 elif [[ "$SUBMIT" == "qsub" ]] ; then
