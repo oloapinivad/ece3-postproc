@@ -1,9 +1,11 @@
 #!/bin/bash
 
-set -e
-
-# Script to merge monthly IFS files into a single yearly file. 
+# Easy2cmor tool
+# by Paolo Davini (Oct 2018)
 # Adapted from Gijs van der Oord.
+# Script to merge monthly IFS files into a single yearly file. 
+
+set -e
 
 expname=${expname:-det4}
 year=${year:-1950}

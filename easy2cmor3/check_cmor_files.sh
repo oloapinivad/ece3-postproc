@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Easy2cmor tool
+# by Paolo Davini (Oct 2018)
+# Estimation of the produced output by cmorization, comparing to the original varlist.json
 
 usage()
 {

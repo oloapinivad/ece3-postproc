@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Easy2cmor tool
+# by Paolo Davini (Oct 2018)
+# Adapted from a script by Gijs van den Oord and Kristian Strommen
+
 ###############################################################################
 #
 # Filter and CMORize one year of EC-Earth output: uses CMIP6 tables only.
@@ -13,13 +17,10 @@
 # OCE=1 means process NEMO data (default is 0).
 # MERGE=1 means that IFS files will be merged into yearly files.
 # VALID=1 means that data validation by Jon Seddon will be run.
+# CORRECT=1 means that the script for data correction is active
 # RESO is used to set machine dependent properties for job submission.
 # INDEX change the relization_index in the metadata file.
 # STARTTIME is used for IFS reference date (fundamental for concatenation).
-# NCORESATM/OCE/MERGE/VALID is used for parallel computation.
-#
-#
-# Paolo Davini (Apr 2018) - based on a script by Gijs van den Oord and Kristian Strommen
 #
 ################################################################################
 
@@ -34,21 +35,22 @@ year0=$year
 RESO=T255 # resolition, to set accorindgly machine dependent requirements
 USERexp=${USERexp:-$USER}  #extra: allows analysis of experiment owned by different user
 MONTH=0 #if month=0, then loop on all months (IFS only)
-ATM=1
-OCE=1
+ATM=0
+OCE=0
 MERGE=0 #flag for merging
 VALID=0 #flag for validation
 CORRECT=0 #flag for correction
+PREPARE=0 #flag for PrePARE check
 STARTTIME=1950-01-01 #very important to allow correct merging
 
 # options controller 
 OPTIND=1
-while getopts "h:e:y:j:u:a:o:m:v:c:i:r:s:" OPT; do
+while getopts "h:e:y:j:u:a:o:m:v:p:c:i:r:s:" OPT; do
     case "$OPT" in
     h|\?) echo "Usage: submit_year.sh -e <experiment name> -y <year> -i \
                 -a <process atmosphere (0,1): default 0> -o <process ocean (0,1): default 0> -u <userexp> \
 		-m <merge into yearly (0,1): default 0> -v <validate data (0,1): default 0> \
-		-c <launch data corrector (0,1): default 0> \
+		-p <check with PrePARE (0,1): default 0> -c <launch data corrector (0,1): default 0> \
 		-j <initial year for lagged merging and validation (default: year) > \
 		-r <resolution (T255,T511): default T255> -s <reference time for NetCDF (YYYY-MM-DD): default 1950-01-01>"
           exit 0 ;;
@@ -59,6 +61,7 @@ while getopts "h:e:y:j:u:a:o:m:v:c:i:r:s:" OPT; do
     o)    OCE=$OPTARG ;;
     m)    MERGE=$OPTARG ;;
     v) 	  VALID=$OPTARG ;;
+    p)    PREPARE=$OPTARG ;;
     c)    CORRECT=$OPTARG ;;
     u)    USERexp=$OPTARG ;;
     r)	  RESO=$OPTARG ;;
@@ -115,6 +118,12 @@ else
     echo "Validating files: no"
 fi
 
+if [ "$PREPARE" -eq 1 ]; then
+    echo "PrePARE check: yes"
+else
+    echo "PrePARE check: no"
+fi
+
 if [ "$CORRECT" -eq 1 ]; then
     echo "Correction metadata: yes"
     echo "Disabling all the other options!"
@@ -134,6 +143,7 @@ DELTAMIN=$(( (year-year0) * 10 ))
 OPT_MERGE="year=${year},expname=${expname}"
 OPT_VALID=${OPT_MERGE}
 OPT_COR=${OPT_MERGE}
+OPT_PRE=${OPT_MERGE}
 
 
 # Define basic options for SLURM sbatch submission
@@ -153,10 +163,15 @@ if [[ "$SUBMIT" == "sbatch" ]] ; then
                 --export=${OPT_VALID} --job-name=validate-${expname}-${year}
                 --output=$LOGFILE/validate_${expname}_${year}_%j.out --error=$LOGFILE/validate_${expname}_${year}_%j.err
                 ./validate.sh'
-	JOB_COR='$SUBMIT --account=$ACCOUNT --time 01:00:00 --partition=$PARTITION --mem=${MEMORY2} -n $NCORESCORRECT
+	JOB_COR='$SUBMIT --account=$ACCOUNT --time 01:00:00 --partition=$PARTITION --mem=${MEMORY} -n $NCORESCORRECT
                 --export=${OPT_COR} --job-name=correct-${expname}-${year} --begin=now+${DELTAMIN}minutes
                 --output=$LOGFILE/correct_${expname}_${year}_%j.out --error=$LOGFILE/correct_${expname}_${year}_%j.err
                 ./correct_rename.sh'
+	JOB_PRE='$SUBMIT --account=$ACCOUNT --time 00:10:00 --partition=$PARTITION --mem=${MEMORY} -n $NCORESPREPARE
+                --export=${OPT_PRE} --job-name=PrePARE-${expname}-${year} --begin=now
+                --output=$LOGFILE/PrePARE_${expname}_${year}_%j.out --error=$LOGFILE/PrePARE_${expname}_${year}_%j.err
+                ./call_PrePARE.sh'
+
 	#--dependency=afterok:$JOBIDMERGE
 
 # define options for PBS qsub submission
@@ -181,6 +196,10 @@ elif [[ "$SUBMIT" == "qsub" ]] ; then
                 -l EC_threads_per_task=$NCORESCORRECT -v ${OPT_COR} -N correct-${expname}-${year}
                 -o $LOGFILE/correct_${expname}_${year}.out  -e $LOGFILE/correct_${expname}_${year}.err
                 ./correct_rename.sh'
+	JOB_PRE='$SUBMIT -l EC_billing_account=$ACCOUNT -l walltime=00:10:00 -q $PARTITION -l EC_memory_per_task=${MEMORY}
+                -l EC_threads_per_task=$NCORESCORRECT -v ${OPT_PRE} -N PrePARE-${expname}-${year}
+                -o $LOGFILE/PrePARE_${expname}_${year}.out  -e $LOGFILE/PrePARe_${expname}_${year}.err
+                ./call_PrePARE.sh'
 fi
 
 
@@ -214,6 +233,11 @@ fi
 # Validator submission, delayed with dependency
 if [ "$VALID" -eq 1 ] ; then
 	eval ${JOB_VAL}
+fi
+
+# PrePARE submitting
+if [ "$PREPARE" -eq 1 ] ; then
+        eval ${JOB_PRE}
 fi
 
 # Corrector submitting

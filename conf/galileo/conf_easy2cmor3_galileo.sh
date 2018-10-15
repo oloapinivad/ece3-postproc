@@ -45,6 +45,7 @@ NCORESOCE=1
 NCORESMERGE=32 #parallelization is available for merger
 NCORESVALID=1
 NCORESCORRECT=1
+NCORESPREPARE=1 #parallelization is available but not very useful
 
 #----machine dependent argument----#
 ACCOUNT=$ECE3_POSTPROC_ACCOUNT 

@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+# Easy2cmor tool
+# by Paolo Davini (Oct 2018)
+# Automatico cmorization tool
+# Estimates the presence of cmorized output and submit a chain of jobs
+# Do some checks to avoid useless resubmissions
+
 usage()
 {
    echo "Usage:"
@@ -95,7 +101,7 @@ do
 
 	#submitting command	
 	$EASYDIR/submit_year.sh -e $expname -y $YEAR -j $(( YEAR_ZERO + 1 )) -r $RESO  \
-                                 -a 1 -o 1 -m 1 -v 1
+                                 -a 1 -o 1 -m 1 -v 1 -p 1
 	
     fi
 done

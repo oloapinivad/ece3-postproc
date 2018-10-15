@@ -1,6 +1,9 @@
 #!/bin/bash
+# Easy2cmor tool
+# by Paolo Davini (Oct 2018)
 
 # simple updater of the cmor code
+# the branch to be installed can be specified
 
 
 #--------config file-----

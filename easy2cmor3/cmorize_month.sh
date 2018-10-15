@@ -1,10 +1,11 @@
 #!/bin/bash
+# Easy2cmor tool
+# by Paolo Davini (Oct 2018)
+# Based on a script by Gijs van Oord and Kristian Strommen
 
 ##########################################################################
 #
-# Filter and CMORize one month of IFS output and/or one leg of NEMO
-#
-# Paolo Davini (Apr 2018) - based on a script by Gijs van Oord and Kristian Strommen
+# Filter and CMORize one month of IFS output and/or one year of NEMO
 #
 #########################################################################
 

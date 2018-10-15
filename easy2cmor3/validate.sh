@@ -1,11 +1,14 @@
 #!/bin/bash
 
+# Easy2cmor tool
+# by Paolo Davini (Oct 2018)
+# Adapted from Kristian Strommen
+
 set -e
 
 # Script to validate output of ece2cmor3 for a Primavera experiment.
 # Uses Jon Seddon's primavera-val python tool.
 # a conda "validate" environment including iris has been installed
-# Adapted from Kristian Strommen
 
 #Will validate all years between year1 and year2 of experiment with name expname
 expname=${expname:-cccc}
@@ -43,7 +46,7 @@ echo "=================================================================="
     
 	cd $CMORDIR
 	nfiles=$(ls *.nc | wc -l)
-	checkfile=../validate_${year}.txt
+	checkfile=../validate_${expname}_${year}.txt
 
         #Validate all the (symbolic link) files
 	rm -f $checkfile
