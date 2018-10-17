@@ -269,5 +269,15 @@
         "source": "w2o",
         "grid": "grid_W",
         "target": "w2o"
+    },
+    {
+        "source": "hfcorr",
+        "grid": "SBC",
+        "target": "hfcorr"
+    },
+    {
+        "source": "wfcorr",
+        "grid": "SBC",
+        "target": "wfcorr"
     }
 ]

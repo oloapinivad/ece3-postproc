@@ -9,7 +9,7 @@
 usage()
 {
    echo "Usage:"
-   echo "       autocmor.sh [-a account] [-u USERexp] expname -r RESO"
+   echo "       autocmor.sh [-a account] [-u USERexp] -r RESO expname"
    echo
    echo "Options are:"
    echo "   -a ACCOUNT  : specify a different special project for accounting (default: ${ECE3_POSTPROC_ACCOUNT:-unknown})"
@@ -44,14 +44,10 @@ while getopts "hu:a:r:" opt; do
 done
 shift $((OPTIND-1))
 
-if [ $# -ne 1 ]; then
-   usage
-   exit 1
-fi
-
 #setting expname
 expname=$1
 echo "$expname"
+echo "$RESO"
 
 # load user and machine specifics
 . ${ECE3_POSTPROC_TOPDIR}/conf/${ECE3_POSTPROC_MACHINE}/conf_easy2cmor3_${ECE3_POSTPROC_MACHINE}.sh
@@ -73,7 +69,7 @@ echo "First year is ${YEAR_ZERO}"
 echo "First year will be skipped due to new folder structure"
 echo "Last year is ${YEAR_LAST}"
 
-#YEAR_LAST=1951 #wrong to run checks
+YEAR_LAST=1950 #wrong to run checks
 
 # -- Write and submit one script per year
 for YEAR in $(seq $(( YEAR_ZERO + 1 )) ${YEAR_LAST})
@@ -101,7 +97,7 @@ do
 
 	#submitting command	
 	$EASYDIR/submit_year.sh -e $expname -y $YEAR -j $(( YEAR_ZERO + 1 )) -r $RESO  \
-                                 -a 1 -o 1 -m 1 -v 1 -p 1
+                                 -a 0 -o 1 -m 0 -v 0 -p 0
 	
     fi
 done
