@@ -69,7 +69,7 @@ echo "First year is ${YEAR_ZERO}"
 echo "First year will be skipped due to new folder structure"
 echo "Last year is ${YEAR_LAST}"
 
-YEAR_LAST=1950 #wrong to run checks
+YEAR_LAST=1951 #wrong to run checks
 
 # -- Write and submit one script per year
 for YEAR in $(seq $(( YEAR_ZERO + 1 )) ${YEAR_LAST})
@@ -97,7 +97,7 @@ do
 
 	#submitting command	
 	$EASYDIR/submit_year.sh -e $expname -y $YEAR -j $(( YEAR_ZERO + 1 )) -r $RESO  \
-                                 -a 0 -o 1 -m 0 -v 0 -p 0
+                                 -a 1 -o 1 -m 1 -v 1 -p 1
 	
     fi
 done

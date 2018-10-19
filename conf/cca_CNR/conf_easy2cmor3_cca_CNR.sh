@@ -12,7 +12,7 @@ SRCDIR=${PERM}/ecearth3/cmorization
 ECE2CMOR3DIR=${SRCDIR}/ece2cmor3/ece2cmor3
 
 #Jon Seddon tables
-TABDIR=${SRCDIR}/jon-seddon-tables/Tables
+TABDIR=${SRCDIR}/jon-seddon-tables-fix/Tables
 
 #Specify location of primavera-val
 VALDIR=${SRCDIR}/primavera-val
@@ -45,6 +45,7 @@ NCORESOCE=1
 NCORESMERGE=32 #parallelization is available for merger
 NCORESVALID=1
 NCORESCORRECT=1
+NCORESPREPARE=1
 
 #----machine dependent argument----#
 ACCOUNT=$ECE3_POSTPROC_ACCOUNT 
@@ -54,13 +55,13 @@ PARTITION=nf
 
 # as a function of the resolution change the memory and time requirements
 if [[ $RESO == T511 ]] ; then
-        MEMORY=60GB
-        MEMORY2=$MEMORY
+        MEMORY=50GB
+        MEMORY2=110GB
         TLIMIT="03:59:00"
         DELTA=240
         TCHECK="07:59:00"
 elif [[ $RESO == T255 ]] ; then
-        MEMORY=40GB
+        MEMORY=20GB
         MEMORY2=${MEMORY}
         TLIMIT="00:59:00"
         DELTA=100
