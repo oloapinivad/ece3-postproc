@@ -8,7 +8,7 @@
 # obtained is equal to the number of files initially found
 # uses a series of user function to perform the required operation
 
-for year in $(seq 1953 2000) ; do
+for year in $(seq 2041 2049) ; do
 
 # important for the file structure
 expname=${expname:-qctr}
@@ -17,7 +17,8 @@ replace=true #set to false for testing, avoid replacement of old files
 
 # important for the data selection in the folder: allow for a reduction of the data to be modified
 #delimeter="*.nc" 	#all the files
-delimeter="*SI*.nc"	#for the fix_areacello, only sea ice block 
+delimeter="tos*gr*.nc"  # tos gr files
+#delimeter="*SI*.nc"	#for the fix_areacello, only sea ice block 
 
 echo "---- Correcting and renaming year $year ----"
 
@@ -31,8 +32,8 @@ echo "---- Correcting and renaming year $year ----"
 function rename_ripf { 
 
 	# it works only for change in the physics index, can be generalized
-	ph_idx=1
-	oldripf=r1i1p2f1
+	ph_idx=2
+	oldripf=r1i1p1f1
         newripf=r1i1p${ph_idx}f1
 
 	file=$1
@@ -71,6 +72,21 @@ function fix_areacello {
 	done
 }
 
+function change_email {
+        file=$1
+        cp --remove-destination "$(readlink $file)" $file
+        echo "Correcting mail for $file ..."
+        $ncatted -a contact,global,m,c,"cmip6-data@ec-earth.org" $file
+}
+
+function fix_tos {
+        file=$1
+        cp --remove-destination "$(readlink $file)" $file
+        echo "Correcting tos for $file ..."
+        $ncap2 -s "tos=tos-273.15;" $file tmp.nc
+	mv tmp.nc $file
+}
+
 
 	
 # find directory (should be integrated in easy2cmor3)	
@@ -89,8 +105,10 @@ ln -s $CMORDIR/$delimeter $TMPDIR/
 # filelist and loop on file, calling the renamer (it can be parallelized!)
 filelist=$(ls $delimeter)
 for file in $filelist ; do
+	fix_tos $file
+	#change_email $file
 	#rename_ripf $file
-	fix_areacello $file
+	#fix_areacello $file
 done
 
 # check output files

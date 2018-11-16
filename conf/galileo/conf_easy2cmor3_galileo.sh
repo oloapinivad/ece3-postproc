@@ -72,3 +72,4 @@ fi
 #--------nco for merging---------------#
 ncrcat="ncrcat -h"
 ncatted="ncatted -hO"
+ncap2="ncap2 -h"

@@ -73,7 +73,7 @@ for ncf in $filelist; do
 
 done
 
-nval=$(cat ~/tmp_log.txt | wc -l )
+nval=$(cat  ${BASETMPDIR}/tmp_log_${expname}_${year}.txt | wc -l )
 rm -f ${BASETMPDIR}/tmp_log_${expname}_${year}.txt
 
 echo "... year $year, Succesfully validated $nval / $nfile files!!!" >> $LOGFILE
