@@ -42,6 +42,7 @@ VALID=0 #flag for validation
 CORRECT=0 #flag for correction
 PREPARE=0 #flag for PrePARE check
 STARTTIME=1950-01-01 #very important to allow correct merging
+DO_PRIMA=true #do primavera tables in top of cmip6 tables?
 
 # options controller 
 OPTIND=1
@@ -136,10 +137,8 @@ echo "Submitting jobs via $SUBMIT..."
 
 # Machine and process options
 BASE_OPT="expname=$expname,year=$year,USERexp=$USERexp"
-OPT_ATM="$BASE_OPT,ATM=$ATM,OCE=0,NCORESATM=$NCORESATM,STARTTIME=$STARTTIME"
-OPT_OCE="$BASE_OPT,ATM=0,OCE=$OCE,NCORESOCE=$NCORESOCE"
-#DELTAMIN=$(( (year-year0+1) * $DELTA ))
-DELTAMIN=$(( (year-year0) * 10 ))
+OPT_ATM="$BASE_OPT,ATM=$ATM,OCE=0,NCORESATM=$NCORESATM,STARTTIME=$STARTTIME,DO_PRIMA=${DO_PRIMA}"
+OPT_OCE="$BASE_OPT,ATM=0,OCE=$OCE,NCORESOCE=$NCORESOCE,DO_PRIMA=${DO_PRIMA}"
 OPT_MERGE="year=${year},expname=${expname}"
 OPT_VALID=${OPT_MERGE}
 OPT_COR=${OPT_MERGE}
@@ -148,6 +147,7 @@ OPT_PRE=${OPT_MERGE}
 
 # Define basic options for SLURM sbatch submission
 if [[ "$SUBMIT" == "sbatch" ]] ; then
+	DELTAMIN=$(( (year-year0+1) * $DELTA ))
 	MACHINE_OPT="--account=$ACCOUNT --time $TLIMIT --partition=$PARTITION --mem=$MEMORY"
 	JOB_ATM='$SUBMIT ${MACHINE_OPT} --export=MON=${MON},${OPT_ATM} -n $NCORESATM --job-name=ifs-${expname}-${year}-${MON}
                  --output=$LOGFILE/cmor_${expname}_${year}_${MON}_ifs_%j.out --error=$LOGFILE/cmor_${expname}_${year}_${MON}_ifs_%j.err
@@ -160,7 +160,7 @@ if [[ "$SUBMIT" == "sbatch" ]] ; then
                 --output=$LOGFILE/merge_${expname}_${year}_%j.out --error=$LOGFILE/merge_${expname}_${year}_%j.err
                 ./merge_month.sh'
 	JOB_VAL='$SUBMIT --account=$ACCOUNT --time $TCHECK --partition=$PARTITION --mem=${MEMORY2} -n $NCORESVALID
-                --export=${OPT_VALID} --job-name=validate-${expname}-${year}
+                --export=${OPT_VALID} --job-name=validate-${expname}-${year}  --dependency=afterok:$JOBIDMERGE
                 --output=$LOGFILE/validate_${expname}_${year}_%j.out --error=$LOGFILE/validate_${expname}_${year}_%j.err
                 ./validate.sh'
 	JOB_COR='$SUBMIT --account=$ACCOUNT --time 01:00:00 --partition=$PARTITION --mem=${MEMORY} -n $NCORESCORRECT
@@ -168,14 +168,13 @@ if [[ "$SUBMIT" == "sbatch" ]] ; then
                 --output=$LOGFILE/correct_${expname}_${year}_%j.out --error=$LOGFILE/correct_${expname}_${year}_%j.err
                 ./correct_rename.sh'
 	JOB_PRE='$SUBMIT --account=$ACCOUNT --time 00:10:00 --partition=$PARTITION --mem=${MEMORY} -n $NCORESPREPARE
-                --export=${OPT_PRE} --job-name=PrePARE-${expname}-${year} --begin=now
+                --export=${OPT_PRE} --job-name=PrePARE-${expname}-${year}  --dependency=afterok:$JOBIDMERGE
                 --output=$LOGFILE/PrePARE_${expname}_${year}_%j.out --error=$LOGFILE/PrePARE_${expname}_${year}_%j.err
                 ./call_PrePARE.sh'
 
-	#--dependency=afterok:$JOBIDMERGE
-
 # define options for PBS qsub submission
 elif [[ "$SUBMIT" == "qsub" ]] ; then
+	DELTAMIN=$(date --date "now + $DELTA minutes" '+%H%M')
         MACHINE_OPT="-l EC_billing_account=$ACCOUNT -l walltime=$TLIMIT -q $PARTITION -l EC_memory_per_task=$MEMORY -l EC_total_tasks=1"
         JOB_ATM='$SUBMIT ${MACHINE_OPT} -v MON=${MON},${OPT_ATM} -l EC_threads_per_task=$NCORESATM -N ifs-${expname}-${year}-${MON}
                  -o $LOGFILE/cmor_${expname}_${year}_${MON}_ifs.out -e $LOGFILE/cmor_${expname}_${year}_${MON}_ifs.err
@@ -183,8 +182,6 @@ elif [[ "$SUBMIT" == "qsub" ]] ; then
         JOB_OCE='$SUBMIT ${MACHINE_OPT} -v ${OPT_OCE} -l EC_threads_per_task=$NCORESOCE -N nemo-${expname}-${year}
                  -o $LOGFILE/cmor_${expname}_${year}_nemo.out -e $LOGFILE/cmor_${expname}_${year}_nemo.err
                  ./cmorize_month.sh'
-        DELTAMIN=$(date --date "now + $DELTA minutes" '+%H%M')
-        #echo $DELTAMIN
         JOB_MER='$SUBMIT ${MACHINE_OPT} -v ${OPT_MERGE} -l EC_threads_per_task=$NCORESMERGE -a $DELTAMIN
                  -N merge-${expname}-${year} -o $LOGFILE/merge_${expname}_${year}.out -e $LOGFILE/merge_${expname}_${year}.err
                 ./merge_month.sh'
@@ -197,7 +194,7 @@ elif [[ "$SUBMIT" == "qsub" ]] ; then
                 -o $LOGFILE/correct_${expname}_${year}.out  -e $LOGFILE/correct_${expname}_${year}.err
                 ./correct_rename.sh'
 	JOB_PRE='$SUBMIT -l EC_billing_account=$ACCOUNT -l walltime=00:10:00 -q $PARTITION -l EC_memory_per_task=${MEMORY}
-                -l EC_threads_per_task=$NCORESCORRECT -v ${OPT_PRE} -N PrePARE-${expname}-${year}
+                -l EC_threads_per_task=$NCORESCORRECT -v ${OPT_PRE} -W depend=afterok:$JOBIDMERGE -N PrePARE-${expname}-${year}
                 -o $LOGFILE/PrePARE_${expname}_${year}.out  -e $LOGFILE/PrePARe_${expname}_${year}.err
                 ./call_PrePARE.sh'
 fi

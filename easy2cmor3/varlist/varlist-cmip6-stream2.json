@@ -112,7 +112,9 @@
         "wfo",
         "rsntds",
         "rsdo",
-        "hfds"
+        "hfds",
+	"wfcorr",
+	"hfcorr"
     ],
     "SIday": [
         "sithick",

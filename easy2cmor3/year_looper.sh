@@ -5,13 +5,13 @@
 
 #rough scheme for looping on years, it produces up to 15 jobs for each year so beware
 
-EXP=qctr
-YEAR1=1951
-YEAR2=2000
-ATM=0
+EXP=ap00
+YEAR1=1950
+YEAR2=1950
+ATM=1
 OCE=0
 MERGE=0
-VALID=1
+VALID=0
 PREPARE=0
 CORRECT=0
 RESO=T511

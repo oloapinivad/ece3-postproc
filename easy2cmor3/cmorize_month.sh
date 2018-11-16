@@ -21,7 +21,8 @@ USERexp=${USERexp:-$USER}
 NCORESATM=${NCORESATM:-1}
 NCORESOCE=${NCORESOCE:-1}
 STARTTIME=${STARTTIME:-1950-01-01}
-DO_PRIMA=${DO_PRIMA:-true} #extra flag for primavera tables
+DO_CMIP6=${DO_CMIP6:-true} #flag for CMIP6 tables
+DO_PRIMA=${DO_PRIMA:-true} #extra flag for PRIMAVERA tables
 
 #--------config file-----
 . ${ECE3_POSTPROC_TOPDIR}/conf/${ECE3_POSTPROC_MACHINE}/conf_easy2cmor3_${ECE3_POSTPROC_MACHINE}.sh
@@ -52,6 +53,7 @@ VARLISTDIR=$EASYDIR/varlist
 cmip6_var=$VARLISTDIR/varlist-cmip6-stream2.json
 prim_var=$VARLISTDIR/varlist-primavera-stream2.json
 #cmip6_var=$VARLISTDIR/varlist-short.json
+#prim_var=$VARLISTDIR/varlist-primavera-short.json
 
 # Parameter table directory and files
 PARAMDIR=$EASYDIR/paramtable
@@ -221,12 +223,12 @@ echo "========================================================="
 
 # Currently set up to run everything that works!
 if [ "$ATM" -eq 1 ]; then
-    runece2cmor_atm CMIP6 $NCORESATM $year $MON
+    if ${DO_CMIP6} ; then runece2cmor_atm CMIP6 $NCORESATM $year $MON ; fi
     if ${DO_PRIMA} ; then runece2cmor_atm PRIMAVERA $NCORESATM $year $MON ; fi
 fi
 
 if [ "$OCE" -eq 1 ]; then
-    runece2cmor_oce CMIP6 $NCORESOCE $year
+    if ${DO_CMIP6} ; then runece2cmor_oce CMIP6 $NCORESOCE $year ; fi
     if ${DO_PRIMA} ; then runece2cmor_oce PRIMAVERA $NCORESOCE $year ; fi
 fi
 

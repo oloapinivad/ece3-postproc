@@ -120,7 +120,7 @@ perc=$(bc <<< "scale=2; 100*$totfiles/$totvars")
 echo "TOTAL -> Theory:" $totvars "Actual:" $totfiles "i.e. $perc % "
 done
 
-space=$(du -sh $DIRFILE | cut -f 1)
-echo "Total space occupied by one year of exp $exp is: $space"
+space=$(du -sh $CMORDIR | cut -f 1)
+echo "Total space occupied by one year of exp $expname is: $space"
 echo
 
