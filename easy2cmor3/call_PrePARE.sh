@@ -7,8 +7,8 @@
 set -e
 
 #Will validate all years between year1 and year2 of experiment with name expname
-expname=${expname:-qctr}
-year=${year:-1950}
+expname=${expname:-ap20}
+year=${year:-1956}
 
 #--------config file-----
 . ${ECE3_POSTPROC_TOPDIR}/conf/${ECE3_POSTPROC_MACHINE}/conf_easy2cmor3_${ECE3_POSTPROC_MACHINE}.sh

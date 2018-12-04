@@ -10,13 +10,12 @@
 # This script submits 12+1 jobs, each filtering/cmorizing one month of data.
 # In a delayed framework provides also data merging and validation.
 #
-# Note that for NEMO processing, all files in the output folder will be
-# processed irrespective of the MON variable, so this is only useful for IFS.
 #
 # ATM=1 means process IFS data.
 # OCE=1 means process NEMO data (default is 0).
 # MERGE=1 means that IFS files will be merged into yearly files.
 # VALID=1 means that data validation by Jon Seddon will be run.
+# PREPARE=1 means that PrePARE validation will be run.
 # CORRECT=1 means that the script for data correction is active
 # RESO is used to set machine dependent properties for job submission.
 # INDEX change the relization_index in the metadata file.
@@ -29,7 +28,7 @@ set -ue
 #---REQUIRED ARGUMENTS----#
 expname=det4
 year=1950
-year0=$year
+year0=$year # this is used for multiple year submissions, useful to avoid overlap of scripts
 
 #---DEFAULT INPUT ARGUMENT----#
 RESO=T255 # resolition, to set accorindgly machine dependent requirements
@@ -143,11 +142,11 @@ OPT_MERGE="year=${year},expname=${expname}"
 OPT_VALID=${OPT_MERGE}
 OPT_COR=${OPT_MERGE}
 OPT_PRE=${OPT_MERGE}
+DELTAMIN=$(( (year-year0+1) * $DELTA ))
 
 
 # Define basic options for SLURM sbatch submission
 if [[ "$SUBMIT" == "sbatch" ]] ; then
-	DELTAMIN=$(( (year-year0+1) * $DELTA ))
 	MACHINE_OPT="--account=$ACCOUNT --time $TLIMIT --partition=$PARTITION --mem=$MEMORY"
 	JOB_ATM='$SUBMIT ${MACHINE_OPT} --export=MON=${MON},${OPT_ATM} -n $NCORESATM --job-name=ifs-${expname}-${year}-${MON}
                  --output=$LOGFILE/cmor_${expname}_${year}_${MON}_ifs_%j.out --error=$LOGFILE/cmor_${expname}_${year}_${MON}_ifs_%j.err
@@ -174,7 +173,7 @@ if [[ "$SUBMIT" == "sbatch" ]] ; then
 
 # define options for PBS qsub submission
 elif [[ "$SUBMIT" == "qsub" ]] ; then
-	DELTAMIN=$(date --date "now + $DELTA minutes" '+%H%M')
+	DELTAMIN=$(date --date "now + $DELTAMIN minutes" '+%H%M')
         MACHINE_OPT="-l EC_billing_account=$ACCOUNT -l walltime=$TLIMIT -q $PARTITION -l EC_memory_per_task=$MEMORY -l EC_total_tasks=1"
         JOB_ATM='$SUBMIT ${MACHINE_OPT} -v MON=${MON},${OPT_ATM} -l EC_threads_per_task=$NCORESATM -N ifs-${expname}-${year}-${MON}
                  -o $LOGFILE/cmor_${expname}_${year}_${MON}_ifs.out -e $LOGFILE/cmor_${expname}_${year}_${MON}_ifs.err
@@ -182,7 +181,7 @@ elif [[ "$SUBMIT" == "qsub" ]] ; then
         JOB_OCE='$SUBMIT ${MACHINE_OPT} -v ${OPT_OCE} -l EC_threads_per_task=$NCORESOCE -N nemo-${expname}-${year}
                  -o $LOGFILE/cmor_${expname}_${year}_nemo.out -e $LOGFILE/cmor_${expname}_${year}_nemo.err
                  ./cmorize_month.sh'
-        JOB_MER='$SUBMIT ${MACHINE_OPT} -v ${OPT_MERGE} -l EC_threads_per_task=$NCORESMERGE -a $DELTAMIN
+        JOB_MER='$SUBMIT ${MACHINE_OPT} -v ${OPT_MERGE} -l EC_threads_per_task=$NCORESMERGE -W depend=afterok:$JOBIDNEMO$JOBIDIFS
                  -N merge-${expname}-${year} -o $LOGFILE/merge_${expname}_${year}.out -e $LOGFILE/merge_${expname}_${year}.err
                 ./merge_month.sh'
         JOB_VAL='$SUBMIT -l EC_billing_account=$ACCOUNT -l walltime=$TCHECK -q $PARTITION -l EC_memory_per_task=${MEMORY2}
@@ -199,25 +198,36 @@ elif [[ "$SUBMIT" == "qsub" ]] ; then
                 ./call_PrePARE.sh'
 fi
 
+# Because NEMO output files corresponding to same leg are all in one big file, we don't
+# need to submit a job for each month, only one for each leg
+if [ "$OCE" -eq 1 ]; then
+        JOBID=$(eval ${JOB_OCE})
+        if [[ $SUBMIT == "sbatch" ]] ; then
+                JOBIDNEMO=$(echo $JOBID | cut -f4 -d" ")
+        elif [[  $SUBMIT == "qsub" ]] ; then
+                JOBIDNEMO=$JOBID
+        fi
+fi
+
 
 # Atmospheric submission
 # For IFS we submit one job for each month
 if [ "$ATM" -eq 1 ] ; then
 
-	# Loop on months
-    	for MON in $MONS ; do
-		eval ${JOB_ATM}
-	done
+	JOBIDIFS=""
+	#loop on months
+	for MON in $MONS ; do
+        	JOBID=$(eval ${JOB_ATM})
+        	if [[ $SUBMIT == "sbatch" ]] ; then
+        	        JOBIDIFS=$(echo $JOBID | cut -f4 -d" ")
+        	elif [[  $SUBMIT == "qsub" ]] ; then
+        	        JOBIDIFS=${JOBIDIFS}:$JOBID
+        	fi
+        done
 
 fi
 
-# Because NEMO output files corresponding to same leg are all in one big file, we don't
-# need to submit a job for each month, only one for each leg
-if [ "$OCE" -eq 1 ]; then
-    	eval ${JOB_OCE}
-fi
-
-# Merger submission, delayed by $DELTA time per year
+# Merger submission, on dependency to ATM and OCE
 if [ "$MERGE" -eq 1 ] ; then
     	JOBID=$(eval ${JOB_MER})
 	if [[ $SUBMIT == "sbatch" ]] ; then 
@@ -232,7 +242,7 @@ if [ "$VALID" -eq 1 ] ; then
 	eval ${JOB_VAL}
 fi
 
-# PrePARE submitting
+# PrePARE submitting, delayed with dependency 
 if [ "$PREPARE" -eq 1 ] ; then
         eval ${JOB_PRE}
 fi
