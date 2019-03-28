@@ -83,6 +83,7 @@ do
 	cat $ROOTDIR/validate_${expname}_$year.txt
     else
 	echo "POSTPROC"
+	echo $( eval echo $ECE3_POSTPROC_CMORDIR )
 	 #-- check if postproc is already, the exit
 	ll=$(echo $(${QUEUE_CMD} | grep "ifs-${expname}-${year}\|nemo-${expname}-${year}\|merge-${expname}-${year}\|validate-${expname}-${year}"))
 	if [[ ! -z $ll ]] ; then
@@ -95,6 +96,10 @@ do
             continue
         fi
 
+	TGTDIR=$( eval echo $ECE3_POSTPROC_CMORDIR )
+	echo "Let's start Cmorization, cleaning $TGTDIR..."
+	rm -rf $TGTDIR
+	echo "Submitting $EASYDIR/submit_year.sh"
 	#submitting command	
 	$EASYDIR/submit_year.sh -e $expname -y $year -j $(( year_ZERO + 1 )) -r $RESO  \
                                  -a 1 -o 1 -m 1 -v 1 -p 1

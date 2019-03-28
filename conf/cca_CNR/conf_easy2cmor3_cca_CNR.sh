@@ -56,9 +56,9 @@ PARTITION=nf
 # as a function of the resolution change the memory and time requirements
 if [[ $RESO == T511 ]] ; then
         MEMORY=50GB
-        MEMORY2=110GB
+        MEMORY2=60GB
         TLIMIT="03:59:00"
-        DELTA=240
+        DELTA=180
         TCHECK="07:59:00"
 elif [[ $RESO == T255 ]] ; then
         MEMORY=20GB

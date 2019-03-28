@@ -192,7 +192,7 @@ elif [[ "$SUBMIT" == "qsub" ]] ; then
                 -l EC_threads_per_task=$NCORESCORRECT -v ${OPT_COR} -N correct-${expname}-${year}
                 -o $LOGFILE/correct_${expname}_${year}.out  -e $LOGFILE/correct_${expname}_${year}.err
                 ./correct_rename.sh'
-	JOB_PRE='$SUBMIT -l EC_billing_account=$ACCOUNT -l walltime=00:10:00 -q $PARTITION -l EC_memory_per_task=${MEMORY}
+	JOB_PRE='$SUBMIT -l EC_billing_account=$ACCOUNT -l walltime=00:20:00 -q $PARTITION -l EC_memory_per_task=${MEMORY}
                 -l EC_threads_per_task=$NCORESCORRECT -v ${OPT_PRE} -W depend=afterok:$JOBIDMERGE -N PrePARE-${expname}-${year}
                 -o $LOGFILE/PrePARE_${expname}_${year}.out  -e $LOGFILE/PrePARe_${expname}_${year}.err
                 ./call_PrePARE.sh'
