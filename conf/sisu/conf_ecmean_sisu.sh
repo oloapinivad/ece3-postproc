@@ -1,36 +1,24 @@
 #!/bin/bash
 
-# --- TOOLS -----
-# Required programs, including compression options
-module unload cdo hdf5 netcdf python numpy
-module load  mkl/2017--binary
-module load  hdf5/1.8.17--intel--pe-xe-2017--binary 
-module load netcdf/4.4.1--intel--pe-xe-2017--binary 
-module load cdo 
-module load python/2.7.12 
-module load numpy/1.11.2--python--2.7.12 
-module load nco/4.6.7
-
 # --- PATTERN TO FIND POST-PROCESSED DATA FROM HIRESCLIM2
 # 
 # Must include ${EXPID} and be single-quoted
 #
-export ${USERexp:=$USER}
-export ECE3_POSTPROC_POSTDIR='/marconi_scratch/userexternal/${USERexp}/ece3/${EXPID}/post'
+export ECE3_POSTPROC_POSTDIR='/wrk/${USER}/ece-3.2.3-r/classic/post/${EXPID}'
 
 
 # --- TOOLS -----
-# Required programs, including compression options
-cdo="/cineca/prod/opt/tools/cdo/1.8.2/intel--pe-xe-2017--binary/bin/cdo -L"
-
-export cdo=cdo
+# Require cdo, including compression options
+export cdo="$USERAPPL/bioconda_env/nctools/bin/cdo"
+shopt -s expand_aliases    
+alias cdo="$USERAPPL/bioconda_env/nctools/bin/cdo"
 export cdozip="$cdo -f nc4c -z zip"
 export cdonc="$cdo -f nc"
 
 # job scheduler submit command
-export submit_cmd="sbatch"
+submit_cmd="sbatch"
 
-#preferred type of CDO interpolation (curvilinear grids are obliged to use bilinear)
+# preferred type of CDO interpolation (curvilinear grids are obliged to use bilinear)
 export remap="remapcon2"
 
 # --- PROCESSING TO PERFORM (uncomment to change default)
@@ -50,7 +38,7 @@ export remap="remapcon2"
 #     Tables for one simulation will be in ${ECE3_POSTPROC_DIAGDIR}/table/${EXPID}
 #     Summary tables for several simulations will be in ${ECE3_POSTPROC_DIAGDIR}/table/
 #     
-export ECE3_POSTPROC_DIAGDIR='$HOME/ecearth3/diag'
+export ECE3_POSTPROC_DIAGDIR='/wrk/${USER}/ece-3.2.3-r/classic/post/diag'
 
 # [2] Where to save the climatology (769M IFS, 799M IFS+NEMO). 
 #
@@ -61,13 +49,12 @@ export ECE3_POSTPROC_DIAGDIR='$HOME/ecearth3/diag'
 #
 # where year1 and year2 are your script argument.
 #
-#CLIMDIR0=<my favorite path to store climatoloy data>
-export CLIMDIR0='/marconi_scratch/userexternal/${USER}/tmp/${EXPID}/post/model2x2_${year1}_${year2}'
-
+#CLIMDIR0=<my favorite path to store climatology data>
 
 # [3] Where to save the extracted PIs for REPRODUCIBILITY tests
 #
 #     Can include ${STEMID} as ensemble ID.
 #     Must be single-quoted if to be evaluated later.
 #
-export ECE3_POSTPROC_PI4REPRO='$HOME/ecearth3/diag/${STEMID}'
+export ECE3_POSTPROC_PI4REPRO='/wrk/${USER}/ece-3.2.3-r/classic/post/diag/${STEMID}'
+

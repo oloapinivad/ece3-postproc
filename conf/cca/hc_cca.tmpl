@@ -6,7 +6,7 @@
 #PBS -l EC_total_tasks=1
 #PBS -l EC_threads_per_task=<NPROCS>
 #PBS -l EC_hyperthreads=1
-#PBS -l walltime=03:00:00
+#PBS -l walltime=04:00:00
 #PBS -j oe
 #PBS -o <OUT>/log/hiresclim_<EXPID>_<YEAR>.out
 
@@ -17,7 +17,7 @@ echo '$EC_total_tasks     ='$EC_total_tasks
 echo '$EC_threads_per_task='$EC_threads_per_task
 echo '$EC_tasks_per_node  ='$EC_tasks_per_node  
 
-set -e
+set -eu
 
 cd $ECE3_POSTPROC_TOPDIR/script
 

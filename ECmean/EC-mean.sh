@@ -12,14 +12,17 @@ set -ue
 
 usage()
 {
-    echo "Usage:   ${0##*/} [-y] [-p] [-u USERexp] [-r ALT_RUNDIR]  EXP  YEAR_START  YEAR_END"
+    echo "Usage:   ${0##*/} [-y] [-p] [-u USERexp] [-r POSTDIR]  EXP  YEAR_START  YEAR_END"
     echo
     echo "Options are:"
-    echo "   -r ALT_RUNDIR : fully qualified path to another user EC-Earth top RUNDIR"
-    echo "                   that is RUNDIR/EXP/post must exists and be readable"
-    echo "   -u USERexp  : alternative user owner of the experiment, default $USER"
+    echo "   -r POSTDIR  : fully qualified path to another dir with Hiresclim2 output."
+    echo "                   Must exists and be readable. Default: \${ECE3_POSTPROC_POSTDIR}/mon"
+    echo "   -u USERexp  : alternative 'user' owner of the experiment"
     echo "   -y          : (Y)early global mean are added to 'OUTDIR/yearly_fldmean_EXP.txt'"
-    echo "   -p          : account for (P)rimavera complicated output"
+    echo "   -p          : (P)rimavera specific treatment to select pressure levels"
+    echo
+    echo "   ECE3_POSTPROC_POSTDIR and USERexp default values should be set in"
+    echo "   your conf_timeseries_\$ECE3_POSTPROC_MACHINE.sh file"
 }
 
 
@@ -79,7 +82,7 @@ mkdir -p $TABLEDIR
 # TEMP dirs
 ############################################################
 # Where to store the 2x2 climatologies
-echo $(eval echo $CLIMDIR0)
+echo $(eval echo ${CLIMDIR0-})
 [[ -z "${CLIMDIR0:-}" ]] && CLIMDIR=$(eval echo ${ECE3_POSTPROC_POSTDIR})/clim-${year1}-${year2} || CLIMDIR=$(eval echo $CLIMDIR0)
 export CLIMDIR
 mkdir -p $CLIMDIR
@@ -97,7 +100,7 @@ PIDIR=$ECE3_POSTPROC_TOPDIR/ECmean
 # Base directory of HiresClim2 postprocessing outputs
 if [[ -n $ALT_RUNDIR ]]
 then
-    export DATADIR=${ALT_RUNDIR}/mon
+    export DATADIR=${ALT_RUNDIR}
 else
     export DATADIR=$(eval echo ${ECE3_POSTPROC_POSTDIR})/mon
 fi
@@ -108,6 +111,14 @@ do_ocean=0
 [[ -r $DATADIR/Post_${year1}/${exp}_${year1}_sosstsst.nc ]] && do_ocean=1 && \
     echo "*II* ecmean accounts for nemo output"
 export do_ocean
+
+# -- other options
+
+# process 3D vars (most of which which are in SH files) ? 
+# set to 0 if you only want simple diags e.g. Gregory plots or if using the reduced outclass
+export do_3d_vars=${ECE3_POSTPROC_ECM_3D_VARS:-1}
+# compute clear sky fluxes, set to 0 if using the reduced outclass
+export do_clear_flux=${ECE3_POSTPROC_ECM_CLEAR_FLUX:-1}
 
 # -- mask files
 

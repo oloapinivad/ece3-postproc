@@ -4,18 +4,19 @@ set -ue
 
 usage()
 {
-    echo "Usage: ts.sh [-a account] [-u userexp] [-r POSTDIR] [-c] EXP"
+    echo "Usage: ts.sh [-a account] [-d dependency] [-u userexp] [-r POSTDIR] [-c] EXP"
     echo
     echo "Submit to a job scheduler the computation of timeseries for experiment EXP"
     echo
     echo "This is basically a wrapper around the timeseries.sh script."
     echo 
     echo "Options are:"
+    echo "   -l          : local (run on the local node, do not submit to compute node)"
     echo "   -c          : check if processing was successful"
     echo "   -a account  : specify a different special project for accounting (default: ${ECE3_POSTPROC_ACCOUNT:-unknown})"
+    echo "   -d depend   : add dependency between this job and other jobs"
     echo "   -r POSTDIR  : overwrite ECE3_POSTPROC_POSTDIR "
-    echo "   -u USERexp  : alternative 'user' owner of the experiment, default to $USER"
-    echo "                  overwrite USERexp token."
+    echo "   -u USERexp  : alternative 'user' owner of the experiment, overwrite USERexp token"
     echo
     echo "   ECE3_POSTPROC_POSTDIR and USERexp default values should be set in"
     echo "   your conf_timeseries_$ECE3_POSTPROC_MACHINE.sh file"
@@ -23,15 +24,21 @@ usage()
 
 # -- default option
 account="${ECE3_POSTPROC_ACCOUNT-}"
+dependency=
 ALT_RUNDIR=
 checkit=0
+nosub=0
 options=
 
-while getopts "h?cu:r:a:" opt; do
+while getopts "h?clu:r:a:d:" opt; do
     case "$opt" in
         h|\?)
             usage
             exit 0
+            ;;
+        d)  dependency=$OPTARG
+            ;;
+        l)  nosub=1
             ;;
         r)  options="${options} -r $OPTARG"
             ALT_RUNDIR=$OPTARG
@@ -90,29 +97,38 @@ then
     ls -lt ${diagdir}/timeseries/${EXPID}/ocean/index.html
 
     printf "\n\tLog file: $OUT/log/ts_${EXPID}_.out"
-    printf "\n\tDo you want to check this log w/ less? "
-    read -n 1 answer
-    [[ $answer == "y" ]] || [[ $answer == "Y" ]] && less $OUT/log/ts_${EXPID}_.out
+    #printf "\n\tDo you want to check this log w/ less? "
+    #read -n 1 answer
+    #[[ $answer == "y" ]] || [[ $answer == "Y" ]] && less $OUT/log/ts_${EXPID}_.out
 
     set -e
     exit
 fi
 
 
-# -- submit script
-tgt_script=$OUT/ts_$1.job
+# -- submit script or execute on the login node
 
-sed "s/<EXPID>/$1/" < ${CONFDIR}/header_$ECE3_POSTPROC_MACHINE.tmpl > $tgt_script
+if (( nosub ))
+then
+    ../timeseries/timeseries.sh ${options} $1
+else
+    tgt_script=$OUT/ts_$1.job
 
-[[ -n $account ]] && \
-    sed -i "s/<ACCOUNT>/$account/" $tgt_script || \
-    sed -i "/<ACCOUNT>/ d" $tgt_script
+    sed "s/<EXPID>/$1/" < ${CONFDIR}/header_$ECE3_POSTPROC_MACHINE.tmpl > $tgt_script
 
-sed -i "s/<JOBID>/ts/" $tgt_script
-sed -i "s/<Y1>//" $tgt_script
-sed -i "s|<OUT>|$OUT|" $tgt_script
+    [[ -n $account ]] && \
+        sed -i "s/<ACCOUNT>/$account/" $tgt_script || \
+        sed -i "/<ACCOUNT>/ d" $tgt_script
 
-echo ../timeseries/timeseries.sh ${options} $1 >> $tgt_script
+    [[ -n $dependency ]] && \
+        sed -i "s/<DEPENDENCY>/$dependency/" $tgt_script || \
+        sed -i "/<DEPENDENCY>/ d" $tgt_script
 
-${submit_cmd} $tgt_script
+    sed -i "s/<JOBID>/ts/" $tgt_script
+    sed -i "s/<Y1>//" $tgt_script
+    sed -i "s|<OUT>|$OUT|" $tgt_script
 
+    echo ../timeseries/timeseries.sh ${options} $1 >> $tgt_script
+    
+    ${submit_cmd} $tgt_script
+fi

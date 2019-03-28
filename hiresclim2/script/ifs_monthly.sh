@@ -84,13 +84,15 @@ fi
 for v in t u v z lnsp
 do
    rm -f ${out}_${v}.nc
-   $cdozip -r -R -t $ecearth_table cat icmsh_??????_$v.grb ${out}_${v}.nc
+   [ -f icmsh_${year}01_$v.grb ] && $cdozip -r -R -t $ecearth_table cat icmsh_??????_$v.grb ${out}_${v}.nc
 done
 
 #part on surface pressure
-$cdo chcode,152,134 ${out}_lnsp.nc temp_lnsp.nc
-$cdo -t $ecearth_table exp temp_lnsp.nc ${out}_sp.nc
-rm temp_lnsp.nc
+if [[ -f ${out}_lnsp.nc ]] ; then
+    $cdo chcode,152,134 ${out}_lnsp.nc temp_lnsp.nc
+    $cdo -t $ecearth_table exp temp_lnsp.nc ${out}_sp.nc
+    rm temp_lnsp.nc
+fi
 
 
 # ICMGG
@@ -186,17 +188,57 @@ $cdozip -R -r -t $ecearth_table mulc,1000 -divc,$pptime -selvar,ro \
    icmgg_${year}.grb ${out}_ro.nc
 $cdozip -R -r -t $ecearth_table mulc,1000 -divc,$pptime -selvar,sf \
    icmgg_${year}.grb ${out}_sf.nc
-$cdo -t $ecearth_table setparam,228.128 -expr,"totp=1000*(lsp+cp)/$pptime" \
-   icmgg_${year}.grb tmp_totp.grb
-$cdozip -r -R -t $ecearth_table copy tmp_totp.grb ${out}_totp.nc
 
-#$cdozip -r -R -t $ecearth_table mulc,1000 -divc,$pptime -selvar,e \
-#   icmgg_${year}.grb ${out}_e.nc
-$cdozip -r -R -t $ecearth_table splitvar -mulc,1000 -divc,$pptime \
- -selvar,e,lsp,cp icmgg_${year}.grb ${out}_
-$cdo -R -t $ecearth_table setparam,80.128 -fldmean \
-   -expr,"totp=1000*(lsp+cp+e)/$pptime" icmgg_${year}.grb tmp_pme.grb
-$cdozip -r -t $ecearth_table copy tmp_pme.grb ${out}_pme.nc
+# Assume that 2 (or 3) out of 3 (tp,lsp,cp) precipitation variables are
+# available, derive the missing one if needed. 
+
+if ( ! $cdo -t $ecearth_table showname icmgg_$year.grb | grep -Fwq totp )
+then
+    $cdo -t $ecearth_table setparam,228.128 -expr,"totp=1000*(lsp+cp)/$pptime" \
+        icmgg_${year}.grb tmp_totp.grb
+    $cdozip -r -R -t $ecearth_table copy tmp_totp.grb ${out}_totp.nc
+
+    $cdozip -r -R -t $ecearth_table splitvar -mulc,1000 -divc,$pptime \
+        -selvar,e,lsp,cp icmgg_${year}.grb ${out}_
+
+    $cdo -R -t $ecearth_table setparam,80.128 -fldmean \
+        -expr,"pme=1000*(lsp+cp+e)/$pptime" icmgg_${year}.grb tmp_pme.grb
+    $cdozip -r -t $ecearth_table copy tmp_pme.grb ${out}_pme.nc
+
+elif ( ! $cdo -t $ecearth_table showname icmgg_$year.grb | grep -Fwq lsp )
+then
+    $cdo -t $ecearth_table setparam,142.128 -expr,"lsp=1000*(totp-cp)/$pptime" \
+        icmgg_${year}.grb tmp_lsp.grb
+    $cdozip -r -R -t $ecearth_table copy tmp_lsp.grb ${out}_lsp.nc
+
+    $cdozip -r -R -t $ecearth_table splitvar -mulc,1000 -divc,$pptime \
+        -selvar,e,totp,cp icmgg_${year}.grb ${out}_
+
+    $cdo -R -t $ecearth_table setparam,80.128 -fldmean \
+        -expr,"pme=1000*(totp+e)/$pptime" icmgg_${year}.grb tmp_pme.grb
+    $cdozip -r -t $ecearth_table copy tmp_pme.grb ${out}_pme.nc
+
+elif ( ! $cdo -t $ecearth_table showname icmgg_$year.grb | grep -Fwq cp )
+then
+    $cdo -t $ecearth_table setparam,143.128 -expr,"cp=1000*(totp-lsp)/$pptime" \
+        icmgg_${year}.grb tmp_cp.grb
+    $cdozip -r -R -t $ecearth_table copy tmp_cp.grb ${out}_cp.nc
+
+    $cdozip -r -R -t $ecearth_table splitvar -mulc,1000 -divc,$pptime \
+        -selvar,e,lsp,totp icmgg_${year}.grb ${out}_
+
+    $cdo -R -t $ecearth_table setparam,80.128 -fldmean \
+        -expr,"pme=1000*(totp+e)/$pptime" icmgg_${year}.grb tmp_pme.grb
+    $cdozip -r -t $ecearth_table copy tmp_pme.grb ${out}_pme.nc
+
+else
+    $cdozip -r -R -t $ecearth_table splitvar -mulc,1000 -divc,$pptime \
+        -selvar,e,cp,lsp,totp icmgg_${year}.grb ${out}_
+
+    $cdo -R -t $ecearth_table setparam,80.128 -fldmean \
+        -expr,"pme=1000*(totp+e)/$pptime" icmgg_${year}.grb tmp_pme.grb
+    $cdozip -r -t $ecearth_table copy tmp_pme.grb ${out}_pme.nc
+fi
 
 # divide fluxes by PP timestep
 $cdozip -r -R -t $ecearth_table splitvar -divc,$pptime \

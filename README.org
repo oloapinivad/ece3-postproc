@@ -15,6 +15,10 @@ The code has been ported on /cca (ECMWF)/, /rhino (KNMI)/, /marconi
 
    : git clone https://github.com/plesager/ece3-postproc.git
 
+   and the dedicated data set available from ECMWF archive:
+
+   : ec:/nm6/EC-EARTH/ECEARTH3.2b/INPUT/ece-post-proc.tar.gz
+
    The general idea is that you pass the experiment name (EXP) and the
    years to process (typically a range, say, YEAR1 YEAR2) as input to
    the scripts on the command line.
@@ -22,7 +26,7 @@ The code has been ported on /cca (ECMWF)/, /rhino (KNMI)/, /marconi
    For this to work as intended, locations of the post-processing code, of the
    data used to run the EC-Earth model, and your platform, must be known. They
    are unlikely to change and set as environment variables, so in your shell
-   rc file (bash.rc or similar):
+   rc file (~/.bashrc or equivalent):
 
    : export ECE3_POSTPROC_TOPDIR=<dir where this file is>
    : export ECE3_POSTPROC_DATADIR=<dir where your ecearth init data (not run output!) are located>
@@ -102,7 +106,11 @@ The code has been ported on /cca (ECMWF)/, /rhino (KNMI)/, /marconi
 
     The NEMO variable names expected by HIRESCLIM2 may differ from those found
     in EC-Earth3 output. If needed, you can change the variables name from EC-Earth in
-    /conf_hiresclim_<your-machine>.sh/.
+    /conf_hiresclim_<your-machine>.sh/. Note for example that for the
+    ice thickness from the /icemod/ file, you need:
+    : export nm_icethic="sithic"  # for EC-Earth 3.2.3, and "sithick" for PRIMAVERA
+    : export nm_icethic="sithick" # for older version like PRIMAVERA
+
 
 **** Filtering IFS output
      If you have IFS output with mixed time and/or levels output,
@@ -169,24 +177,40 @@ The code has been ported on /cca (ECMWF)/, /rhino (KNMI)/, /marconi
     
 *** or/and produce Timeseries:
 
-    : ts.sh [-a account] [-u userexp] [-r POSTDIR] [-c] EXP
+    : ts.sh [-l] [-a account] [-u userexp] [-r POSTDIR] [-c] EXP
+
+    It will create and store time-series plots of several variables.
+    It is smart enough to update an existing series, i.e. you can run
+    it several time during an on-going run to monitor it.
+
+    Timeseries for one experiment EXP will be in the diagnostic dir
+    ${ECE3_POSTPROC_DIAGDIR}/timeseries/EXP, as two netCDF files and
+    two html pages (one for atmosphere and one for ocean).
+         
+    The output can be put on a remote machine through ssh and scp. See
+    remote variables RHOST, RUSER, WWW_DIR_ROOT in the config file. If
+    access to the remote machine is possible only from the login node,
+    you should run the script on that node with the /-l/ flag.
 
    
 ** REPRODUCIBILITY TEST
 *** Overview
-    The acceptance/reproducibility test consists in 4 steps:
+    The acceptance/reproducibility test consists in 3+1 steps:
     - run an ensemble of 5 members
     - running EC-mean to get the climatology and the Reichler & Kim
       (R&K) performance indices of each run
     - cast the R&K indices into a format suitable for the next step
-    - repeat for another ensemble and compare 
-      
+
+    Several ensembles, corresponding to different setups (platform,
+    compiler,...), must be run. Then a statistical comparison (4th step) is
+    performed.
+
 *** Requirements
-    The acceptance/reproducibility test relies on a set of scripts
+    The acceptance/reproducibility test (4th step) relies on a set of scripts
     written in R. Few R packages are needed: /s2dverification, ncdf4,
-    RColorBrewer/. If you do not control your environment and R and/or
-    the packages are missing, it may be easier to work on another
-    machine where you can easy installed the packages. For example:
+    RColorBrewer/. If you do not control your environment and R and/or the
+    packages are missing, it may be easier to work on another machine where
+    you can easy installed the packages. For example:
     : # define a personal R library location,
     : mkdir /usr/people/sager/Rlib
     : # and make sure that R is aware of it (put that one in your ~/.bashrc): 
@@ -196,6 +220,8 @@ The code has been ported on /cca (ECMWF)/, /rhino (KNMI)/, /marconi
     : install.packages("s2dverification", lib="/usr/people/sager/Rlib/")
     : install.packages("ncdf4", lib="/usr/people/sager/Rlib/")
     : install.packages("RColorBrewer", lib="/usr/people/sager/Rlib/")
+    If you are not doing the test yourself, but only run an ensemble and
+    EC-mean on its members, you do not need these R packages.
 
 *** Experiment design
     You must run 5 experiments for 20 years with perturbed initial
@@ -210,7 +236,7 @@ The code has been ported on /cca (ECMWF)/, /rhino (KNMI)/, /marconi
 **** For AMIP runs
      you can create these initial conditions on the fly, by adding a
      call to the perturbation script in your /classic/ece-*.sh.tmpl/,
-     i.e. by replacing:
+     i.e. by replacing (be sure that there is *no* space after each '\'):
      : ln -s \
      : ${ini_data_dir}/ifs/${ifs_grid}/${leg_start_date_yyyymmdd}/ICMSHECE3INIT \
      :                                                     ICMSH${exp_name}INIT
@@ -219,6 +245,69 @@ The code has been ported on /cca (ECMWF)/, /rhino (KNMI)/, /marconi
      : ${ECE3_POSTPROC_TOPDIR}/reproducibility/perturb_ifs_ic.py -s t \
      :     ${ini_data_dir}/ifs/${ifs_grid}/${leg_start_date_yyyymmdd}/ICMSHECE3INIT \
      :                                                         ICMSH${exp_name}INIT
+     If you are using the initial conditions from 1950 provided by BSC
+     as laid out in the next section, you should use (5 lines to change):
+
+     : Index: ece-esm.sh.tmpl
+     : ===================================================================
+     : --- ece-esm.sh.tmpl	(revision 5836)
+     : +++ ece-esm.sh.tmpl	(working copy)
+     : @@ -25,7 +25,7 @@
+     :  #     config="ifs nemo lim3 rnfmapper xios:detached oasis lpjg:fdbck"           # "Veg"     : GCM+LPJ-Guess
+     :  #     config="ifs nemo lim3 rnfmapper xios:detached oasis tm5:chem,o3,ch4,aero" # "AerChem" : GCM+TM5
+     :  
+     : -config="ifs nemo lim3 rnfmapper xios:detached oasis lpjg:fdbck tm5:co2"
+     : +config="ifs amip"
+     :  
+     :  # minimum sanity
+     :  has_config amip nemo && error "Cannot have both nemo and amip in config!!"
+     : @@ -493,13 +493,15 @@
+     :  
+     :          # Initial data
+     :          ln -s \
+     : -        ${ini_data_dir}/ifs/${ifs_grid}/${leg_start_date_yyyymmdd}/ICMGGECE3INIUA \
+     : +        <full-path-to-your-ic-dir>/atmos/ICMGGa0raINIUA \
+     :                                                              ICMGG${exp_name}INIUA
+     : -        ln -s \
+     : -        ${ini_data_dir}/ifs/${ifs_grid}/${leg_start_date_yyyymmdd}/ICMSHECE3INIT \
+     : +        # apply AMIP perturbation to 3D temperature
+     : +        ${ECE3_POSTPROC_TOPDIR}/reproducibility/perturb_ifs_ic.py -s t \
+     : +        <full-path-to-your-ic-dir>/atmos/ICMSHa0raINIT \
+     :                                                              ICMSH${exp_name}INIT
+     : +
+     :          rm -f ICMGG${exp_name}INIT
+     : -        cp ${ini_data_dir}/ifs/${ifs_grid}/${leg_start_date_yyyymmdd}/ICMGGECE3INIT \
+     : +        cp <full-path-to-your-ic-dir>/atmos/ICMGGa0raINIT \
+     :                                                              ICMGG${exp_name}INIT
+     :  
+     :          # add bare_soil_albedo to ICMGG*INIT
+     Then, using your favorite method, run 5 experiments with a name
+     that ends with 1,...,5.
+
+     *UPDATE* There is an alternative location of the BSC-1950 archive at
+     ECMWF:
+     : ec:/nm6/EC-EARTH/ECEARTH3.2b/INPUT/ece-data-reproducibility.tar.gz
+     It contains perturbed initial conditions for AMIP runs, which can be used
+     directly by replacing:
+
+     :    # Initial data
+     :    ln -s \
+     :    ${ini_data_dir}/ifs/${ifs_grid}/${leg_start_date_yyyymmdd}/ICMGGECE3INIUA \
+     :                                                        ICMGG${exp_name}INIUA
+     :    ln -s \
+     :    ${ini_data_dir}/ifs/${ifs_grid}/${leg_start_date_yyyymmdd}/ICMSHECE3INIT \
+     :                                                        ICMSH${exp_name}INIT
+     : 
+     :    rm -f ICMGG${exp_name}INIT
+     :    cp ${ini_data_dir}/ifs/${ifs_grid}/${leg_start_date_yyyymmdd}/ICMGGECE3INIT \
+     :                                                        ICMGG${exp_name}INIT
+     with (assuming you unpacked the data in your EC-Earth ini_data_dir):
+     : ln -s ${ini_data_dir}/ic/atmos/ICMGGa0raINIUA   ICMGG${exp_name}INIUA
+     : ln -s ${ini_data_dir}/ic/atmos/0${exp_name:3}/ICMSHa${exp_name:3}raINIT ICMSH${exp_name}INIT
+     : 
+     : rm -f ICMGG${exp_name}INIT
+     : cp ${ini_data_dir}/ic/atmos/ICMGGa0raINIT ICMGG${exp_name}INIT
+     This may be solution if you cannot install the grib_api module for python.
 
 **** For CMIP runs
      A perturbation script is also available for ocean restart but has
@@ -279,14 +368,18 @@ The code has been ported on /cca (ECMWF)/, /rhino (KNMI)/, /marconi
      :     ├── a0ra_fc2_19491231_restart.nc
      :     ├── a0ra_fc3_19491231_restart.nc
      :     └── a0ra_fc4_19491231_restart.nc
-     
+     *UPDATE* There is an alternative location of the archive at ECMWF:
+     : ec:/nm6/EC-EARTH/ECEARTH3.2b/INPUT/ece-data-reproducibility.tar.gz
+     it already has these links in place and contains perturbed initial
+     conditions for AMIP runs.
+
      Then you modify your /ece-esm.sh.tmpl/ template script to account
      for that data tree as follow (just 5 lines to change):
 
      : Index: ece-esm.sh.tmpl
      : ===================================================================
-     : --- ece-esm.sh.tmpl      (revision 5029)
-     : +++ ece-esm.sh.tmpl      (working copy)
+     : --- ece-esm.sh.tmpl	(revision 5836)
+     : +++ ece-esm.sh.tmpl	(working copy)
      : @@ -25,7 +25,7 @@
      :  #     config="ifs nemo lim3 rnfmapper xios:detached oasis lpjg:fdbck"           # "Veg"     : GCM+LPJ-Guess
      :  #     config="ifs nemo lim3 rnfmapper xios:detached oasis tm5:chem,o3,ch4,aero" # "AerChem" : GCM+TM5
@@ -296,7 +389,7 @@ The code has been ported on /cca (ECMWF)/, /rhino (KNMI)/, /marconi
      :  
      :  # minimum sanity
      :  has_config amip nemo && error "Cannot have both nemo and amip in config!!"
-     : @@ -189,7 +189,7 @@
+     : @@ -215,7 +215,7 @@
      :  
      :  # This is only needed if the experiment is started from an existing set of NEMO
      :  # restart files
@@ -305,7 +398,7 @@ The code has been ported on /cca (ECMWF)/, /rhino (KNMI)/, /marconi
      :  
      :  nem_restart_offset=0
      :  
-     : @@ -450,13 +450,13 @@
+     : @@ -493,13 +493,13 @@
      :  
      :          # Initial data
      :          ln -s \
@@ -322,7 +415,6 @@ The code has been ported on /cca (ECMWF)/, /rhino (KNMI)/, /marconi
      :                                                              ICMGG${exp_name}INIT
      :  
      :          # add bare_soil_albedo to ICMGG*INIT
-     :      
      
      Then, using your favorite method, run 5 experiments with a name
      that ends with 1,...,5.
@@ -420,7 +512,7 @@ The code has been ported on /cca (ECMWF)/, /rhino (KNMI)/, /marconi
     - Some EC-Earth experiments put the water flux output from NEMO in
       the SBC files instead of the grid_T files. Then you need
       : export use_SBC=1
-      in your ./conf/conf_hiresclim_<your-machine>.sh config.
+      in your ./conf/<your-machine>/conf_hiresclim_<your-machine>.sh config.
 
 *** Build rebuild_nemo from EC-Earth source code:
     This is needed only if the output files of NEMO are per processes.

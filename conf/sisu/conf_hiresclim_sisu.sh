@@ -10,17 +10,14 @@
 #
 # optional variable are $USER, $LEGNB, $year
 #
-#export IFSRESULTS0='/lustre3/projects/PRIMAVERA/${USER}/ecearth3/${EXPID}/output/ifs/${LEGNB}'
-#export NEMORESULTS0='/lustre3/projects/PRIMAVERA/${USER}/ecearth3/${EXPID}/output/nemo/${LEGNB}'
-export IFSRESULTS0='/lustre3/projects/CMIP6/${USER}/rundirs/${EXPID}/output/ifs/${LEGNB}'
-export NEMORESULTS0='/lustre3/projects/CMIP6/${USER}/rundirs/${EXPID}/output/nemo/${LEGNB}'
+export IFSRESULTS0='/wrk/${USER}/ece-3.2.3-r/classic/${EXPID}/output/ifs/${LEGNB}'
+export NEMORESULTS0='/wrk/${USER}/ece-3.2.3-r/classic/${EXPID}/output/nemo/${LEGNB}'
 
 # --- PATTERN TO DEFINE WHERE TO SAVE POST-PROCESSED DATA
 # 
 # Should include ${EXPID} and be single-quoted
 #
-export ECE3_POSTPROC_POSTDIR='/lustre3/projects/CMIP6/${USER}/rundirs/${EXPID}/post'
-
+export ECE3_POSTPROC_POSTDIR='/wrk/${USER}/ece-3.2.3-r/classic/post/${EXPID}'
 # --- PROCESSING TO PERFORM (uncomment to change default)
 # ECE3_POSTPROC_HC_IFS_MONTHLY=1
 # ECE3_POSTPROC_HC_IFS_MONTHLY_MMA=0
@@ -46,20 +43,29 @@ then
 fi
 
 # --- TOOLS (required programs, including compression options) -----
+# Load python environment
+module load python
+
 submit_cmd="sbatch"
 
-cdo=cdo
+export cdo="$USERAPPL/bioconda_env/nctools/bin/cdo"
+shopt -s expand_aliases    
+alias cdo="$USERAPPL/bioconda_env/nctools/bin/cdo"
+alias ncrename="$USERAPPL/bioconda_env/nco/bin/ncrename"
+alias ncdump="$USERAPPL/bioconda_env/nco/bin/ncdump"
+alias ncks="$USERAPPL/bioconda_env/nco/bin/ncks"
+
 cdozip="$cdo -f nc4c -z zip"
-rbld="/nfs/home/users/sager/primavera/sources/nemo-3.6/TOOLS/REBUILD_NEMO/rebuild_nemo"
-python=/nfs/home/users/sager/anaconda2/bin/python
+rbld="$USERAPPL/NEMO-tools/TOOLS/REBUILD_NEMO/rebuild_nemo"
+python=python
 
 # CDFtools - note that you cannot use the "cdftools light" from the barakuda package
-cdftoolsbin="/nfs/home/users/sager/installed/CDFTOOLS/bin"
+cdftoolsbin="$USERAPPL/CDFTOOLS/bin"
 
 # By default the older (3.0.0) CDFTOOLS syntax is used.
 # If you use version 4 or 3.0.1 (or 3.0.2), set the corresponding flag to 1.
-cdftools4=1
-cdftools301=0
+cdftools4=0
+cdftools301=1
 
 # where to find mesh and mask files for NEMO. Files are expected in $MESHDIR_TOP/$NEMOCONFIG.
 export MESHDIR_TOP=${ECE3_POSTPROC_DATADIR}/post-proc
@@ -69,6 +75,9 @@ rh_build=1
 
 # Base dir to archive (ie just make a copy of) the monthly results. Daily results, if any, are left in scratch. 
 STOREDIR=
+
+IFS_NPROCS=12 
+NEMO_NPROCS=12
 
 # ---------- NEMO VAR/FILES MANGLING ----------------------
 #
