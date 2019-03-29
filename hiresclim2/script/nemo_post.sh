@@ -169,10 +169,6 @@ if [ ${ivf} -eq 1 ]; then
     if [ "${nm_v}"   != "vomecrty" ];  then ncrename -v ${nm_v},vomecrty    ${froot}_${NEMO_V3D_FILES}.nc ; fi
 fi
 
-if [ ${itf} -eq 1 ]; then
-    if [ "${nm_e3t}"   != "e3t" ];  then ncrename -v ${nm_e3t},e3t    ${froot}_grid_T.nc ; fi
-fi
-
 # ICE
 if (( $cdftools4 ))         # auxilliary file for newer CDFtools (4.0 master retrieved on 06-09-2017)
 then

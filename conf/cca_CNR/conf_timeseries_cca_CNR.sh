@@ -12,11 +12,11 @@
 # Provide default if using it. 
 #
 export ${USERexp:=$USER} 
-export ECE3_POSTPROC_POSTDIR='/scratch/ms/it/${USERexp}/ece3/${EXPID}/post'
+[[ -z ${ECE3_POSTPROC_POSTDIR:-} ]] && export ECE3_POSTPROC_POSTDIR='/scratch/ms/it/${USERexp}/ece3/${EXPID}/post'
 #
 # Where to find mesh and mask files for NEMO.
 # Files are expected in $MESHDIR_TOP/$NEMOCONFIG.
-export MESHDIR_TOP="${PERM}/ecearth3/nemo"
+export MESHDIR_TOP="/perm/ms/it/ccpd/ecearth3/ece3-postproc-files"
 
 # --- OUTPUT -----
 #
@@ -28,7 +28,7 @@ export MESHDIR_TOP="${PERM}/ecearth3/nemo"
 #     
 #     (See also ./conf_ecmean_rhino.sh for a similar 'diagdir')
 #     
-export ECE3_POSTPROC_DIAGDIR='$HOME/ecearth3/diag'
+[[ -z ${ECE3_POSTPROC_DIAGDIR:-} ]] && export ECE3_POSTPROC_DIAGDIR='$PERM/ecearth3/diag/'
 #
 #  [2] The output can be put on a remote machine RHOST (login: RUSER)
 #      in the WWW_DIR_ROOT/time_series/${EXPID} directory, using ssh and scp.
@@ -38,9 +38,9 @@ export RUSER=""
 export WWW_DIR_ROOT=""
 
 
-############################
+#######################
 # Required software   #
-############################
+#######################
 
 for soft in nco netcdf python cdo cdftools
 do
@@ -54,10 +54,11 @@ done
 export CDFTOOLS_BIN="${CDFTOOLS_DIR}/bin"
 
 # The rebuild_nemo (provided with NEMO), that somebody has built (relies on flio_rbld.exe):
-export RBLD_NEMO="${PERM}/ecearth3/revisions/trunk/sources/nemo-3.6/TOOLS/REBUILD_NEMO/rebuild_nemo"
+export RBLD_NEMO="${PERM}/ecearth3/revisions/ecearth-3.3.1/sources/nemo-3.6/TOOLS/REBUILD_NEMO/rebuild_nemo"
 
 export PYTHON=python
 export cdo=cdo
 
 # job scheduler submit command
 submit_cmd="qsub"
+
