@@ -11,15 +11,14 @@ YEAR2=1950
 ATM=0
 OCE=0
 MERGE=0
-VALID=1
 PREPARE=0
 CORRECT=0
 RESO=T511
 
 #simple loop
 for YEAR in $(seq $YEAR1 $YEAR2) ; do
-	./submit_year.sh -e $EXP -y $YEAR -j $YEAR1 -r $RESO  \
-			 -a $ATM -o $OCE -m $MERGE -v $VALID -p $PREPARE -c $CORRECT
+	./submit_year.sh -e $EXP -y $YEAR -r $RESO  \
+			 -a $ATM -o $OCE -p $PREPARE -c $CORRECT
 done 
 
 

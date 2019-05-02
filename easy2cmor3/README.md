@@ -1,6 +1,6 @@
 # EASY2CMOR3 package
 
-By P. Davini (Sep 2018)
+By P. Davini (Sep 2018 - Apr 2019)
 adapted from K. Strommen and Gijs van der Oord scripts 
 
 These are series of scripts thought to provide a simplified and organized appraoch to run ECE2CMOR3 (https://github.com/goord/ece2cmor3).
