@@ -154,9 +154,9 @@ if [ ${iforcey0} -eq 1 ]; then
 fi
 
 #PD: check to have more than one year
-if [ ${BASE_YEAR_INI} -eq ${YEAR_END} ] ; then
-    echo "ERROR: only one year"; exit
-fi
+#if [ ${BASE_YEAR_INI} -eq ${YEAR_END} ] ; then
+#    echo "ERROR: only one year"; exit
+#fi
 
 export SUPA_FILE=${DIAG_D}/${RUN}_${YEAR_INI}_${YEAR_END}_time-series_ocean.nc
 
@@ -378,7 +378,7 @@ if [ ${IPREPHTML} -eq 0 ]; then
                     ncwa -O -y max -v max_amoc_${ll}N  -a y,depthw   tmp0.nc -o tmp.nc
 
                     ncap2 -3 -O -h -s "max_amoc_${ll}N@units=\"Sv\"" \
-                        -s "max_amoc_${ll}N@long_name=\"Maximum of Atlantic MOC at ${ll}N\""  tmp.nc -o tmp.nc
+                     -s "max_amoc_${ll}N@long_name=\"Maximum of Atlantic MOC at ${ll}N\""  tmp.nc -o tmp.nc
 
                     rm -f tmp1.nc tmp0.nc
 

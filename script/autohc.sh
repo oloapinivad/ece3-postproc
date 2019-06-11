@@ -24,11 +24,10 @@ set -ue
 # -- default options
 account="${ECE3_POSTPROC_ACCOUNT-}"
 options=""
+JOBID=""
+depend=""
 nprocs=12
-yref=""
 lprimavera=0
-
-echo "lprimavera is $lprimavera"
 
 # -- options
 while getopts "hu:a:m:pn:" opt; do
@@ -60,11 +59,11 @@ if [ $# -ne 1 ]; then
 fi
 
 EXPID=$1
+USERexp=${USERexp:-$USER}
 
-echo "$EXPID"
-
-#echo "$USERexp"
-echo "lprimavera is $lprimavera"
+echo "Experiment is: $EXPID"
+echo "User is: $USERexp"
+echo "Filtering flag is: $lprimavera"
 
 # check environment
 [[ -z "${ECE3_POSTPROC_TOPDIR:-}" ]] && echo "User environment not set. See ../README." && exit 1
@@ -75,7 +74,6 @@ check_environment
 CONFDIR=${ECE3_POSTPROC_TOPDIR}/conf/${ECE3_POSTPROC_MACHINE}
 
 . ${CONFDIR}/conf_hiresclim_${ECE3_POSTPROC_MACHINE}.sh
-echo "$USERexp"
 
 # -- add here options for submit commands     (queue_cmd definito in config perchè diverso a seconda di cca o marconi) 
 #case "${submit_cmd}" in
@@ -109,9 +107,9 @@ for YEAR in $(seq ${YEAR_ZERO} ${YEAR_LAST})
 do 
     echo; echo ---- $YEAR -----
     # -- If postcheck exists plot it, then exit! 
-    if [ -f  $(eval echo ${ECE3_POSTPROC_POSTDIR})/postcheck_${EXPID}_$YEAR.txt ] 
+    if [ -f  $INFODIR/${EXPID}/postcheck_${EXPID}_$YEAR.txt ] 
     then
-	cat $(eval echo ${ECE3_POSTPROC_POSTDIR})/postcheck_${EXPID}_$YEAR.txt
+	cat  $INFODIR/${EXPID}/postcheck_${EXPID}_$YEAR.txt
     else
 	# -- check if postproc is already, the exit
 	ll=$(echo $(${queue_cmd} | grep "hc_${EXPID}_${YEAR}"))
@@ -148,6 +146,33 @@ EOF
         echo "lprimavera is $lprimavera"
 
 	echo "Submitting for year $YEAR"
-        ${submit_cmd} $tgt_script
+        JOBID=$(${submit_cmd} $tgt_script)
+	if [[ !  -z $JOBID ]] ; then
+                depend="-d $JOBID"
+        else
+                depend=""
+        fi
+
+	ll=$(echo $(${queue_cmd} | grep "ecm_${EXPID}_${YEAR}"))
+        if [[ ! -z $ll ]] ; then
+            echo "EC-mean postprocessing for year $YEAR already going on..."
+            continue
+        else
+            ecm_script=${ECE3_POSTPROC_TOPDIR}/script/ecm.sh
+            ${ecm_script} -p -y $depend $EXPID ${YEAR} ${YEAR}
+        fi
+
+    fi
+
+    if [ ${YEAR} -eq ${YEAR_LAST} ] ; then
+	ll=$(echo $(${queue_cmd} | grep "ts_${EXPID}_"))
+        if [[ ! -z $ll ]] ; then
+            echo "Timeseries postprocessing already going on..."
+            continue
+        else
+	   echo "It is timeseries time.. submitting!!!"
+	   ts_script=${ECE3_POSTPROC_TOPDIR}/script/ts.sh
+	   ${ts_script} $depend $EXPID
+	fi
     fi
 done

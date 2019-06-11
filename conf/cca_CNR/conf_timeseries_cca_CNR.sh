@@ -37,12 +37,18 @@ export MESHDIR_TOP="/perm/ms/it/ccpd/ecearth3/ece3-postproc-files"
 export RUSER=""
 export WWW_DIR_ROOT=""
 
+# options for ectrans
+export do_ectrans=true
+export rhost="wilma"
+
 
 #######################
 # Required software   #
 #######################
 
-for soft in nco netcdf python cdo cdftools
+module unload nco cdo python
+
+for soft in nco/4.6.7 netcdf python/2.7.12-01 cdo/1.9.6
 do
     if ! module -t list 2>&1 | grep -q $soft
     then
@@ -51,7 +57,7 @@ do
 done
 
 # The CDFTOOLS set of executables should be found into:
-export CDFTOOLS_BIN="${CDFTOOLS_DIR}/bin"
+#export CDFTOOLS_BIN="${CDFTOOLS_DIR}/bin"
 
 # The rebuild_nemo (provided with NEMO), that somebody has built (relies on flio_rbld.exe):
 export RBLD_NEMO="${PERM}/ecearth3/revisions/ecearth-3.3.1/sources/nemo-3.6/TOOLS/REBUILD_NEMO/rebuild_nemo"

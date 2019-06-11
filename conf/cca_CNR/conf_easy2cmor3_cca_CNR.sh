@@ -12,7 +12,9 @@ SRCDIR=${PERM}/ecearth3/cmorization
 ECE2CMOR3DIR=${SRCDIR}/ece2cmor3/ece2cmor3
 
 #Jon Seddon tables
-TABDIR=${SRCDIR}/jon-seddon-tables-fix/Tables
+#TABDIR=${SRCDIR}/jon-seddon-tables-fix/Tables
+#official tables
+TABDIR=${ECE2CMOR3DIR}/resources/cmip6-cmor-tables/Tables
 
 #Specify location of primavera-val
 VALDIR=${SRCDIR}/primavera-val
@@ -23,27 +25,30 @@ EASYDIR=${ECE3_POSTPROC_TOPDIR}/easy2cmor3
 #anaconda location
 CONDADIR=${SCRATCH}/PRIMAVERA/anaconda2/bin
 
+# storage information directory
+INFODIR=${PERM}/ecearth3/infodir/cmorized
+mkdir -p $INFODIR
+
 #---------user configuration ---------#
 
 # optional variable are $USERexp/$USER, $year
 export ${USERexp:=$USER}
 export IFSRESULTS0='/lus/snx11062/scratch/ms/it/${USERexp}/ece3/${expname}/output/Output_${year}/IFS'
+export IFSRESULTS0_M1='/lus/snx11062/scratch/ms/it/${USERexp}/ece3/${expname}/output/Output_$(( year - 1 ))/IFS'
 export NEMORESULTS0='/lus/snx11062/scratch/ms/it/${USERexp}/ece3/${expname}/output/Output_${year}/NEMO'
-export ECE3_POSTPROC_CMORDIR='${SCRATCH}/ece3/${expname}/cmorized/Year_${year}'
+export ECE3_POSTPROC_CMORDIR='${SCRATCH}/ece3/${expname}/cmorized/cmor_${year}'
 
 # define folder for logfile
 LOGFILE=$SCRATCH/log/cmorize
 mkdir -p $LOGFILE || exit 1
 
-# Temporary directories: cmor and linkdata
+# Temporary directories
 BASETMPDIR=$SCRATCH/tmp_cmor
 mkdir -p $BASETMPDIR || exit 1
 
 #---PARALLELIZATION OPTIONS---#
-NCORESATM=8 #parallelization is available for IFS
+NCORESATM=12 #parallelization is available for IFS
 NCORESOCE=1
-NCORESMERGE=32 #parallelization is available for merger
-NCORESVALID=1
 NCORESCORRECT=1
 NCORESPREPARE=1
 
@@ -63,9 +68,9 @@ if [[ $RESO == T511 ]] ; then
 elif [[ $RESO == T255 ]] ; then
         MEMORY=20GB
         MEMORY2=${MEMORY}
-        TLIMIT="00:59:00"
+        TLIMIT="02:59:00"
         DELTA=100
-        TCHECK="01:59:00"
+        TCHECK="02:59:00"
 fi
 
 

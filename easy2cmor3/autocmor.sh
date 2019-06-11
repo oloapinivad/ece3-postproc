@@ -66,28 +66,28 @@ fi
 
 # -- on which years are we running
 echo "First year is ${year_ZERO}"
-echo "First year will be skipped due to new folder structure"
 echo "Last year is ${year_LAST}"
+echo "Due to the lastout I will not run it on the last year"
 
 #year_LAST=1955 #wrong to run checks
 
 # -- Write and submit one script per year
-for year in $(seq $(( year_ZERO + 1 )) ${year_LAST})
+for year in $(seq $(( year_ZERO )) $((year_LAST - 1)))
 do 
     echo; echo ---- $year -----
     # -- If postcheck exists plot it, then exit! 
-    ROOTDIR=$( echo $( eval echo $ECE3_POSTPROC_CMORDIR )  | rev | cut -f2- -d"/" | rev)
-    mkdir -p $ROOTDIR
-    if [ -f  $ROOTDIR/validate_${expname}_${year}.txt  ] 
+    #ROOTDIR=$( echo $( eval echo $ECE3_POSTPROC_CMORDIR )  | rev | cut -f2- -d"/" | rev)
+    #mkdir -p $ROOTDIR
+    if [ -f  $INFODIR/${expname}/PrePARE_${expname}_${year}.txt  ] 
     then
-	cat $ROOTDIR/validate_${expname}_$year.txt
+	cat $INFODIR/${expname}/PrePARE_${expname}_$year.txt
     else
-	echo "POSTPROC"
+	echo "LAUNCHIN' CMORIZATION..."
 	echo $( eval echo $ECE3_POSTPROC_CMORDIR )
 	 #-- check if postproc is already, the exit
 	ll=$(echo $(${QUEUE_CMD} | grep "ifs-${expname}-${year}\|nemo-${expname}-${year}\|merge-${expname}-${year}\|validate-${expname}-${year}"))
 	if [[ ! -z $ll ]] ; then
-            echo "CMOR postprocessing for year $year already going on..."
+            echo "IFS CMOR postprocessing for year $year already going on..."
             continue
         fi
 	ll=$(echo $(${QUEUE_CMD} | grep "rbld-${expname}"))
@@ -101,8 +101,10 @@ do
 	rm -rf $TGTDIR
 	echo "Submitting $EASYDIR/submit_year.sh"
 	#submitting command	
-	$EASYDIR/submit_year.sh -e $expname -y $year -j $(( year_ZERO + 1 )) -r $RESO  \
-                                 -a 1 -o 1 -m 1 -v 1 -p 1
+	$EASYDIR/run_1year_ece2cmor3.sh -e $expname -y $year -r $RESO  \
+                                 -a 1 -o 1 -v 0 -p 1 -u $USERexp
 	
     fi
 done
+
+$QUEUE_CMD -u $USER

@@ -137,9 +137,6 @@
             "zg",
             "ua"
         ],
-        "Efx": [
-            "slthick"
-        ],
         "Emon": [
             "mrsol",
             "sfcWindmax",
@@ -166,6 +163,7 @@
             "tsl"
         ],
         "Omon": [
+            "prra",
             "prsn"
         ],
         "SIday": [
@@ -241,10 +239,12 @@
         ],
         "Ofx": [
             "deptho",
+            "masscello",
             "areacello",
             "sftof",
             "basin",
-            "hfgeou"
+            "hfgeou",
+            "thkcello"
         ],
         "Omon": [
             "masso",

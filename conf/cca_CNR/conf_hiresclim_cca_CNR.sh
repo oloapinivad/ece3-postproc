@@ -19,8 +19,12 @@ export ${USERexp:=$USER}
 #
 [[ -z ${ECE3_POSTPROC_POSTDIR:-} ]] && export ECE3_POSTPROC_POSTDIR='/scratch/ms/it/${USER}/ece3/${EXPID}/post'
 
+
+# INFODIR: where to save postchecks
+INFODIR=$PERM/ecearth3/infodir/hiresclim
+
 # --- PROCESSING TO PERFORM (uncomment to change default)
-# ECE3_POSTPROC_HC_IFS_MONTHLY=1
+ ECE3_POSTPROC_HC_IFS_MONTHLY=1
 # ECE3_POSTPROC_HC_IFS_MONTHLY_MMA=0
 # ECE3_POSTPROC_HC_IFS_DAILY=0
 # ECE3_POSTPROC_HC_IFS_6HRS=0
@@ -46,31 +50,23 @@ fi
 
 # --- TOOLS (required programs, including compression options) -----
 submit_cmd="qsub"
-queue_cmd="qstat -u $USER"
+queue_cmd="qscan -a -u $USER"
 
 
 # to avoid using ncdump that comes with HDF4 if loaded
-module unload hdf netcdf4 cray-hdf5-parallel cray-netcdf-hdf5parallel
+module unload hdf netcdf4 cray-hdf5-parallel cray-netcdf-hdf5parallel cdo nco
 
 # for a working ncdump, remove modules that may be in the way and load
 # recommended netcdf4
 for mm in $(module -t list 2>&1| grep hdf5); do module unload $(echo ${mm} | sed "s|(.*||"); done
-#module load netcdf4/4.4.1
-module load netcdf4/4.6.2
 
-for soft in netcdf python cdo cdftools
+for soft in python netcdf4/4.6.2 nco/4.7.8 cdo/1.9.6 cdftools
 do
     if ! module -t list 2>&1 | grep -q $soft
     then
         module load $soft
     fi
 done
-module unload nco
-module load nco/4.3.7
-
-module unload cdo
-#module load cdo/1.6.1
-module load cdo/1.9.5
 
 
 cdo=cdo
@@ -80,18 +76,19 @@ cdozip="$cdo -f nc4c -z zip"
 rbld="$PERM/ecearth3/revisions/primavera/sources/utils/rebuild_nemo/rebuild_nemo"
 
 # cdftools are loaded by modules
-cdftoolsbin="${CDFTOOLS_DIR}/bin"
+#cdftoolsbin="${CDFTOOLS_DIR}/bin"
+cdftoolsbin="$PERM/ecearth3/cdftools4/bin"
 python=python
 
 
 # By default the older (3.0.0) CDFTOOLS syntax is used.
 # If you use version 4 or 3.0.1 (or 3.0.2), set the corresponding flag to 1.
-cdftools4=0
+cdftools4=1
 cdftools301=0
 
 
 # Set to 0 for not to rebuild 3D relative humidity
-rh_build=0
+rh_build=1
 
 #extension for IFS files, default ""
 [[ -z ${GRB_EXT:-} ]] && GRB_EXT="" #".grb"

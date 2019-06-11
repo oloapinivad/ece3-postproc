@@ -68,11 +68,15 @@ echo $lp
 . ${ECE3_POSTPROC_TOPDIR}/functions.sh
 check_environment
 
+# export useful var
+EXPID=$exp
+YEAR1=$year1
+YEAR2=$year2
+
 # load cdo, netcdf and dir template for results
 . $ECE3_POSTPROC_TOPDIR/conf/$ECE3_POSTPROC_MACHINE/conf_ecmean_${ECE3_POSTPROC_MACHINE}.sh
 
 # set variables which can be eval'd
-EXPID=$exp
 export OUTDIR=$(eval echo ${ECE3_POSTPROC_DIAGDIR})/table
 
 TABLEDIR=${OUTDIR}/${exp}
@@ -90,6 +94,7 @@ mkdir -p $CLIMDIR
 #TMPDIR=$(mktemp -d) # $SCRATCH/tmp_ecearth3_ecmean.XXXXXX)
 mkdir -p $SCRATCH/tmp_ecearth3/tmp
 export TMPDIR=$(mktemp -d $SCRATCH/tmp_ecearth3/tmp/ecmean_${exp}_XXXXXX)
+
 
 ############################################################
 # Checking settings dependent only on the ECE3_POSTPROC_* variables, i.e. env
@@ -205,11 +210,14 @@ cat ./gregory.txt
 cd -
 echo "table produced"
 
-cd $TABLEDIR/..
-\rm -f ecmean_$exp.tar 
-\rm -f ecmean_$exp.tar.gz
-tar cvf ecmean_$exp.tar $exp
-gzip ecmean_$exp.tar
+# ectrans block
+if [[  ${do_ectrans} == true ]]
+then
+    cd $TABLEDIR/..
+    tarfile=ecmean-$exp.tar.gz
+    rm -f $tarfile # remove old if any
+    tar cfvz $tarfile  $exp/
+    ectrans -remote $rhost -source $tarfile -verbose -overwrite
+fi
 
-#TODO ectrans -remote sansone -source ecmean_$exp.tar.gz  -verbose -overwrite
-#TODO ectrans -remote sansone -source ~/EXPERIMENTS.${ECE3_POSTPROC_MACHINE}.$USERme.dat -verbose -overwrite
+

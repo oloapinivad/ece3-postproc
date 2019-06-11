@@ -57,9 +57,6 @@ fi
 # load cdo, netcdf and dir for results and mesh files
 . $ECE3_POSTPROC_TOPDIR/conf/$ECE3_POSTPROC_MACHINE/conf_timeseries_$ECE3_POSTPROC_MACHINE.sh
 
-# -- HARDCODED OPTION
-do_trans=0
-
 #############################################################
 # -- Check configuration settings
 ############################################################
@@ -137,11 +134,12 @@ fi
 # -- Archive and transfer
 #########################
 
-if (( $do_trans ))
+if [[ $do_ectrans == true ]] 
 then
     cd ${DIR_TIME_SERIES}
-    rm -r -f  timeseries_$EXPID.tar # remove old if any
-    tar cfv timeseries_$EXPID.tar  $EXPID/
-#    ectrans -remote sansone -source timeseries_$EXPID.tar  -put -verbose -overwrite
-#    ectrans -remote sansone -source ~/EXPERIMENTS.$MACHINE.$USER.dat -verbose -overwrite
+    cd ../
+    tarfile=timeseries-$EXPID.tar.gz
+    rm -f $tarfile # remove old if any
+    tar cfvz $tarfile  $EXPID/
+    ectrans -remote $rhost -source $tarfile -verbose -overwrite
 fi

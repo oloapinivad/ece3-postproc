@@ -12,6 +12,9 @@ There is one main script which is meant to handle the whole cmorization:
 **./submit_year.sh**: it is a wrapper of for different scripts, which provides the cmorization of IFS and NEMO separately, the merging into yearly files and the validation of the results. If it's IFS only, it launches 12 jobs, one for each month, and if coupled, it launches 13, with all of NEMO handled in one job. Two other extra jobs are added, one for merging and one for validation. The two latter jobs are delayed in order to account for the termination of the other jobs.
 It is meant to work with SLURM and PBS since it has been developed on Marconi/Galileo and on CCA, so that data structure too is following CNR requirements.
 
+
+# from here below is outdated
+
 The 3 scripts called by the wrapper are: 
 1.  **./cmorize_month.sh**: it aims at cmorizing 1 month of IFS data and/or 1 year of NEMO data. 
 Metadata, varlist and parameter tables used to cmorize PRIMAVERA data are in the subdirectories.

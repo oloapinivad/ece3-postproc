@@ -32,7 +32,7 @@ ALT_RUNDIR=""
 checkit=0
 options=""
 
-while getopts "hcr:u:a:py" opt; do
+while getopts "hcr:u:a:d:py" opt; do
     case "$opt" in
         h)  usage
             exit 0
@@ -89,6 +89,8 @@ fi
 
 # set variables which can be eval'd
 EXPID=$1
+YEAR1=$2
+YEAR2=$3
 
 # -- Scratch dir (location of submit script and its log, and temporary files)
 OUT=$SCRATCH/tmp_ecearth3
@@ -108,7 +110,8 @@ then
 else
     outdir=$(eval echo ${ECE3_POSTPROC_POSTDIR})/mon
 fi
-[[ ! -d $outdir ]] && echo "*EE* Experiment HiresClim2 output dir $outdir does not exist!" && exit 1
+# Temporary remove this - ECmean is in dependency for hiresclim in autohc.sh so does need this
+#[[ ! -d $outdir ]] && echo "*EE* Experiment HiresClim2 output dir $outdir does not exist!" && exit 1
 
 
 # -- check previous processing

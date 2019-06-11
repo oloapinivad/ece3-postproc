@@ -37,37 +37,32 @@ CMORDIR=$(eval echo ${ECE3_POSTPROC_CMORDIR})
 
 #--------loop on tables -------
 
-#for table in CMIP6 PRIMAVERA ; do
-for table in CMIP6 ; do
+DIRFILE=${CMORDIR}/CMIP6/*/EC-Earth-Consortium/*/*/*/*/*/*/*
 
-if [[ -d ${CMORDIR}/$table ]] ; then
-	DIRFILE=${CMORDIR}/$table/*/EC-Earth-Consortium/*/*/*/*/*/*/*
-	echo "Single-month structure..."
-else 
-	DIRFILE=${CMORDIR}
-	echo "Merged structure..."
-fi
+# configurator
+. ${EASYDIR}/config_and_create_metadata.sh $expname
 
-if [[ $table == CMIP6 ]] ; then
-	varlist=$EASYDIR/varlist/cmip6-data-request-varlist-CMIP-historical-EC-EARTH-AOGCM.json
-fi
+echo "#---------------------------------------------------#"
+echo "#-- Variables from varlist vs. Variables produced --#"
+echo "#---------------------------------------------------#"
+echo "#------- Experiment $expname ---- Year $year -------#"
+echo "#---------------------------------------------------#"
 
-echo "----------------------------------------------"
-echo "Variables from varlist vs. Variables CMORIZED!"
-echo "-------- Table $table ------------------------"
-echo "Experiment $expname ------------------ Year $year "
-echo "----------------------------------------------"
+echo "varlist.json is: $VARLIST"
+echo "output is: $DIRFILE"
+
+echo "#---------------------------------------------------#"
+echo
 
 # this is a clumsy way to achieve it, but it works
-
 # find lines
-s0=($(cat $varlist | grep -nF ': [' | cut -f 1 -d :))
-f0=($(cat $varlist | grep -n "]" | cut -f 1 -d :))
+s0=($(cat $VARLIST | grep -nF ': [' | cut -f 1 -d :))
+f0=($(cat $VARLIST | grep -n "]" | cut -f 1 -d :))
 totvars=0; totfiles=0
 
 # find categories names and count them
 for t in $(seq 0 $((${#s0[@]}-1))) ; do
-	categ=$(sed "${s0[$t]},${s0[$t]}!d" $varlist | cut -f 2 -d '"')
+	categ=$(sed "${s0[$t]},${s0[$t]}!d" $VARLIST | cut -f 2 -d '"')
 	fullcateg="$fullcateg $categ"
 	ll=$((${f0[$t]}-${s0[$t]}-1))
 	nvars="$nvars $ll"
@@ -103,8 +98,8 @@ newvars=($newvars)
 
 # do the loop
 for t in $(seq 0 $((${#newcateg[@]}-1))) ; do
-	[[ ${newcateg[$t]} == Oclim ]] && continue
-	[[ ${newcateg[$t]} == Oyr ]] && continue
+	#[[ ${newcateg[$t]} == Oclim ]] && continue
+	#[[ ${newcateg[$t]} == Oyr ]] && continue
 	categ=${newcateg[$t]}
 	nvars=${newvars[$t]}
 
@@ -120,7 +115,6 @@ done
 echo
 perc=$(bc <<< "scale=2; 100*$totfiles/$totvars")
 echo "TOTAL -> Theory:" $totvars "Actual:" $totfiles "i.e. $perc % "
-done
 
 # volume occupied
 space=$(du -sh $CMORDIR | cut -f 1)

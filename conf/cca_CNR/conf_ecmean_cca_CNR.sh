@@ -11,7 +11,7 @@ export ${USERexp:=$USER}
 # --- TOOLS -----
 # Required programs, including compression options
 module unload cdo
-module -s load cdo/1.9.5
+module -s load cdo/1.9.6
 
 export cdo=cdo
 export cdozip="$cdo -f nc4c -z zip"
@@ -56,7 +56,7 @@ export do_3d_vars=1
 # By default, if this is commented or empty, it is next to hiresclim2 monthly
 # means output in the "post" dir:
 # 
-#     CLIMDIR=${ECE3_POSTPROC_POSTDIR}/clim-${year1}-${year2}
+CLIMDIR0='${SCRATCH}/tmp_ecearth3/ECmean/$EXPID/clim-${YEAR1}-${YEAR2}'
 #
 # where year1 and year2 are your script argument.
 #
@@ -68,4 +68,8 @@ export do_3d_vars=1
 #     Must be single-quoted if to be evaluated later.
 #
 export ECE3_POSTPROC_PI4REPRO='$PERM/ecearth3/diag/${STEMID}'
+
+# options for ectrans
+export do_ectrans=true
+export rhost="wilma"
 

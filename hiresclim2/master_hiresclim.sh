@@ -147,8 +147,6 @@ else
     nemo=0
 fi
 
-INFODIR=$OUTDIR0
-
 # where to find mesh and mask files 
 export MESHDIR=${MESHDIR_TOP}/$NEMOCONFIG
 
@@ -191,11 +189,11 @@ cd $PROGDIR/script
     echo; echo
 
     if [ $fstore == 1 ] ; then      
-        mkdir -p $INFODIR
-        echo "$expname for $year has been postprocessed successfully" > $INFODIR/postcheck_${expname}_${year}.txt
-        echo "Postprocessing lasted for $runtime sec (or $hh hrs)" >> $INFODIR/postcheck_${expname}_${year}.txt
-        echo "Configuration: MON: $ifs_monthly ; DAY: $ifs_daily ; 6HRS: $ifs_6hrs; "  >> $INFODIR/postcheck_${expname}_${year}.txt
-        echo $(date) >> $INFODIR/postcheck_${expname}_${year}.txt
+        mkdir -p $INFODIR/${expname}
+        echo "$expname for $year has been postprocessed successfully" > $INFODIR/${expname}/postcheck_${expname}_${year}.txt
+        echo "Postprocessing lasted for $runtime sec (or $hh hrs)" >> $INFODIR/${expname}/postcheck_${expname}_${year}.txt
+        echo "Configuration: MON: $ifs_monthly ; DAY: $ifs_daily ; 6HRS: $ifs_6hrs; "  >> $INFODIR/${expname}/postcheck_${expname}_${year}.txt
+        echo $(date) >> $INFODIR/${expname}/postcheck_${expname}_${year}.txt
     fi
 
 # copy monthly data
