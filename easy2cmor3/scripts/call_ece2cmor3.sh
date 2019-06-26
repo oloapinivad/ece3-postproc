@@ -13,11 +13,11 @@
 set -ex
 # Required arguments
 
-expname=${expname:-ch00}
-year=${year:-1851}
-ATM=${ATM:-1}
-OCE=${OCE:-1}
-VEG=${VEG:-0}
+expname=${expname:-vvv0}
+year=${year:-1850}
+ATM=${ATM:-0}
+OCE=${OCE:-0}
+VEG=${VEG:-1}
 USERexp=${USERexp:-$USER}
 
 #--------config file-----
@@ -27,6 +27,7 @@ USERexp=${USERexp:-$USER}
 NEMORESULTS=$(eval echo $NEMORESULTS0)
 IFSRESULTS=$(eval echo $IFSRESULTS0)
 IFSRESULTS_M1=$(eval echo $IFSRESULTS0_M1)
+LPJGRESULTS=$(eval echo $LPJGRESULTS0)
 CMORDIR=$(eval echo ${ECE3_POSTPROC_CMORDIR})
 
 TMPDIR=$BASETMPDIR/${expname}_${year}_${RANDOM}
@@ -78,6 +79,12 @@ function runece2cmor_ifs {
     if [[ -d ${IFSRESULTS_M1} ]] ;then 
     	IFSFILEM1=${IFSRESULTS_M1}/ICM??${expname}*12
     	ln -s $IFSFILEM1 ${ATMDIR_M1}/
+    else 
+	IFSFILEM1SH=${IFSRESULTS}/ICMSH${expname}+000000
+	IFSFILEM1GG=${IFSRESULTS}/ICMGG${expname}+000000
+	yearm1=$(( year - 1 ))
+	ln -s $IFSFILEM1SH ${ATMDIR_M1}/ICMSH${expname}${yearm1}12
+	ln -s $IFSFILEM1GG ${ATMDIR_M1}/ICMGG${expname}${yearm1}12
     fi
 
     # link initial state file 
@@ -99,7 +106,7 @@ function runece2cmor_ifs {
     echo "================================================================"
     echo "  Processing and CMORizing filtered IFS data with ece2cmor3"
     echo "================================================================" 
-    $ece2cmor $ATMDIR --exp $expname --conf $CONFIGFILE --vars $VARLIST --npp $THREADS --tmpdir $FLDDIR --ifs --odir ${CMORDIR} --overwritemode replace --skip_alevel_vars
+    $ece2cmor $ATMDIR --exp $expname --meta $CONFIGFILE --varlist $VARLIST --npp $THREADS --tmpdir $FLDDIR --ifs --odir ${CMORDIR} --overwritemode replace --skip_alevel_vars
     
     # Removing tmp directory
     if [ -d "${FLDDIR}" ] ; then
@@ -154,7 +161,7 @@ function runece2cmor_nemo {
     echo "================================================================"
     echo "  Processing and CMORizing NEMO data with ece2cmor3"
     echo "================================================================" 
-    $ece2cmor $OCEDIR --exp $expname --conf $CONFIGFILE --vars $VARLIST --npp $THREADS --tmpdir $FLDDIR --nemo --odir ${CMORDIR} --overwritemode replace
+    $ece2cmor $OCEDIR --exp $expname --meta $CONFIGFILE --varlist $VARLIST --npp $THREADS --tmpdir $FLDDIR --nemo --odir ${CMORDIR} --overwritemode replace
     
     # Removing tmp directory
     if [ -d "${FLDDIR}" ] ; then
@@ -172,6 +179,57 @@ function runece2cmor_nemo {
     echo "oceanic ece2cmor3 complete!"
 
 }
+
+#-------oceanic cmorization function---------#
+
+# Function defining CMORization of NEMO output
+function runece2cmor_lpjg {
+    THREADS=$1
+    year=$2
+
+    #prepare folder
+    FLDDIR=$TMPDIR/lpjg_${year}/CMIP6
+    VEGDIR=$TMPDIR/lpjg_${year}/data_${year}
+    mkdir -p $FLDDIR $VEGDIR
+
+    #linking
+    ln -s $LPJGRESULTS/*.out $VEGDIR/
+
+    #check
+    if [ "$VEG" -eq 1 ] && [ ! -d "$LPJGRESULTS" ] ; then
+        echo "Error: data directory $LPJGRESULTS for NEMO output does not exist, aborting" >&2; exit 1
+    fi
+
+    #check if varlistb exists   
+    if [ ! -f $VARLIST ]; then echo "Skipping non-existent varlist $VARLIST"; return ; fi
+
+    #prepare metadata
+    CONFIGFILE=$FLDDIR/metadata-${expname}-year${year}.json
+    cp $METADATAFILEVEG $CONFIGFILE
+
+    # Launching ece2cmor3
+    echo "================================================================"
+    echo "  Processing and CMORizing NEMO data with ece2cmor3"
+    echo "================================================================" 
+    $ece2cmor $VEGDIR --exp $expname --meta $CONFIGFILE --varlist $VARLIST --npp $THREADS --tmpdir $FLDDIR --lpjg --odir ${CMORDIR} --overwritemode replace
+
+    # Removing tmp directory
+    if [ -d "${FLDDIR}" ] ; then
+        echo "Deleting temp dir ${FLDDIR}"; rm -rf "${FLDDIR}"
+    fi
+
+    # Removing linked directory
+    if [ -d "${VEGDIR}" ] ; then
+        echo "Deleting link dir ${OCEDIR}"; rm -rf "${OCEDIR}"
+    fi
+
+    #cleanup
+    rmdir $TMPDIR/lpjg_${year}
+
+    echo "vegetation ece2cmor3 complete!"
+
+}
+
 
 #-------real run-----------#
 

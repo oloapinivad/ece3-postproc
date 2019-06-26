@@ -3,13 +3,13 @@ set -e
 
 
 # script to compile EC-Earth with a single command
-do_svn=false
-do_compile=false
+do_svn=true
+do_compile=true
 do_runconfig=true
 do_clean=false
 
 # user configuration
-revision=6903
+revision=6970
 platform_src=ecmwf-cca-intel-mpi
 platform_run=ecmwf-cca-intel
 do_lpjg=true

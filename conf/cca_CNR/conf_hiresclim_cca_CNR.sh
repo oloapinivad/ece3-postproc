@@ -73,11 +73,11 @@ cdo=cdo
 cdozip="$cdo -f nc4c -z zip"
 
 # useless for CNR due to nemo_rebuilder
-rbld="$PERM/ecearth3/revisions/primavera/sources/utils/rebuild_nemo/rebuild_nemo"
+rbld="/perm/ms/it/ccpd/ecearth3/revisions/primavera/sources/utils/rebuild_nemo/rebuild_nemo"
 
 # cdftools are loaded by modules
 #cdftoolsbin="${CDFTOOLS_DIR}/bin"
-cdftoolsbin="$PERM/ecearth3/cdftools4/bin"
+cdftoolsbin="/perm/ms/it/ccpd/ecearth3/cdftools4/bin"
 python=python
 
 

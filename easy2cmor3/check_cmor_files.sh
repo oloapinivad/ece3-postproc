@@ -14,8 +14,9 @@ usage()
 
 expname=$1
 year=$2
+missing=$3
 
-if [ $# -ne 2 ]; then
+if [ $# -lt 2 ]; then
    usage
    exit 1
 fi
@@ -67,8 +68,32 @@ for t in $(seq 0 $((${#s0[@]}-1))) ; do
 	ll=$((${f0[$t]}-${s0[$t]}-1))
 	nvars="$nvars $ll"
 done
+
+if [[ $missing == true ]] ; then
+missingfile=missing_vars_${expname}_${year}
+rm -f $missingfile
+for t in $(seq 0 $((${#s0[@]}-1))) ; do
+	categ=$(sed "${s0[$t]},${s0[$t]}!d" $VARLIST | cut -f 2 -d '"')
+	#echo $categ >> ${missingfile}
+	for ff in  $( seq ${s0[$t]} ${f0[$t]} ) ; do
+	 	#file=$( sed -n ${ff}p $VARLIST | grep -n ","  | cut -f 2 -d '"' )
+		file=$( sed -n ${ff}p $VARLIST | grep -vn "]"  | cut -f 2 -d '"' )
+		#if [[ ! -z $file ]] && [[ $file != "1:        ]," ]] && [[ $file != $categ ]] &&  [[ $file != "        ]," ]]   ; then
+		if [[ ! -z $file ]] && [[ $file != $categ ]] ; then
+			ff=$(ls ${CMORDIR}/CMIP6/*/EC-Earth-Consortium/*/*/*/${categ}/${file}/*/*/${file}_${categ}_*.nc 2> /dev/null | wc -l )
+			if [[ $ff -ne 1 ]] ; then
+				echo "$file $categ is missing!" >> ${missingfile} 
+			fi
+		fi
+	done
+	echo "--------------------" >> ${missingfile}
+done
+fi
+
+
 fullcateg=($fullcateg)
 fullvars=($nvars)
+
 
 # sum together same categories from different models
 newvars=""

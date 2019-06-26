@@ -7,7 +7,7 @@
 set -e
 
 #Will validate all years between year1 and year2 of experiment with name expname
-expname=${expname:-xx10}
+expname=${expname:-chis}
 year=${year:-1850}
 
 #--------config file-----
@@ -58,9 +58,6 @@ rm -rf ${BASETMPDIR}/tmp_log_${expname}_${year}.txt
 for ncf in $filelist ; do
 
 	check=0
-	#varjump="siage_SImon sicompstren_SImon siflswdtop_SImon sisali_SImon sispeed_SImon sitemptop_SImon sithick_SImon sithick_SIday ta_Emon wap_6hrPlev zg_Emon"
-	#varjump="ta_Emon wap_6hrPlev zg_Emon"
-	#varjump="sitimefrac_SIday sisnthick_SIday"
 	varjump="wap_6hrPlev zg_6hrPlevPt"
 	for varj in $varjump ; do 
 		if grep -q "$varj" <<< "$ncf"; then

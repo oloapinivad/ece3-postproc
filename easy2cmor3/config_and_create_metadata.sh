@@ -24,9 +24,10 @@ investigate=${3:-false}
 
 
 case $expname in
-	*)	mip=CMIP; exptype=historical; model=EC-EARTH-AOGCM; realization=4 ;;
-	chis)   mip=CMIP; exptype=historical; model=EC-EARTH-AOGCM; realization=4 ;;
-	c126)	mip=CMIP; exptype=ssp126;     model=EC-EARTH-AOGCM; realization=4 ;;
+	chis)   mip=CMIP; 		exptype=historical; model=EC-EARTH-AOGCM; realization=4 ;;
+	c126)	mip=ScenarioMIP; 	exptype=ssp126;     model=EC-EARTH-AOGCM; realization=4 ;;
+	vhis)   mip=CMIP; 		exptype=historical; model=EC-EARTH-Veg  ; realization=4 ;;
+	*)      mip=CMIP; 		exptype=historical; model=EC-EARTH-AOGCM; realization=4 ;;
 esac
 
 echo "Config file for $expname"
@@ -57,7 +58,7 @@ if [[ $generate == true ]] ; then
 	bash $creator $mip $exptype $model
 	cd $EASYDIR
 
-	for realm in ifs nemo ; do
+	for realm in ifs nemo lpjg ; do
 		filein=${ECE2CMOR3DIR}/scripts/metadata-cmip6-$mip-$exptype-$model-$realm-template.json  
 		METADATADIR=${EASYDIR}/metadata
 		fileout=${METADATADIR}/metadata-cmip6-$mip-$exptype-$model-$realm-$expname.json
@@ -68,7 +69,7 @@ fi
 
 # exporting values for ece2cmor runs
 # set varlist
-VARLISTDIR=$PERM/ecearth3/revisions/r6903/runtime/classic/ctrl/cmip6-output-control-files/$mip/$model/cmip6-experiment-$mip-$exptype
+VARLISTDIR=$PERM/ecearth3/revisions/r6970/runtime/classic/ctrl/cmip6-output-control-files/$mip/$model/cmip6-experiment-$mip-$exptype
 if [[ $investigate == false ]] ; then
 	VARLIST=$VARLISTDIR/cmip6-data-request-varlist-$mip-$exptype-$model.json
 else 
@@ -79,4 +80,5 @@ fi
 METADATADIR=${EASYDIR}/metadata
 METADATAFILEATM=${METADATADIR}/metadata-cmip6-$mip-$exptype-$model-ifs-${expname}.json
 METADATAFILEOCE=${METADATADIR}/metadata-cmip6-$mip-$exptype-$model-nemo-${expname}.json
+METADATAFILEVEG=${METADATADIR}/metadata-cmip6-$mip-$exptype-$model-lpjg-${expname}.json
 

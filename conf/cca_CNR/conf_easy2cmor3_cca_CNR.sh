@@ -6,7 +6,8 @@
 #----program folder definition ------- #
 
 # Location of cmorization tool
-SRCDIR=${PERM}/ecearth3/cmorization
+#SRCDIR=${PERM}/ecearth3/cmorization
+SRCDIR=/perm/ms/it/ccpd/ecearth3/cmorization
 
 #source code of ece2cmor3
 ECE2CMOR3DIR=${SRCDIR}/ece2cmor3/ece2cmor3
@@ -23,7 +24,8 @@ VALDIR=${SRCDIR}/primavera-val
 EASYDIR=${ECE3_POSTPROC_TOPDIR}/easy2cmor3
 
 #anaconda location
-CONDADIR=${SCRATCH}/PRIMAVERA/anaconda2/bin
+#CONDADIR=${PERM}/anaconda2/bin
+CONDADIR=/scratch/ms/it/ccpd/PRIMAVERA/anaconda2/bin
 
 # storage information directory
 INFODIR=${PERM}/ecearth3/infodir/cmorized
@@ -36,6 +38,7 @@ export ${USERexp:=$USER}
 export IFSRESULTS0='/lus/snx11062/scratch/ms/it/${USERexp}/ece3/${expname}/output/Output_${year}/IFS'
 export IFSRESULTS0_M1='/lus/snx11062/scratch/ms/it/${USERexp}/ece3/${expname}/output/Output_$(( year - 1 ))/IFS'
 export NEMORESULTS0='/lus/snx11062/scratch/ms/it/${USERexp}/ece3/${expname}/output/Output_${year}/NEMO'
+export LPJGRESULTS0='/lus/snx11062/scratch/ms/it/${USERexp}/ece3/${expname}/output/Output_${year}/LPJG'
 export ECE3_POSTPROC_CMORDIR='${SCRATCH}/ece3/${expname}/cmorized/cmor_${year}'
 
 # define folder for logfile
@@ -49,8 +52,11 @@ mkdir -p $BASETMPDIR || exit 1
 #---PARALLELIZATION OPTIONS---#
 NCORESATM=12 #parallelization is available for IFS
 NCORESOCE=1
+NCORESVEG=1
 NCORESCORRECT=1
 NCORESPREPARE=1
+NCORESQA=18
+NCORESNCT=1
 
 #----machine dependent argument----#
 ACCOUNT=$ECE3_POSTPROC_ACCOUNT 

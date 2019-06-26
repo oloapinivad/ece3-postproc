@@ -16,7 +16,7 @@
 set -e
 
 #Will validate all years between year1 and year2 of experiment with name expname
-expname=${1:-chst}
+expname=${expname:-chst}
 
 #--------config file-----
 . ${ECE3_POSTPROC_TOPDIR}/conf/${ECE3_POSTPROC_MACHINE}/conf_easy2cmor3_${ECE3_POSTPROC_MACHINE}.sh
@@ -37,20 +37,21 @@ TREEDIR=$(echo $CMORDIR | rev | cut -f2- -d "/" | rev)
 source activate nctime
 
 # Check time coverage continuity
-logfile1=$INFODIR/${expname}/nctcck_${expname}.txt
+logfile1=$INFODIR/${expname}/EC-Earth_nctcck_${expname}.txt
 echo "nctcck -i $HOME/ini --max-processes $NPROCS ${TREEDIR} ..."
 nctcck -i $HOME/ini --max-processes $NPROCS ${TREEDIR} > $logfile1
 echo "Done nctcck!"
 
 # Check time axis correctness 
 echo "nctxck -i $HOME/ini --max-processes $NPROCS ${TREEDIR} ..."
-logfile2=$INFODIR/${expname}/nctxck_${expname}.txt
+logfile2=$INFODIR/${expname}/EC-Earth_nctxck_${expname}.txt
 nctxck -i $HOME/ini --max-processes $NPROCS ${TREEDIR} > $logfile2
 echo "Done nctxck!"
 
 #clean log
 sed -i '/%/d' $logfile1
 sed -i '/%/d' $logfile2
+
 
 conda deactivate
 
