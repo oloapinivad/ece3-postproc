@@ -23,11 +23,17 @@ export PATH="$CONDADIR:$PATH"
 CMORDIR=$(eval echo ${ECE3_POSTPROC_CMORDIR})
 cd $CMORDIR
 mkdir -p $INFODIR/${expname}
-LOGFILE=$INFODIR/${expname}/PrePARE_${expname}_${year}.txt
-rm -f $LOGFILE
+LOGPREPARE=$INFODIR/${expname}/PrePARE_${expname}_${year}.txt
+rm -f $LOGPREPARE
+
+# load config file
+. ${EASYDIR}/config_and_create_metadata.sh $expname
 
 # start the environment
-source activate ece2cmor3
+# cmor environment must be installed in conda via conda create -n cmor -c conda-forge -c pcmdi cmor 
+# with 3.4.0 version of cmor you need to update the lib/python2.7/site-packages/cmip6_cv/PrePARE/out_names_tests.json 
+# from https://github.com/PCMDI/cmor/blob/master/LibCV/PrePARE/out_names_tests.json
+source activate cmor-nightly
 
 
 function check_file {
@@ -38,14 +44,14 @@ function check_file {
   	local status=$?
 	if [ $status -ne 0 ]; then
 		echo "ERROR"
-		cat ${tmpfile} >> $LOGFILE
+		cat ${tmpfile} >> $LOGPREPARE
 		exit
 	fi
 	rm -f ${tmpfile}
      	return $status
 }
 
-#echo "Starting checking $CMORDIR : " >> $LOGFILE
+#echo "Starting checking $CMORDIR : " >> $LOGPREPARE
 #filelist=$(find $CMORDIR | grep '\.nc$')
 filelist=$(find $CMORDIR -name "*.nc" )
 nfile=$(find $CMORDIR -name "*.nc" | wc -l )
@@ -58,7 +64,9 @@ rm -rf ${BASETMPDIR}/tmp_log_${expname}_${year}.txt
 for ncf in $filelist ; do
 
 	check=0
-	varjump="wap_6hrPlev zg_6hrPlevPt"
+	#varjump="wap_6hrPlev zg_6hrPlevPt"
+	#varjump="wap_6hrPlev"
+	varjump="NONE"
 	for varj in $varjump ; do 
 		if grep -q "$varj" <<< "$ncf"; then
 			echo "Skipping $varj..."
@@ -80,8 +88,11 @@ done
 nval=$(cat  ${BASETMPDIR}/tmp_log_${expname}_${year}.txt | wc -l )
 rm -f ${BASETMPDIR}/tmp_log_${expname}_${year}.txt
 
-echo "... year $year, Succesfully validated $nval / $nfile files!!!" >> $LOGFILE
-#echo "Finished checking $CMORDIR : " >> $LOGFILE
+echo $nvar $nfile $expected_nfile $LOGPREPARE
+if [[ $nfile -eq ${expected_nfile} ]] ; then
+	echo "... year $year, Succesfully validated $nval / $nfile files!!!" >> $LOGPREPARE
+fi
+#echo "Finished checking $CMORDIR : " >> $LOGPREPARE
 
 conda deactivate
 

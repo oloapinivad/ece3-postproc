@@ -26,7 +26,7 @@ cd ${EASYDIR}
 
 # activate conda
 export PATH="$CONDADIR:$PATH"
-NPROCS=2
+NPROCS=${NCORESNCTIME}
 
 # set path and log files
 CMORDIR=$(eval echo ${ECE3_POSTPROC_CMORDIR})

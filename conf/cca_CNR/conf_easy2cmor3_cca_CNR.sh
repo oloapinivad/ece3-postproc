@@ -55,8 +55,8 @@ NCORESOCE=1
 NCORESVEG=1
 NCORESCORRECT=1
 NCORESPREPARE=1
-NCORESQA=18
-NCORESNCT=1
+NCORESQA=108
+NCORESNCTIME=18
 
 #----machine dependent argument----#
 ACCOUNT=$ECE3_POSTPROC_ACCOUNT 
@@ -65,6 +65,7 @@ QUEUE_CMD="qstat -f"
 PARTITION=nf
 
 # as a function of the resolution change the memory and time requirements
+RESO=${RESO:-T255} 
 if [[ $RESO == T511 ]] ; then
         MEMORY=50GB
         MEMORY2=60GB

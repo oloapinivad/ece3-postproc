@@ -30,8 +30,8 @@ echo $PATH
 # option for forced clean up, update and reinstall
 if [[ $hard == true ]] ; then
    echo "HARD CLEANUP"
-   echo "update conda..."
-   conda update -n base conda
+   #echo "update conda..."
+   #conda update -n base conda
    echo "remove environment..."
    conda-env remove -y -n ece2cmor3
    echo "create environment..."

@@ -5,46 +5,38 @@ adapted from K. Strommen and Gijs van der Oord scripts
 
 These are series of scripts thought to provide a simplified and organized appraoch to run ECE2CMOR3 (https://github.com/goord/ece2cmor3).
 Since it has been merged in to the ece3-postproc tool, it uses a configuration file that you can find in '${ECE3_POSTPROC_TOPDIR}/conf/${ECE3_POSTPROC_MACHINE}/conf_easy2cmor3_${ECE3_POSTPROC_MACHINE}.sh'
-Here you can specify in there easily where your experiment is, where the output should go, the required varlist and parameter tables, the metadata, etc
+Here you can specify in there easily where your experiment is, where the output should go, the required varlist and parameter tables, the metadata, the number of processors for each process, etc
+Of course the different softwares must be installed separately: they are available under conda. 
 
-There is one main script which is meant to handle the whole cmorization:
+The package includes script for ece2cmor (so for the cmorization part) but also for the QA part. Tools as nctime and QA-DKRZ (which must be installed separately) can be used with some of this scripts. There is also the possibility to create ad-hoc functions to correct wrong metadata. When the cmorization has success it produces some check files in a specified folder which can be used to track the whole procedure. 
+The script in the folder are briefly desribed here below:
 
-**./submit_year.sh**: it is a wrapper of for different scripts, which provides the cmorization of IFS and NEMO separately, the merging into yearly files and the validation of the results. If it's IFS only, it launches 12 jobs, one for each month, and if coupled, it launches 13, with all of NEMO handled in one job. Two other extra jobs are added, one for merging and one for validation. The two latter jobs are delayed in order to account for the termination of the other jobs.
-It is meant to work with SLURM and PBS since it has been developed on Marconi/Galileo and on CCA, so that data structure too is following CNR requirements.
+* 'run_1year_ece2cmor3.sh': this is the core script. It handles the submission of the job with different flags (ATM, OCE, VEG) for the different component. These call 3 different functions with uses the ece2cmor3 package. It handles also the three tools for QA (PrePARE, nctime, QA-DKRZ). PrePARE is run as a dependency following the ece2cmor scripts. It is working correctly only with PBS and it has been tuned for cca
 
+* 'year_looper.sh': A generic wrapper function which apply the 'run_1year_ece2cmor3.sh' script to a loop of years
 
-# from here below is outdated
+* 'autocmor.sh': A loop which check how many years of the experiments have been currently run and call the  'run_1year_ece2cmor3.sh' over all the missing years. Very useful during simulation operative production.
 
-The 3 scripts called by the wrapper are: 
-1.  **./cmorize_month.sh**: it aims at cmorizing 1 month of IFS data and/or 1 year of NEMO data. 
-Metadata, varlist and parameter tables used to cmorize PRIMAVERA data are in the subdirectories.
-Testing indicates 1 month of low-res (T255ORCA1) IFS takes around 35-40 minutes, and 1 year of low-res NEMO takes around 15 minutes. For hi-res (T511ORCA025) 1 month IFS takes around 2h30 min hours and NEMO around 1h30. However, IFS can be parallized considerably reducing the time (15 minutes with 8 cores at T255).
+* 'ece3cmor_updater.sh' : Basic script which fetch and pull the most recenet commit of the ece2cmor3 package from github. It also install it on the required folder and can perform installation from scratch.
 
-2. **/merge_month.sh** : It breaks the directory structure but it concatenates the IFS data into a single one year file using NCO. For hi-res it takes about 30 minutes with 24 cores (it can be heavily parallelized)
+* 'check_cmor_files.sh' : given an experiment and a defined year, it compares the output produced by the cmorization with that of the varlist.json from the data request
 
-3. **./validate.sh** : It uses the Jon Seddon validation tool (that should be installed separately, https://github.com/jonseddon/primavera-val) to check data integrity. Best way to install the tool is make use of conda creating an environment called `validate`. The command is: '$ conda create -n validate -c conda-forge iris '. It takes about 1 hour at low-res and 4-5 hours at hi-res (no parallelization is available).
+* 'check_files_per_year.sh' : for a series of years from a given experiment, it estimates how many variables are there per year
 
-Finally, Other companion perhaps useful scripts are present:
+* 'config_and_create_metadata.sh' : create metadata and varlist request extracting it from the ece2cmor3 tool and the EC-Earth repository. Quite a lot of manual adjstument is needed
 
-- ./check_cmor_files.sh
+* 'adjust_versions.sh' : powerful script from Uwe. Check how many versions have been produced and recreate a user-defined one. Useful when cmor data generation is going across midnight (i.e. always)
 
-It evalutes the difference between the data obtained by the cmorization and the request you made in your varlist
+Inside the scripts folder you can find the scripts which handle the core operations:
 
-- ./code_updater.sh
+* 'call_correct_rename.sh' : simple script that performs correction/renaming operation on wrong cmor files. You can create your own functions and call them. 
+* 'call_ece2cmor3.sh': core script which is called to perform the cmorization. It is made by 3 different functions one for IFS, one for NEMO and one for LPJG
+* 'call_qa-dkrz.sh': script to call the QA-DKRZ quality assurance tool (conda version)
+* 'call_github-qa-dkrz.sh': same as above, but for the github installed version
+* 'call_nctime.sh': script to call the nctime tool
+* 'call_new-PrePARE.sh': script to call PrePARE. 
+* 'call_PrePARE.sh'
 
-It is a trivial script aimed at pulling and installing a newer version of the ece2cmor3 tool
-
-- ./year_looper.sh
-
-Zero-order looper to launch several years (using ./submit_year.sh)
-
-- ./autocmor.sh
-
-Tries to diagnose if cmorization has been completed for a single experiments and launch missing years. Useful for automation into running simulations. 
-
-- ./correct_rename.sh
-
-Run a loop on years in order to rename and/or update metadata when a posteriori correction is required.
 
 
 

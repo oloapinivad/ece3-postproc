@@ -20,15 +20,27 @@ fi
 expname=$1
 generate=${2:-false}
 investigate=${3:-false}
-
-
+reference_revision=r6970
 
 case $expname in
 	chis)   mip=CMIP; 		exptype=historical; model=EC-EARTH-AOGCM; realization=4 ;;
 	c126)	mip=ScenarioMIP; 	exptype=ssp126;     model=EC-EARTH-AOGCM; realization=4 ;;
+	c370)   mip=ScenarioMIP;        exptype=ssp370;     model=EC-EARTH-AOGCM; realization=4 ;;
+	c585)   mip=ScenarioMIP;        exptype=ssp585;     model=EC-EARTH-AOGCM; realization=4 ;;
 	vhis)   mip=CMIP; 		exptype=historical; model=EC-EARTH-Veg  ; realization=4 ;;
 	*)      mip=CMIP; 		exptype=historical; model=EC-EARTH-AOGCM; realization=4 ;;
 esac
+
+[[ $mip == ScenarioMIP ]] && parent_realization=4 || parent_realization=1
+
+# set number of files without 
+if [[ $model == "EC-EARTH-AOGCM" ]] ; then
+	expected_nfile_nofx=258 
+	expected_nfile=264
+elif [[ $model == "EC-EARTH-Veg" ]] ; then
+	expected_nfile_nofx=277
+	expected_nfile=283
+fi
 
 echo "Config file for $expname"
 echo "mip = $mip"
@@ -63,13 +75,14 @@ if [[ $generate == true ]] ; then
 		METADATADIR=${EASYDIR}/metadata
 		fileout=${METADATADIR}/metadata-cmip6-$mip-$exptype-$model-$realm-$expname.json
 		[[ -f $filein ]] && mv $filein $fileout
-		sed -i "/realization/s/1/$realization/"  $fileout
+		sed -i "/realization_index/s/1/${realization}/"  $fileout
+		sed -i "/parent_variant_label/s/r1/r${parent_realization}/"  $fileout
 	done
 fi
 
 # exporting values for ece2cmor runs
 # set varlist
-VARLISTDIR=$PERM/ecearth3/revisions/r6970/runtime/classic/ctrl/cmip6-output-control-files/$mip/$model/cmip6-experiment-$mip-$exptype
+VARLISTDIR=$PERM/ecearth3/revisions/${reference_revision}/runtime/classic/ctrl/cmip6-output-control-files/$mip/$model/cmip6-experiment-$mip-$exptype
 if [[ $investigate == false ]] ; then
 	VARLIST=$VARLISTDIR/cmip6-data-request-varlist-$mip-$exptype-$model.json
 else 
@@ -80,5 +93,6 @@ fi
 METADATADIR=${EASYDIR}/metadata
 METADATAFILEATM=${METADATADIR}/metadata-cmip6-$mip-$exptype-$model-ifs-${expname}.json
 METADATAFILEOCE=${METADATADIR}/metadata-cmip6-$mip-$exptype-$model-nemo-${expname}.json
+
 METADATAFILEVEG=${METADATADIR}/metadata-cmip6-$mip-$exptype-$model-lpjg-${expname}.json
 
