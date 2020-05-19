@@ -13,11 +13,11 @@
 set -ex
 # Required arguments
 
-expname=${expname:-vvv0}
-year=${year:-1850}
-ATM=${ATM:-0}
+expname=${expname:-ll00}
+year=${year:-2000}
+ATM=${ATM:-1}
 OCE=${OCE:-0}
-VEG=${VEG:-1}
+VEG=${VEG:-0}
 USERexp=${USERexp:-$USER}
 
 #--------config file-----
@@ -32,7 +32,6 @@ CMORDIR=$(eval echo ${ECE3_POSTPROC_CMORDIR})
 
 TMPDIR=$BASETMPDIR/${expname}_${year}_${RANDOM}
 mkdir -p $CMORDIR $TMPDIR
-
 echo "Main folders..."
 echo "Looking for IFS data in: $IFSRESULTS"
 echo "Looking for NEMO data in: $NEMORESULTS"
@@ -46,6 +45,14 @@ export ECE2CMOR3_NEMO_BATHY_METER=$NEMORESULTS/../../../run/bathy_meter.nc
 
 # configurator
 . ${EASYDIR}/config_and_create_metadata.sh $expname
+
+# reference date
+REFDATE=${refdate:-1850-01-01}
+echo $refdate $REFDATE
+
+# table dir
+TABDIR=${tabdir:-}
+echo $TABDIR
 
 #-------preliminary setup------------------#
 
@@ -106,7 +113,8 @@ function runece2cmor_ifs {
     echo "================================================================"
     echo "  Processing and CMORizing filtered IFS data with ece2cmor3"
     echo "================================================================" 
-    $ece2cmor $ATMDIR --exp $expname --meta $CONFIGFILE --varlist $VARLIST --npp $THREADS --tmpdir $FLDDIR --ifs --odir ${CMORDIR} --overwritemode replace --skip_alevel_vars
+    $ece2cmor $ATMDIR --exp $expname --meta $CONFIGFILE --varlist $VARLIST --npp $THREADS --tmpdir $FLDDIR --ifs --odir ${CMORDIR} --overwritemode replace --skip_alevel_vars --refd ${REFDATE} ${TABDIR}
+
     
     # Removing tmp directory
     if [ -d "${FLDDIR}" ] ; then
@@ -161,7 +169,7 @@ function runece2cmor_nemo {
     echo "================================================================"
     echo "  Processing and CMORizing NEMO data with ece2cmor3"
     echo "================================================================" 
-    $ece2cmor $OCEDIR --exp $expname --meta $CONFIGFILE --varlist $VARLIST --npp $THREADS --tmpdir $FLDDIR --nemo --odir ${CMORDIR} --overwritemode replace
+    $ece2cmor $OCEDIR --exp $expname --meta $CONFIGFILE --varlist $VARLIST --npp $THREADS --tmpdir $FLDDIR --nemo --odir ${CMORDIR} --overwritemode replace --refd ${REFDATE}
     
     # Removing tmp directory
     if [ -d "${FLDDIR}" ] ; then
@@ -211,7 +219,7 @@ function runece2cmor_lpjg {
     echo "================================================================"
     echo "  Processing and CMORizing NEMO data with ece2cmor3"
     echo "================================================================" 
-    $ece2cmor $VEGDIR --exp $expname --meta $CONFIGFILE --varlist $VARLIST --npp $THREADS --tmpdir $FLDDIR --lpjg --odir ${CMORDIR} --overwritemode replace
+    $ece2cmor $VEGDIR --exp $expname --meta $CONFIGFILE --varlist $VARLIST --npp $THREADS --tmpdir $FLDDIR --lpjg --odir ${CMORDIR} --overwritemode replace --refd ${REFDATE}
 
     # Removing tmp directory
     if [ -d "${FLDDIR}" ] ; then

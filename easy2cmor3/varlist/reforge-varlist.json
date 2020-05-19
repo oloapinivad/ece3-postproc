@@ -1,0 +1,129 @@
+{
+   "ifs":  {
+       "fx": [
+	     "orog"
+       ],
+       "Amon": [
+            "tas",
+            "ts",
+            "tasmin",
+            "tasmax",
+            "psl",
+            "ps",
+            "uas",
+            "vas",
+            "sfcWind",
+            "hurs",
+            "huss",
+            "pr",
+            "prsn",
+            "prc",
+            "evspsbl",
+            "sbl",
+            "tauu",
+            "tauv",
+            "gwdtauu",
+            "gwdtauv",
+            "hfls",
+            "hfss",
+            "rlds",
+            "rlus",
+            "rsds",
+            "rsus",
+            "rsdscs",
+            "rsuscs",
+            "rldscs",
+            "rsdt",
+            "rsut",
+            "rlut",
+            "rlutcs",
+            "rsutcs",
+            "prw",
+            "clt",
+            "clwvi",
+            "clivi",
+            "rtmt",
+            "ta",
+            "ua",
+            "va",
+            "hus",
+            "hur",
+            "wap",
+            "zg"
+       ],
+       "Eday": [
+            "evspsbl",
+            "tauu",
+            "tauv",
+	    "ta850",
+	    "ua850",
+	    "va850"
+       ], 
+       "CFday": [
+            "ps"
+       ],
+       "AERday": [
+            "zg500"
+       ],
+       "Emon": [
+            "mrsol",
+            "ps",
+            "rls",
+            "rss"
+       ],
+       "day": [
+            "huss",
+            "tasmin",
+            "tasmax",
+            "tas",
+            "pr",
+            "psl",
+            "mrso",
+            "mrsos",
+            "hurs",
+            "snc",
+            "clt",
+            "tslsi",
+            "snw",
+            "prc",
+            "prsn",
+            "mrro",
+            "uas",
+            "vas",
+            "sfcWindmax",
+            "hfls",
+            "hfss",
+            "rlds",
+            "rlus",
+            "rsds",
+            "rsus",
+            "rlut",
+            "ta",
+            "hus",
+            "va",
+            "ua",
+            "zg"
+       ],
+       "LImon": [
+            "snc",
+            "lwsnl",
+            "snd",
+            "snw",
+            "snm",
+            "sbl",
+            "hfdsn",
+            "tsn"
+       ],
+       "Lmon": [
+            "mrsos",
+            "mrso",
+            "mrfso",
+            "mrros",
+            "mrro",
+            "tsl"
+       ],
+       "SImon": [
+            "siconca"
+       ]
+   }
+}

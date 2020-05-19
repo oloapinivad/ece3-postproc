@@ -5,23 +5,23 @@
 
 #rough scheme for looping on years, it produces up to 15 jobs for each year so beware
 
-EXP=chis
-YEAR1=2014
-YEAR2=2014
-ATM=0
+EXP=mln0
+YEAR1=1999
+YEAR2=2029
+ATM=1
 OCE=0
 VEG=0
 PREPARE=0
-QADKRZ=1
+QADKRZ=0
 NCTIME=0
 CORRECT=0
-RESO=T255
+RESO=T799
 
 #simple loop
 for YEAR in $(seq $YEAR1 $YEAR2) ; do
 
 	# if no ece2cmor is required, skip	
-	if [[ $ATM -eq 0 ]] && [[ $OCE -eq 0 ]] && [[ $VEG -eq 0 ]] && [[ $PREPARE -eq 0 ]]  ; then
+	if [[ $ATM -eq 0 ]] && [[ $OCE -eq 0 ]] && [[ $VEG -eq 0 ]] && [[ $PREPARE -eq 0 ]]  && [[ $CORRECT -eq 0 ]]  ; then
 		continue
 	fi
 

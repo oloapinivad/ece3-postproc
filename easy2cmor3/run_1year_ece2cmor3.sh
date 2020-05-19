@@ -168,10 +168,10 @@ if [[ "$SUBMIT" == "qsub" ]] ; then
 	JOB_VEG='$SUBMIT ${MACHINE_OPT} -l walltime=$TLIMIT -v ${OPT_VEG} -l EC_threads_per_task=$NCORESVEG -N lpjg-${expname}-${year}
                  -o $LOGFILE/cmor_${expname}_${year}_lpjg.out -e $LOGFILE/cmor_${expname}_${year}_lpjg.err
                  ./call_ece2cmor3.sh'
-	JOB_COR='$SUBMIT -l ${MACHINE_OPT} -l walltime=01:00:00
+	JOB_COR='$SUBMIT ${MACHINE_OPT} -l walltime=01:00:00
                 -l EC_threads_per_task=$NCORESCORRECT -v ${OPT_COR} -N correct-${expname}-${year}
                 -o $LOGFILE/correct_${expname}_${year}.out  -e $LOGFILE/correct_${expname}_${year}.err
-                ./correct_rename.sh'
+                ./call_correct_rename.sh'
 	JOB_PRE='$SUBMIT ${MACHINE_OPT} -l walltime=$TLIMIT -l EC_threads_per_task=$NCORESPREPARE -v ${OPT_PRE} 
                  -N PrePARE-${expname}-${year} ${DEPENDENCY} -o $LOGFILE/PrePARE_${expname}_${year}.out  
                  -e $LOGFILE/PrePARE_${expname}_${year}.err ./call_PrePARE.sh'

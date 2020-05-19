@@ -55,9 +55,9 @@ mkdir -p $TMPDIR
 cp -nrs $(eval echo ${ECE3_POSTPROC_CMORDIR}/*) $TMPDIR
 
 # cleaning old environment
-#if [[ ${do_force} == true ]] ; then
-#	rm -rf ${QA_RESULTS}
-#fi
+if [[ ${do_force} == true ]] ; then
+	rm -rf ${QA_RESULTS}
+fi
 
 echo "Running QA-DKRZ"
 

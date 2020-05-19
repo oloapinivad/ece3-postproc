@@ -1,19 +1,52 @@
 #!/bin/bash
 set -e
 
+# ece3_compiler.sh
+# P. Davini (CNR)
+# Jul 2019
+
+# this is a basic script which performs the checkout, compilation and configuration
+# of a required revision (from the trunk) of EC-Earth3. 
+# It is meant to work on ECMWF machine but it can be adapted for further architecture.
+
+# if you want to use eccodes, extra modification must be adopted
+# https://dev.ec-earth.org/projects/ecearth3/wiki/Using_eccodes_library
+
+
+#---------------------#
+
+# this are the compiling environment needed
+
+# ECMWF - CCA-intel - Sep 2019
+module load PrgEnv-intel
+module unload cray-netcdf-hdf5parallel cray-hdf5-parallel eccodes netcdf4 grib_api
+#module load cray-hdf5-parallel/1.10.0.1
+#module load cray-netcdf-hdf5parallel/4.4.1.1
+module load cray-hdf5-parallel/1.8.14 # forcily needed by runoffmapper
+module load cray-netcdf-hdf5parallel/4.3.3.1 #as above
+module load grib_api/1.27.0
+module load netcdf4/4.6.2
+
+# ECMWF - CCA-intel - Jun 2019  
+#module load cray-hdf5-parallel/1.8.14 # forcily needed by runoffmapper
+#module load cray-netcdf-hdf5parallel/4.3.3.1 #as above
+#module load eccodes/2.12.5
+#module load grib_api/1.12.3 # needed by IFS
+#module load netcdf4/4.6.2
+
 
 # script to compile EC-Earth with a single command
-do_svn=true
-do_compile=true
-do_runconfig=true
-do_clean=false
+do_svn=true # checkout
+do_compile=true # compilation
+do_runconfig=true # configuration
+do_clean=false # make clean: not working
 
 # user configuration
-revision=6970
-platform_src=ecmwf-cca-intel-mpi
-platform_run=ecmwf-cca-intel
-do_lpjg=true
-nemo_config=ORCA1L75_LIM3
+revision=7122 #which revision do you want?
+platform_src=ecmwf-cca-intel-mpi # src architecture
+platform_run=ecmwf-cca-intel # runtime architecture
+do_lpjg=false # do want lpjg?
+nemo_config=ORCA1L75_LIM3 #which nemo configuration do you want?
 
 # hard coded option
 rxxxx="r$revision"
@@ -112,12 +145,14 @@ if [[ $do_runconfig == true ]] ; then
 
 	# set source path within file
 	templatefile=$RUNDIR/platform/${platform_run}.xml
-	matchs="ECEARTH_SRC_DIR RUN_DIR USE_FORKING MODULE_LIST"
+	matchs="ECEARTH_SRC_DIR RUN_DIR USE_FORKING MODULE_LIST GRIBAPI_BASE_DIR"
 	for match in $matchs ; do
 		[[ $match == "ECEARTH_SRC_DIR" ]]  && new=${SRCDIR}
 		[[ $match == "RUN_DIR" ]]  && new='${SCRATCH}/ece3/${exp_name}/run'
 		[[ $match == "USE_FORKING" ]]  && new=true
 		[[ $match == "MODULE_LIST" ]] && new='PrgEnv-intel cdo netcdf4/4.6.2'
+		[[ $match == "GRIBAPI_BASE_DIR" ]] && new='/usr/local/apps/grib_api/1.27.0/INTEL/170'
+	
 		function_replacer $templatefile $match "$new"
 	done
 

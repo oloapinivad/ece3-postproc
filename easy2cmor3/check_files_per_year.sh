@@ -59,7 +59,6 @@ do
     # security check
     if [[ $nfiles != $expected_nfile_nofx ]] ; then
 	echo "WTF!!"
-	break
     fi
 done
 

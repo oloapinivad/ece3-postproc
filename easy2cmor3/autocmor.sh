@@ -9,12 +9,13 @@
 usage()
 {
    echo "Usage:"
-   echo "       autocmor.sh [-a account] [-u USERexp] -r RESO expname"
+   echo "       autocmor.sh [-a account] [-u USERexp] -r RESO -m MODELTYPE expname"
    echo
    echo "Options are:"
    echo "   -a ACCOUNT  : specify a different special project for accounting (default: ${ECE3_POSTPROC_ACCOUNT:-unknown})"
    echo "   -u USERexp  : alternative user owner of the experiment, (default: $USER)"
    echo "   -r RESO     : horizontal resolution of IFS (default: T255)"
+   echo "   -m MODELTYPE: configuration of the model (default: EC-EARTH-AOGCM)"
 }
 
 set -ue
@@ -23,9 +24,11 @@ set -ue
 account="${ECE3_POSTPROC_ACCOUNT-}"
 options=""
 RESO=${RESO:-T255}
+MODELTYPE=${MODELTYPE:-EC-EARTH-AOGCM}
+
 
 # -- options
-while getopts "hu:a:r:" opt; do
+while getopts "hu:a:r:m:" opt; do
     case "$opt" in
         h)
             usage
@@ -37,6 +40,8 @@ while getopts "hu:a:r:" opt; do
         a)  account=$OPTARG
             ;;
 	r)  RESO=$OPTARG
+	    ;;
+	m)  MODELTYPE=$OPTARG
             ;;
         *)  usage
             exit 1
@@ -46,8 +51,22 @@ shift $((OPTIND-1))
 
 #setting expname
 expname=$1
+
+# automatic setup
+if [[ $MODELTYPE == "EC-EARTH-Veg" ]] ; then
+	VEG=1; ATM=1; OCE=1
+elif [[ $MODELTYPE == "EC-EARTH-AOGCM" ]] ; then
+	VEG=0; ATM=1; OCE=1
+fi
+
+# manual fix for amip
+if [[ $expname == "vaaa" ]] || [[ $expname == "caaa" ]] ; then
+	OCE=0
+fi
+
 echo "$expname"
 echo "$RESO"
+echo $OCE
 
 # load user and machine specifics
 . ${ECE3_POSTPROC_TOPDIR}/conf/${ECE3_POSTPROC_MACHINE}/conf_easy2cmor3_${ECE3_POSTPROC_MACHINE}.sh
@@ -102,7 +121,7 @@ do
 	echo "Submitting $EASYDIR/submit_year.sh"
 	#submitting command	
 	$EASYDIR/run_1year_ece2cmor3.sh -e $expname -y $year -r $RESO  \
-                                 -a 1 -o 1 -v 0 -p 1 -u $USERexp
+                                 -a $ATM -o $OCE -v $VEG -p 1 -u $USERexp
 	
     fi
 done

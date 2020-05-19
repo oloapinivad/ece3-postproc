@@ -8,16 +8,16 @@
 # obtained is equal to the number of files initially found
 # uses a series of user function to perform the required operation
 
-for year in $(seq 2041 2049) ; do
+#for year in $(seq 1850 1859) ; do
 
 # important for the file structure
-expname=${expname:-qctr}
-year=${year:-1950}
+expname=${expname:-v126}
+year=${year:-2015}
 replace=true #set to false for testing, avoid replacement of old files
 
 # important for the data selection in the folder: allow for a reduction of the data to be modified
-#delimeter="*.nc" 	#all the files
-delimeter="tos*gr*.nc"  # tos gr files
+delimeter="*.nc" 	#all the files
+#delimeter="tos*gr*.nc"  # tos gr files
 #delimeter="*SI*.nc"	#for the fix_areacello, only sea ice block 
 
 echo "---- Correcting and renaming year $year ----"
@@ -27,6 +27,36 @@ echo "---- Correcting and renaming year $year ----"
 
 # since every renaming/metadata correction is specific 
 # ad hoc function should be written and added when needed
+
+# fix reference time for LPJG runs
+function fix_ref_time {
+	file=$1
+	check1=$( ncdump -h $file | fgrep -e time:units | grep "00:00:00" ) 
+	check2=$( ncdump -h $file | fgrep -e time:units ) 
+	if [[ -z $check1 ]] && [[ ! -z $check2 ]]  ; then  
+		echo "Fixing file... $file"
+		$ncatted -a units,time,m,c,"days since 1970-01-01 00:00:00" $file
+	else 
+		echo "No need for this!"
+	fi
+}
+
+# fix wrong branch time for scenarios
+function fix_branch_time_ssp {
+	file=$1
+	$ncatted -a branch_time_in_child,global,m,c,60265. $file
+	$ncatted -a branch_time_in_parent,global,m,c,60265. $file
+	$ncatted -a branch_time,global,d,c, $file
+}
+
+# fix wrong branch time for scenarios
+function fix_branch_time_amip {
+        file=$1
+        $ncatted -a branch_time_in_child,global,d,c, $file
+        $ncatted -a branch_time_in_parent,global,d,c, $file
+        $ncatted -a branch_time,global,d,c, $file
+}
+	
 
 # first example: rename the phisical index changing the block of the ripf identifier
 function rename_ripf { 
@@ -79,6 +109,8 @@ function change_email {
         $ncatted -a contact,global,m,c,"cmip6-data@ec-earth.org" $file
 }
 
+
+
 function fix_tos {
         file=$1
         cp --remove-destination "$(readlink $file)" $file
@@ -95,35 +127,42 @@ TMPDIR=$BASETMPDIR/rename_${year}
 mkdir -p $TMPDIR; cd $TMPDIR
 
 # clean possible mistakes 
-rm -rf $TMPDIR/$delimeter
+rm -rf $TMPDIR
 
 # input files to be linked
-nfilein=$(ls $CMORDIR/$delimeter | wc -l)
+echo "Browsing $CMORDIR"
+filelist=$(cd $CMORDIR && find . -type f -name $delimeter -printf '%P\n')
+nfilein=$(cd $CMORDIR && find . -type f -name $delimeter | wc -l )
 echo "Analyzing $nfilein files..." 
-ln -s $CMORDIR/$delimeter $TMPDIR/
 
 # filelist and loop on file, calling the renamer (it can be parallelized!)
-filelist=$(ls $delimeter)
+#filelist=$(ls $delimeter)
 for file in $filelist ; do
-	fix_tos $file
+	basefile=$(basename $file)
+	basedir=$(dirname $file)
+	mkdir -p $TMPDIR/$basedir
+	cp -r $CMORDIR/$file $TMPDIR/$basedir
+	#fix_tos $file
 	#change_email $file
 	#rename_ripf $file
 	#fix_areacello $file
+	echo $file
+	fix_ref_time $TMPDIR/$basedir/$basefile
+	#fix_branch_time_ssp $TMPDIR/$basedir/$basefile
 done
 
 # check output files
-nfileout=$(ls $TMPDIR/$delimeter | wc -l)
+nfileout=$(cd $TMPDIR && find . -type f -name $delimeter | wc -l )
 echo "Obtained $nfileout files..." 
 
 # if everything is fine, remove original file and replace with the new ones
 if [[ $nfilein -eq $nfileout ]] ; then
 	echo "Everything seems fine... Replacing directories"
 	if [[ $replace == true ]] ; then
-		rm $CMORDIR/$delimeter
-		mv $TMPDIR/$delimeter $CMORDIR
+		rm -rf $CMORDIR
+		mv $TMPDIR $CMORDIR
 		rmdir $TMPDIR
 	fi 
 fi
 
 	
-done
