@@ -55,7 +55,7 @@ expname=$1
 # automatic setup
 if [[ $MODELTYPE == "EC-EARTH-Veg" ]] ; then
 	VEG=1; ATM=1; OCE=1
-elif [[ $MODELTYPE == "EC-EARTH-AOGCM" ]] ; then
+elif [[ $MODELTYPE == "EC-EARTH-AOGCM" ]] || [[ $MODELTYPE == "EC-EARTH-SPPT" ]] ; then
 	VEG=0; ATM=1; OCE=1
 fi
 

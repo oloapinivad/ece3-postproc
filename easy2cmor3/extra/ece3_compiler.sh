@@ -41,8 +41,12 @@ do_compile=true # compilation
 do_runconfig=true # configuration
 do_clean=false # make clean: not working
 
+# if you want to download a specific maintenance or tag, it would be better to always download the
+# corresponding revision number in order to not be confused
+# Interrogation can be done with svn log https://svn.ec-earth.org/ecearth3/tags/3.3.2.1 -v --stop-on-copy
+
 # user configuration
-revision=7122 #which revision do you want?
+revision="7802" #which revision do you want?
 platform_src=ecmwf-cca-intel-mpi # src architecture
 platform_run=ecmwf-cca-intel # runtime architecture
 do_lpjg=false # do want lpjg?

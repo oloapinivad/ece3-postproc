@@ -33,7 +33,10 @@ rm -f $LOGPREPARE
 # cmor environment must be installed in conda via conda create -n cmor -c conda-forge -c pcmdi cmor 
 # with 3.4.0 version of cmor you need to update the lib/python2.7/site-packages/cmip6_cv/PrePARE/out_names_tests.json 
 # from https://github.com/PCMDI/cmor/blob/master/LibCV/PrePARE/out_names_tests.json
-source activate cmor-nightly
+#source activate cmor-nightly
+
+# above is no longer needed if we use cmor 3.5
+source activate ece2cmor3
 
 
 function check_file {

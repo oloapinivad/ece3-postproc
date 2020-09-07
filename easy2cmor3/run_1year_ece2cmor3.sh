@@ -87,6 +87,7 @@ if [[ $autoconfig == true ]] ; then
 	case $model in  
 		EC-EARTH-AOGCM)  ATM=1 ; OCE=1 ; VEG=0 ;;
 		EC-EARTH-Veg)	 ATM=1 ; OCE=1 ; VEG=1 ;;	
+		EC-EARTH-SPPT)  ATM=1 ; OCE=1 ; VEG=0 ;;
 	esac
 	[[ $exptype == "amip" ]] && OCE=0 
 fi

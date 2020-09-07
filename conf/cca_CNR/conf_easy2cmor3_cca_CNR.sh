@@ -35,6 +35,7 @@ mkdir -p $INFODIR
 
 # optional variable are $USERexp/$USER, $year
 export ${USERexp:=$USER}
+export RUNDIR0='/lus/snx11062/scratch/ms/it/${USERexp}/ece3/${expname}/run'
 export IFSRESULTS0='/lus/snx11062/scratch/ms/it/${USERexp}/ece3/${expname}/output/Output_${year}/IFS'
 export IFSRESULTS0_M1='/lus/snx11062/scratch/ms/it/${USERexp}/ece3/${expname}/output/Output_$(( year - 1 ))/IFS'
 export NEMORESULTS0='/lus/snx11062/scratch/ms/it/${USERexp}/ece3/${expname}/output/Output_${year}/NEMO'

@@ -29,6 +29,7 @@ IFSRESULTS=$(eval echo $IFSRESULTS0)
 IFSRESULTS_M1=$(eval echo $IFSRESULTS0_M1)
 LPJGRESULTS=$(eval echo $LPJGRESULTS0)
 CMORDIR=$(eval echo ${ECE3_POSTPROC_CMORDIR})
+RUNDIR=$(eval echo $RUNDIR0)
 
 TMPDIR=$BASETMPDIR/${expname}_${year}_${RANDOM}
 mkdir -p $CMORDIR $TMPDIR
@@ -152,6 +153,7 @@ function runece2cmor_nemo {
 
     #linking
     ln -s $NEMORESULTS/${expname}*.nc $OCEDIR/
+    cp $RUNDIR/subbasins.nc $BASETMPDIR/
     
     #check
     if [ "$OCE" -eq 1 ] && [ ! -d "$NEMORESULTS" ] ; then
@@ -169,7 +171,7 @@ function runece2cmor_nemo {
     echo "================================================================"
     echo "  Processing and CMORizing NEMO data with ece2cmor3"
     echo "================================================================" 
-    $ece2cmor $OCEDIR --exp $expname --meta $CONFIGFILE --varlist $VARLIST --npp $THREADS --tmpdir $FLDDIR --nemo --odir ${CMORDIR} --overwritemode replace --refd ${REFDATE}
+    $ece2cmor $OCEDIR --exp $expname --meta $CONFIGFILE --varlist $VARLIST --npp $THREADS --tmpdir $FLDDIR --nemo --odir ${CMORDIR} --overwritemode replace --refd ${REFDATE} ${TABDIR}
     
     # Removing tmp directory
     if [ -d "${FLDDIR}" ] ; then
@@ -219,7 +221,7 @@ function runece2cmor_lpjg {
     echo "================================================================"
     echo "  Processing and CMORizing NEMO data with ece2cmor3"
     echo "================================================================" 
-    $ece2cmor $VEGDIR --exp $expname --meta $CONFIGFILE --varlist $VARLIST --npp $THREADS --tmpdir $FLDDIR --lpjg --odir ${CMORDIR} --overwritemode replace --refd ${REFDATE}
+    $ece2cmor $VEGDIR --exp $expname --meta $CONFIGFILE --varlist $VARLIST --npp $THREADS --tmpdir $FLDDIR --lpjg --odir ${CMORDIR} --overwritemode replace --refd ${REFDATE} ${TABDIR}
 
     # Removing tmp directory
     if [ -d "${FLDDIR}" ] ; then
