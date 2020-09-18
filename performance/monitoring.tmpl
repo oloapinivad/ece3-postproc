@@ -1,0 +1,133 @@
+<html>
+ <head> 
+    <center>
+    <title> EC-Earth-3 -PROJECT-: -EXPNAME- </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+  </head>
+
+  <body>
+        <div id="wrapper">
+            <TABLE>
+                <TR align="center">
+                    <TD align="left">
+                        <a href="http://www.isac.cnr.it">
+		      <IMG SRC="http://wilma.to.isac.cnr.it/ecearth/ecearth/pics/isac.gif" height="64" alt="ISAC-CNR"> </a>
+                    </TD>
+                    <TD align="center">
+                        <H2>  EC-Earth-3 -PROJECT-: -EXPNAME- </H2>
+                        <TD align="right">
+                            <a href="http://ecearth.knmi.nl">
+                                <IMG SRC="http://wilma.to.isac.cnr.it/ecearth/ecearth/pics/logoecearth.png" height="64" alt="EC-EARTH">
+                           </a>
+                        </TD>
+                </TR>
+
+            </table>
+        </div>
+        <div style="margin: 10px 10px 10px 10px; width: 100%; font-size: x-large">
+            <center>
+	      <br>
+              <big>
+                <b><u>Diagnostics for -EXPNAME-</u></b>
+                <br>
+                <b> -EXPDETAILS-</b>
+		<br>
+		Current status: <font color=-COLSTATUS-> -STATUS- </font>
+              </big>
+
+              <br>&nbsp;<br>
+              <a href=http://wilma.to.isac.cnr.it/ecearth/diag/-PROJECT-/-EXPNAME-/atmosphere/> <font color=336600> Atmospheric Timeseries </font></a>
+	      <br> 
+              <font size="3"> Basic timeseries of global averages of several atmospheric fields </font>
+	      <br>
+	      <a href=http://wilma.to.isac.cnr.it/ecearth/diag/-PROJECT-/-EXPNAME-/ocean/> <font color=4373B8> Oceanic Timeseries </font></a>
+              <br>
+              <font size="3"> Basic timeseries of global averages of several oceanic fields </font>
+              <br>
+              <a href=http://wilma.to.isac.cnr.it/ecearth/diag/-PROJECT-/-EXPNAME-/barakuda/> <font color=7A11A7> Barakuda Plots </font></a>
+              <br>
+              <font size="3"> Detailed oceanic diagnostics for several oceanic fields </font>
+	      <br>
+	      <a href=http://wilma.to.isac.cnr.it/ecearth/diag/-PROJECT-/-EXPNAME-/performance/performance.-EXPNAME-.svg> <font color=F29934> Performance Indicators </font></a>
+              <br>
+              <font size="3"> Zero-order performance plots (including expected simulation end) </font>
+	      <br> 
+	      <a href=http://wilma.to.isac.cnr.it/ecearth/diag/-PROJECT-/-EXPNAME-/ecmean/> <font color=666699> ECmean tables </font></a>
+              <br>
+              <font size="3"> Yearly output from ECmean in txt format </font>
+	      <br>
+              <a href=http://wilma.to.isac.cnr.it/ecearth/diag/-PROJECT-/-EXPNAME-/infocmor/> <font color=EF2N52> QA CMOR </font></a>
+              <br>
+              <font size="3"> PrePARE, nctime and QA-DKRZ Quality Assurance output </font>
+
+
+              <br>&nbsp;<br>
+        </div>
+        <div style="margin: 10px 10px 10px 10px; width: 1024px; font-size:medium">
+            <left>
+              <font size="5"> <b><u>Simulation</u></b> </font>
+              <br>
+              <font size="3"> Year -YSIM- has been run </font>
+              <div align="left" class="w3-light-grey w3-xlarge">
+                <div class="w3-orange w3-center w3-round" style="height:80; width:-PSIM-%">-PSIM-%</div>
+              </div>
+	      <!--<font size="3"> Average core hours per simulated year (CHPSY): -CHPSY- </font> <br> -->
+              <!--<font size="3"> Average number of simulated years per day (SYPD): -SYPD- </font> -->
+	      <br>&nbsp;<br>
+
+              <font size="5"> <b><u>Cmorization</u></b> </font>
+              <br>
+              <font size="3"> Year -YCMOR- has been cmorized </font>
+              <div align="left" class="w3-light-grey">
+                <div class="w3-lime w3-center w3-round" style="height:40;width:-PCMOR-%">-PCMOR-%</div>
+              </div>
+
+              <font size="5"><b><u>Hiresclim</u></b> </font>
+              <br>
+              <font size="3"> Year -YHIR- has been postprocessed </font>
+              <div align="left" class="w3-light-grey">
+                <div class="w3-purple w3-center w3-round" style="height:40; width:-PHIR-%">-PHIR-%</div>
+              </div>
+
+              <br>
+              <font size="5"><b><u>Archive</u></b> </font>
+              <br>
+              <div align="left" class="w3-light-grey">
+                <div class="w3-teal w3-center w3-round" style="height:40; width:-PAOUT-%">Output: -YAOUT-</div>
+              </div>
+              <br>
+              <div align="left" class="w3-light-grey">
+                <div class="w3-blue w3-center w3-round" style="height:40; width:-PACMOR-%">CMOR: -YACMOR-</div>
+              </div>
+              <br>
+              <div align="left" class="w3-light-grey">
+                <div class="w3-cyan w3-center w3-round" style="height:40; width:-PARES-%">Restart: -YARES-</div>
+              </div>
+              <br>
+              <div align="left" class="w3-light-grey">
+                <div class="w3-aqua w3-center w3-round" style="height:40; width:-PALOG-%">Log: -YALOG-</div>
+              </div>
+	      <br>
+              <div align="left" class="w3-light-grey">
+                <div class="w3-light-blue w3-center w3-round" style="height:40; width:-PAINIT-%">ICs: -YAINIT-</div>
+              </div>
+	      <br>
+              <div align="left" class="w3-light-grey">
+                <div class="w3-pale-blue w3-center w3-round" style="height:40; width:-PAPOST-%">Post: -YAPOST-</div>
+              </div>
+              <br>
+	      <br>
+          </div>
+
+	  <a href=http://wilma.to.isac.cnr.it/ecearth/diag/-PROJECT-/> <font color=336600> Back to CNR-ISAC -PROJECT- homepage </font></a>
+
+          <br>
+          <br> <font size="1"> Site is updated every hour 
+	  <br> Last update: -DATE- 
+	  <br> Mantained by CNR-ISAC - Torino (2019)
+	  </font>
+  </body>
+</html>
+
