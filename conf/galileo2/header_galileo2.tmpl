@@ -1,0 +1,15 @@
+#!/bin/bash
+#SBATCH --job-name <JOBID>_<EXPID>
+#SBATCH --time=01:59:00
+#SBATCH --account=<ACCOUNT>
+#SBATCH -N 1
+#SBATCH -n 1
+#SBATCH --mem=24GB
+#SBATCH --dependency=afterok:<DEPENDENCY>
+#SBATCH --output <OUT>/log/<JOBID>_<EXPID>_<Y1>.out
+#SBATCH --error <OUT>/log/<JOBID>_<EXPID>_<Y1>.err
+#SBATCH --partition=gll_usr_prod
+
+set -ex
+
+cd $ECE3_POSTPROC_TOPDIR/script

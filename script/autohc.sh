@@ -146,7 +146,13 @@ EOF
         echo "lprimavera is $lprimavera"
 
 	echo "Submitting for year $YEAR"
-        JOBID=$(${submit_cmd} $tgt_script)
+	if [[ ${submit_cmd} == "qsub" ]] ; then
+        	JOBID=$(${submit_cmd} $tgt_script)
+	elif [[  ${submit_cmd} == "sbatch" ]] ; then
+		echo "here"
+                JOBID=$(echo $(${submit_cmd} $tgt_script) | cut -f4 -d" ")
+	fi
+
 	if [[ !  -z $JOBID ]] ; then
                 depend="-d $JOBID"
         else
@@ -159,6 +165,7 @@ EOF
             continue
         else
             ecm_script=${ECE3_POSTPROC_TOPDIR}/script/ecm.sh
+	    echo ${ecm_script} -p -y $depend $EXPID ${YEAR} ${YEAR}
             ${ecm_script} -p -y $depend $EXPID ${YEAR} ${YEAR}
         fi
 

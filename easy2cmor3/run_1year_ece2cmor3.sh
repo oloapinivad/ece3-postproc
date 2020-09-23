@@ -28,7 +28,7 @@ year=1850
 
 #---DEFAULT INPUT ARGUMENT----#
 RESO=T255 # resolition, to set accorindgly machine dependent requirements
-USERexp=${USERexp:-ccpd}  #extra: allows analysis of experiment owned by different user
+USERexp=${USERexp:-ffabiano}  #extra: allows analysis of experiment owned by different user
 ATM=1
 OCE=0
 VEG=0
@@ -184,6 +184,23 @@ if [[ "$SUBMIT" == "qsub" ]] ; then
                 -N QA-DKRZ-${expname}-${year} -o $LOGFILE/QA-DKRZ_${expname}_${year}.out 
                 -e $LOGFILE/QA-DKRZ_${expname}_${year}.err ./call_github-qa-dkrz.sh'
 
+# Define basic options for SLURM sbatch submission
+elif [[ "$SUBMIT" == "sbatch" ]] ; then
+	MACHINE_OPT="--account=$ACCOUNT --time $TLIMIT --partition=$PARTITION --mem=$MEMORY"
+	JOB_ATM='$SUBMIT ${MACHINE_OPT} --export=${OPT_ATM} -n $NCORESATM --job-name=ifs-${expname}-${year}
+                 --output=$LOGFILE/cmor_${expname}_${year}_ifs_%j.out --error=$LOGFILE/cmor_${expname}_${year}_ifs_%j.err
+                 ./call_ece2cmor3.sh'
+	JOB_OCE='$SUBMIT ${MACHINE_OPT} --export=${OPT_OCE} -n $NCORESOCE --job-name=nemo-${expname}-${year}
+                --output=$LOGFILE/cmor_${expname}_${year}_nemo_%j.out --error=$LOGFILE/cmor_${expname}_${year}_nemo_%j.err
+                ./call_ece2cmor3.sh'
+#	JOB_COR='$SUBMIT --account=$ACCOUNT --time 01:00:00 --partition=$PARTITION --mem=${MEMORY} -n $NCORESCORRECT
+#                --export=${OPT_COR} --job-name=correct-${expname}-${year} --begin=now+${DELTAMIN}minutes
+#                --output=$LOGFILE/correct_${expname}_${year}_%j.out --error=$LOGFILE/correct_${expname}_${year}_%j.err
+#                ./call_correct_rename.sh'
+	JOB_PRE='$SUBMIT ${MACHINE_OPT} -n $NCORESPREPARE
+                --export=${OPT_PRE} --job-name=PrePARE-${expname}-${year}  --dependency=afterok:$JOBIDMERGE
+                --output=$LOGFILE/PrePARE_${expname}_${year}_%j.out --error=$LOGFILE/PrePARE_${expname}_${year}_%j.err
+                ./call_PrePARE.sh'
 fi
 
 # Nemo submission

@@ -112,10 +112,10 @@ fi
 [[ ! -d $DATADIR ]] && echo "*EE* Experiment HiresClim2 output dir $DATADIR does not exist!" && exit 1
 
 # -- nemo
-do_ocean=0
-[[ -r $DATADIR/Post_${year1}/${exp}_${year1}_sosstsst.nc ]] && do_ocean=1 && \
+do_ecmean=0
+[[ -r $DATADIR/Post_${year1}/${exp}_${year1}_sosstsst.nc ]] && do_ecmean=1 && \
     echo "*II* ecmean accounts for nemo output"
-export do_ocean
+export do_ecmean
 
 # -- other options
 
@@ -207,17 +207,35 @@ $PIDIR/gregory.sh $exp $year1 $year2 >> ./gregory.txt
 cat ./gregory.txt
 
 # finalizing
-cd -
 echo "table produced"
 
+# remote host
+    if [ ! "${RHOST}" = "" ]; then
+        echo "Preparing to export to remote host!"; echo
+	echo $(pwd)
+        tar cvf ecmean.tar $exp
+        scp -P $RPORT ecmean.tar ${RUSER}@${RHOST}:${RWWWD}/
+        ssh -p $RPORT ${RUSER}@${RHOST} "cd ${RWWWD}/; mkdir -p $exp/ecmean;  tar xf ecmean.tar 2>/dev/null; mv $exp/*$exp*.txt $exp/ecmean;  rm ecmean.tar"
+        echo; echo
+        echo "Diagnostic page installed on remote host ${RHOST} in ${RWWWD}/ecmean!"
+        echo "( Also browsable on local host in $PIDIR/ )"
+        rm -rf ecmean.tar
+    else
+        echo "Diagnostic page installed in $PIDIR/"
+        echo " => view this directory with a web browser (index.html)..."
+    fi
+
+cd -
+
+
 # ectrans block
-if [[  ${do_ectrans} == true ]]
-then
-    cd $TABLEDIR/..
-    tarfile=ecmean-$exp.tar.gz
-    rm -f $tarfile # remove old if any
-    tar cfvz $tarfile  $exp/
-    ectrans -remote $rhost -source $tarfile -verbose -overwrite
-fi
+#if [[  ${do_ectrans} == true ]]
+#then
+#    cd $TABLEDIR/..
+#    tarfile=ecmean-$exp.tar.gz
+#    rm -f $tarfile # remove old if any
+#    tar cfvz $tarfile  $exp/
+#    ectrans -remote $rhost -source $tarfile -verbose -overwrite
+#fi
 
 

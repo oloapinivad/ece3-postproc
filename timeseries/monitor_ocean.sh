@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 
-set -eu
+set -e
 export HERE=`pwd`
 
 export PYTHONPATH=${HERE}/scripts/barakuda_modules
+#export PATH=/galileo/home/userexternal/ffabiano/opts/miniconda3/envs/py2/bin:${PATH}
+echo 'monitor_ocean.sh'
+echo $PATH
 
 usage()
 {
@@ -89,7 +92,7 @@ if [ "${RUN}" = "" ]; then
     exit
 fi
 
-RWWWD=${WWW_DIR_ROOT}/time_series/${RUN}
+#RWWWD=${WWW_DIR_ROOT}/time_series/${RUN}
 
 echo " Runs to be treated: ${RUN}"; echo
 
@@ -480,8 +483,8 @@ if [ ${IPREPHTML} -eq 0 ]; then
                     echo "ncks -3 -A -h -v time_counter time_${jyear}.nc -o tmp_${hs}.nc"
                     ncks -3 -A -h -v time_counter time_${jyear}.nc -o tmp_${hs}.nc
 
-                    echo "ncks -3 -h -A -v tot_area_ice_${hs} tmp_${hs}.nc -o ${SUPA_Y}"
-                    ncks -3 -h -A -v tot_area_ice_${hs} tmp_${hs}.nc -o ${SUPA_Y}
+                    #echo "ncks -3 -h -A -v tot_area_ice_${hs} tmp_${hs}.nc -o ${SUPA_Y}"
+                    #ncks -3 -h -A -v tot_area_ice_${hs} tmp_${hs}.nc -o ${SUPA_Y}
                     
                 done
                 rm -f tmp0.nc  tmp_e1t_e2t.nc tmp_*.nc
@@ -568,10 +571,12 @@ if [ ${IPREPHTML} -eq 1 ]; then
         echo "Preparing to export to remote host!"; echo
         cd ../
         tar cvf ocean.tar ocean
-        ssh ${RUSER}@${RHOST} "mkdir -p ${RWWWD}"
-        echo "scp ocean.tar ${RUSER}@${RHOST}:${RWWWD}/"
-        scp ocean.tar ${RUSER}@${RHOST}:${RWWWD}/
-        ssh ${RUSER}@${RHOST} "cd ${RWWWD}/; rm -rf ocean; tar xf ocean.tar 2>/dev/null; rm ocean.tar"
+        #ssh ${RUSER}@${RHOST} "mkdir -p ${RWWWD}"
+        #echo "scp ocean.tar ${RUSER}@${RHOST}:${RWWWD}/"
+        #scp ocean.tar ${RUSER}@${RHOST}:${RWWWD}/
+        #ssh ${RUSER}@${RHOST} "cd ${RWWWD}/; rm -rf ocean; tar xf ocean.tar 2>/dev/null; rm ocean.tar"
+        scp -P $RPORT ocean.tar ${RUSER}@${RHOST}:${RWWWD}/
+        ssh -p $RPORT ${RUSER}@${RHOST} "cd ${RWWWD}/; rm -rf $RUN/ocean; tar xf ocean.tar 2>/dev/null; mv ocean/ $RUN/;  rm ocean.tar"
         echo; echo
         echo "Diagnostic page installed on remote host ${RHOST} in ${RWWWD}/ocean!"
         echo "( Also browsable on local host in ${DIAG_D}/ )"
