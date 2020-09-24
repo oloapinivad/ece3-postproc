@@ -4,7 +4,7 @@ export PATH=/usr/local/bin:$PATH
 . ~/.profile
 . ~/.bashrc
 
-explist="bot0"
+explist="b025 b050 b100"
 mastermind="CNR-ISAC"
 transfer="rsync"
 host="federico@wilma.to.isac.cnr.it"
@@ -50,6 +50,9 @@ for exp in $explist ; do
 		#"mmp1") start_year=1999; end_year=2030; exp_info="REFORGE T511 rfrg-ctrl-param"; userexp=ccpd ; project=REFORGE ;;
 		#"mln1") start_year=1999; end_year=2030; exp_info="REFORGE T511 rfrg-ctrl-orog255"; userexp=ccpd ; project=REFORGE ;;
 		"bot0") start_year=2000; end_year=2500; exp_info="BOTTINO Stabilization year 2000"; userexp=ffabiano ; project=BOTTINO ;;
+		"b025") start_year=2025; end_year=2525; exp_info="BOTTINO Stabilization year 2025"; userexp=ffabiano ; project=BOTTINO ;;
+		"b050") start_year=2050; end_year=2550; exp_info="BOTTINO Stabilization year 2050"; userexp=ffabiano ; project=BOTTINO ;;
+		"b100") start_year=2100; end_year=2600; exp_info="BOTTINO Stabilization year 2100"; userexp=ffabiano ; project=BOTTINO ;;
 	
         esac
 

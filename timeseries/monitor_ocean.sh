@@ -576,7 +576,7 @@ if [ ${IPREPHTML} -eq 1 ]; then
         #scp ocean.tar ${RUSER}@${RHOST}:${RWWWD}/
         #ssh ${RUSER}@${RHOST} "cd ${RWWWD}/; rm -rf ocean; tar xf ocean.tar 2>/dev/null; rm ocean.tar"
         scp -P $RPORT ocean.tar ${RUSER}@${RHOST}:${RWWWD}/
-        ssh -p $RPORT ${RUSER}@${RHOST} "cd ${RWWWD}/; rm -rf $RUN/ocean; tar xf ocean.tar 2>/dev/null; mv ocean/ $RUN/;  rm ocean.tar"
+        ssh -p $RPORT ${RUSER}@${RHOST} "cd ${RWWWD}/; mkdir -p $RUN; rm -rf $RUN/ocean; tar xf ocean.tar 2>/dev/null; mv ocean/ $RUN/;  rm ocean.tar"
         echo; echo
         echo "Diagnostic page installed on remote host ${RHOST} in ${RWWWD}/ocean!"
         echo "( Also browsable on local host in ${DIAG_D}/ )"

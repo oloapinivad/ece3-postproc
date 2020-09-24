@@ -215,7 +215,7 @@ echo "table produced"
 	echo $(pwd)
         tar cvf ecmean.tar $exp
         scp -P $RPORT ecmean.tar ${RUSER}@${RHOST}:${RWWWD}/
-        ssh -p $RPORT ${RUSER}@${RHOST} "cd ${RWWWD}/; mkdir -p $exp/ecmean;  tar xf ecmean.tar 2>/dev/null; mv $exp/*$exp*.txt $exp/ecmean;  rm ecmean.tar"
+        ssh -p $RPORT ${RUSER}@${RHOST} "cd ${RWWWD}/; mkdir -p $exp; mkdir -p $exp/ecmean;  tar xf ecmean.tar 2>/dev/null; mv $exp/*$exp*.txt $exp/ecmean;  rm ecmean.tar"
         echo; echo
         echo "Diagnostic page installed on remote host ${RHOST} in ${RWWWD}/ecmean!"
         echo "( Also browsable on local host in $PIDIR/ )"

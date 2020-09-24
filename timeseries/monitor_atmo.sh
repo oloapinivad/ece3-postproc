@@ -394,7 +394,7 @@ if [ ${IPREPHTML} -eq 1 ]; then
         tar cvf atmosphere.tar atmosphere
         echo "scp atmosphere.tar ${RUSER}@${RHOST}:${RWWWD}/"
         scp -P $RPORT atmosphere.tar ${RUSER}@${RHOST}:${RWWWD}/
-        ssh -p $RPORT ${RUSER}@${RHOST} "cd ${RWWWD}/; rm -rf $RUN/atmosphere; tar xf atmosphere.tar 2>/dev/null; mv atmosphere/ $RUN/;  rm atmosphere.tar"
+        ssh -p $RPORT ${RUSER}@${RHOST} "cd ${RWWWD}/; mkdir -p $RUN; rm -rf $RUN/atmosphere; tar xf atmosphere.tar 2>/dev/null; mv atmosphere/ $RUN/;  rm atmosphere.tar"
         echo; echo
         echo "Diagnostic page installed on remote host ${RHOST} in ${RWWWD}/atmosphere!"
         echo "( Also browsable on local host in ${DIAG_D}/ )"
