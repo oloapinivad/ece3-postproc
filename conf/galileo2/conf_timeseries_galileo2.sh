@@ -13,7 +13,7 @@
 #export PATH="/galileo/home/userexternal/$USER/opts/miniconda3/bin:$PATH"
 #source /galileo/home/userexternal/$USER/opts/miniconda3/etc/profile.d/conda.sh
 #conda activate py2
-export PATH=/galileo/home/userexternal/$USER/opts/miniconda3/envs/py2/bin:${PATH}
+export PATH=/galileo/home/userexternal/ffabiano/opts/miniconda3/envs/py2/bin:${PATH}
 
 #module_list="intel/pe-xe-2018--binary szip zlib mkl/2018--binary hdf5/1.8.18--intel--pe-xe-2018--binary netcdf/4.6.1--intel--pe-xe-2018--binary python/2.7.12 numpy/1.15.2--python--2.7.12 nco"
 #for soft in ${module_list}

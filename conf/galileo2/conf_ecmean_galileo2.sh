@@ -23,7 +23,7 @@ export ECE3_POSTPROC_POSTDIR='/gpfs/scratch/userexternal/${USERexp}/ece3/${EXPID
 
 # --- TOOLS -----
 # Required programs, including compression options
-cdo="/galileo/home/userexternal/$USER/opt/cdo/cdo"
+cdo="/galileo/home/userexternal/ffabiano/opt/cdo/cdo"
 
 export cdo=cdo
 export cdozip="$cdo -f nc4c -z zip"
