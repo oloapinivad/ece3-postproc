@@ -24,7 +24,7 @@ export ${USERexp:=$USER}
 [[ -z ${ECE3_POSTPROC_POSTDIR:-} ]] && export ECE3_POSTPROC_POSTDIR='/gpfs/scratch/userexternal/${USER}/ece3/${EXPID}/post'
 
 # INFODIR: where to save postchecks
-INFODIR=$WORK/ffabiano/ecearth3/infodir/hiresclim
+INFODIR=$WORK/$USER/ecearth3/infodir/hiresclim
 
 # --- PROCESSING TO PERFORM (uncomment to change default)
  ECE3_POSTPROC_HC_IFS_MONTHLY=1
@@ -73,7 +73,7 @@ done
 cdo=cdo
 cdozip="$cdo -f nc4c -z zip"
 rbld="$WORK/ecearth3/rebuild_nemo/rebuild_nemo"
-cdftoolsbin="$WORK/ffabiano/ecearth3/cdftools4/bin"
+cdftoolsbin="$WORK/$USER/ecearth3/cdftools4/bin"
 python=python
 
 # By default the older (3.0.0) CDFTOOLS syntax is used.
@@ -95,7 +95,7 @@ IFS_NPROCS=12; NEMO_NPROCS=12
 #fi
 
 # where to find mesh and mask files 
-export MESHDIR_TOP=$WORK/ffabiano/ecearth3/ece3-postproc-files/
+export MESHDIR_TOP=$WORK/$USER/ecearth3/ece3-postproc-files/
 
 # where to find the results from the EC-EARTH experiment
 # On our machine Nemo and IFS results are in separate directories

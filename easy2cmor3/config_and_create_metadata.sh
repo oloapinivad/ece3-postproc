@@ -23,6 +23,9 @@ investigate=${3:-false}
 reference_revision=r7870
 
 case $expname in
+	b025)   mip=LongRunMIP;		exptype=stabilization-ssp585-2025;   model=EC-EARTH-AOGCM; realization=1 ; table=BOTT ;;
+	b050)   mip=LongRunMIP;		exptype=stabilization-ssp585-2050;   model=EC-EARTH-AOGCM; realization=1 ; table=BOTT ;;
+	b100)   mip=LongRunMIP;		exptype=stabilization-ssp585-2100;   model=EC-EARTH-AOGCM; realization=1 ; table=BOTT ;;
 	bot0)   mip=CMIP; 		exptype=historical;   model=EC-EARTH-AOGCM; realization=4 ; table=BOTT ;;
 	chis)   mip=CMIP; 		exptype=historical;   model=EC-EARTH-AOGCM; realization=4 ; table=CMIP ;;
 	caaa)   mip=CMIP;               exptype=amip; 	      model=EC-EARTH-AOGCM; realization=4 ; table=CMIP;;

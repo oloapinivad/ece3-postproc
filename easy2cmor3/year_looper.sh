@@ -5,9 +5,9 @@
 
 #rough scheme for looping on years, it produces up to 15 jobs for each year so beware
 
-EXP=bot0
-YEAR1=2000
-YEAR2=2001
+EXP=b025
+YEAR1=2026
+YEAR2=2047
 ATM=1
 OCE=1
 VEG=0

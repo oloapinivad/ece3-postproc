@@ -10,10 +10,10 @@
 # required programs, including compression options
 #module purge
 
-#export PATH="/galileo/home/userexternal/ffabiano/opts/miniconda3/bin:$PATH"
-#source /galileo/home/userexternal/ffabiano/opts/miniconda3/etc/profile.d/conda.sh
+#export PATH="/galileo/home/userexternal/$USER/opts/miniconda3/bin:$PATH"
+#source /galileo/home/userexternal/$USER/opts/miniconda3/etc/profile.d/conda.sh
 #conda activate py2
-export PATH=/galileo/home/userexternal/ffabiano/opts/miniconda3/envs/py2/bin:${PATH}
+export PATH=/galileo/home/userexternal/$USER/opts/miniconda3/envs/py2/bin:${PATH}
 
 #module_list="intel/pe-xe-2018--binary szip zlib mkl/2018--binary hdf5/1.8.18--intel--pe-xe-2018--binary netcdf/4.6.1--intel--pe-xe-2018--binary python/2.7.12 numpy/1.15.2--python--2.7.12 nco"
 #for soft in ${module_list}
@@ -26,12 +26,12 @@ export PATH=/galileo/home/userexternal/ffabiano/opts/miniconda3/envs/py2/bin:${P
 #done
 
 export ${USERexp:=$USER}
-export ECE3_POSTPROC_DIAGDIR='$WORK/ffabiano/ecearth3/diag'
+export ECE3_POSTPROC_DIAGDIR='$WORK/$USER/ecearth3/diag'
 export ECE3_POSTPROC_POSTDIR='/gpfs/scratch/userexternal/${USERexp}/ece3/${EXPID}/post'
-export MESHDIR_TOP="$WORK/ffabiano/ecearth3/ece3-postproc-files"
+export MESHDIR_TOP="$WORK/$USER/ecearth3/ece3-postproc-files"
 
 # The CDFTOOLS set of executables should be found into:
-export CDFTOOLS_BIN="$WORK/ffabiano/ecearth3/cdftools4/bin"
+export CDFTOOLS_BIN="$WORK/$USER/ecearth3/cdftools4/bin"
 
 # The scrip "rebuild" as provided with NEMO (relies on flio_rbld.exe):
 export RBLD_NEMO="$WORK/ecearth3/rebuild_nemo/rebuild_nemo"

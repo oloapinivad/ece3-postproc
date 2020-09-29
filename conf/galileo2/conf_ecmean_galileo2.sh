@@ -23,7 +23,7 @@ export ECE3_POSTPROC_POSTDIR='/gpfs/scratch/userexternal/${USERexp}/ece3/${EXPID
 
 # --- TOOLS -----
 # Required programs, including compression options
-cdo="/galileo/home/userexternal/ffabiano/opt/cdo/cdo"
+cdo="/galileo/home/userexternal/$USER/opt/cdo/cdo"
 
 export cdo=cdo
 export cdozip="$cdo -f nc4c -z zip"
@@ -52,7 +52,7 @@ export remap="remapcon2"
 #     Tables for one simulation will be in ${ECE3_POSTPROC_DIAGDIR}/table/${EXPID}
 #     Summary tables for several simulations will be in ${ECE3_POSTPROC_DIAGDIR}/table/
 #     
-export ECE3_POSTPROC_DIAGDIR='$WORK/ffabiano/ecearth3/diag'
+export ECE3_POSTPROC_DIAGDIR='$WORK/$USER/ecearth3/diag'
 
 # [2] Where to save the climatology (769M IFS, 799M IFS+NEMO). 
 #
@@ -72,7 +72,7 @@ export CLIMDIR0='/gpfs/scratch/userexternal/${USER}/tmp_ecearth3/ecmean/${EXPID}
 #     Can include ${STEMID} as ensemble ID.
 #     Must be single-quoted if to be evaluated later.
 #
-export ECE3_POSTPROC_PI4REPRO='$WORK/ffabiano/ecearth3/diag/${STEMID}'
+export ECE3_POSTPROC_PI4REPRO='$WORK/$USER/ecearth3/diag/${STEMID}'
 
 
 # About remote HOST to send/install HTML pages to:
