@@ -94,9 +94,11 @@ asypd=float(max(years) - min(years))/365.25/ days
 print days
 print asypd
 
-# totla number of core hours consumed (kh)
+# total number of core hours consumed (kh)
 totch = np.sum(np.diff(np.append(years_start, years)) * chpsy / 365.25) / 1000
+estch = np.mean(chpsy) * (years_final - years_start) / 365.25 / 1000
 print totch
+print estch
 
 
 # Linear fit to extrapolate expected simulation based on the last 5 years
@@ -116,7 +118,8 @@ ax2.plot_date(years, chpsy, xdate=True, ydate=False, color="green", fmt="-", lin
 ax2.set_ylabel('Core hours per simulated year')
 ax2.axhline(np.mean(chpsy), color='darkgreen', linestyle=':',linewidth=2)
 ax2.legend(['Value','Average: '+str(round(np.mean(chpsy),2))+u"\u00B1"+str(round(np.std(chpsy),2))],loc='upper left', shadow=True, fancybox=True)
-ax2.text(0.65, 0.1,'Total consumed kh:'+str(round(totch,2)),transform = ax2.transAxes, fontsize=15)
+ax2.text(0.65, 0.15,'Total consumed kh:'+str(round(totch,2)),transform = ax2.transAxes, fontsize=15)
+ax2.text(0.55, 0.05,'Estimated total required kh:'+str(round(estch,2)),transform = ax2.transAxes, fontsize=15)
 
 # Third plot: SYPD evolution
 ax3=plt.subplot(3,1,3, title='SYPD evolution')

@@ -4,24 +4,25 @@ export PATH=/usr/local/bin:$PATH
 . ~/.profile
 . ~/.bashrc
 
-#explist="hhn1 hln1"
-explist="b025 b050 b100"
+explist="hhn1 hln1"
+#explist="b025 b050 b100"
 mastermind="CNR-ISAC"
-transfer="rsync"
 host="federico@wilma.to.isac.cnr.it"
 port=10133
 
 DIR=$ECE3_POSTPROC_TOPDIR/performance
 
-if [[ $ECE3_POSTPROC_MACHINE == "cca" ]] ; then
+if [[ $ECE3_POSTPROC_MACHINE == "cca_CNR" ]] ; then
 	BASESCRATCH=/lus/snx11062/scratch/ms/it
 	BASEWORK=/perm/ms/it/
-	statcheck="qsub -s"  
+	scheduler="slurm"
+	transfer="ectrans"
 elif [[ $ECE3_POSTPROC_MACHINE == "galileo2" ]] ; then
 	BASESCRATCH=/gpfs/scratch/userexternal
 	BASEWORK=/gpfs/work/IscrB_INCIPIT
 	module load python/2.7.12 numpy/1.15.2--python--2.7.12
-	statcheck="squeue -u ffabiano"
+	scheduler="pbs"
+	transfer="rsync"
 fi
 
 
@@ -29,7 +30,6 @@ for exp in $explist ; do
 
 	 # experiment details
         case $exp in
-<<<<<<< HEAD
                 "chis") start_year=1850; end_year=2015; exp_info="CMIP6 Historical AOGCM"; userexp=ccpd ;;
 		"vhis") start_year=1850; end_year=2015; exp_info="CMIP6 Historical Veg"; userexp=ccpd ;;
 		"c4co") start_year=1850; end_year=2015; exp_info="CMIP6 abrupt-4CO2 AOGCM"; userexp=ccpd ;;
@@ -141,7 +141,11 @@ for exp in $explist ; do
 	# fun single line excercise with grep, tail, sed, awk and tr
 	ifs_status=$(tail -n100 $ifslog | grep " DATE= " | tail -n1 | sed "s/  \+/ /g" | awk '{$1=$1};1' | tr '[:upper:]' '[:lower:]')
 	# grep status from qstat
-	check_status=$($statcheck -u $USER | grep " ${exp} ")
+	if [[ $scheduler == "pbs" ]] ; then
+		check_status=$(squeue -u $USER | grep " ${exp} ")
+	elif [[ $scheduler == "slurm" ]] ; then
+		check_status=$(qstat -s -u $USER | grep "${exp}.job")
+	fi
 	echo $check_status
 	# according to the status update the templates with different values and colors
 	[[ -z ${check_status} ]] && { model_status="not running" ; col_status="red" ; }
@@ -165,6 +169,7 @@ for exp in $explist ; do
 
 	# if ectrans is set, transfer the data
 	if [[ $transfer == "ectrans" ]] ; then
+		host=wilma
 		ectrans -remote $host -source $HTML -verbose -overwrite
 		ectrans -remote $host -source $figure -verbose -overwrite
 		ectrans -remote $host -source $infocmor -verbose -overwrite
