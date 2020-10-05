@@ -12,10 +12,12 @@ import barakuda_tool as bt
 
 
 CRUN = os.getenv('RUN')
-if CRUN == None: print 'The RUN environement variable is no set'; sys.exit(0)
+if CRUN == None:
+    raise ValueError('The RUN environement variable is not set')
 
 SUPA_FILE = os.getenv('SUPA_FILE')
-if SUPA_FILE == None: print 'The SUPA_FILE environement variable is no set'; sys.exit(0)
+if SUPA_FILE == None:
+    raise ValueError('The SUPA_FILE environement variable is not set')
 
 
 
@@ -38,7 +40,7 @@ v_var_units = nmp.zeros(nbvar, dtype = nmp.dtype('a8'))
 v_var_lngnm = nmp.zeros(nbvar, dtype = nmp.dtype('a64'))
 
 
-print '\n *** plot_atmo_time_series.py => USING time series in '+SUPA_FILE
+print('\n *** plot_atmo_time_series.py => USING time series in '+SUPA_FILE)
 
 
 bt.chck4f(SUPA_FILE)
@@ -55,7 +57,7 @@ nbr   = len(vtime)
 XX = nmp.zeros(nbvar*nbr) ; XX.shape = [nbvar, nbr]
 
 for jv in range(nbvar):
-    print ' **** reading '+v_var_names[jv]
+    print(' **** reading '+v_var_names[jv])
     XX[jv,:] = id_clim.variables[v_var_names[jv]][:]
     try:
         v_var_units[jv] = id_clim.variables[v_var_names[jv]].units
@@ -77,7 +79,7 @@ for jv in range(nbvar):
     cln = v_var_lngnm[jv]
     cfn  = cv+'_'+CRUN
 
-    print '   Creating figure '+cfn
+    print('   Creating figure '+cfn)
 
     # Annual data
     VY, FY = bt.monthly_2_annual(vtime[:], XX[jv,:])
@@ -166,10 +168,10 @@ elif cdiag == 'mean_mldr10_1':
 elif cdiag == 'transport_sections':
     fig_id = 'transport'    
     TRANSPORT_SECTION_FILE = os.getenv('TRANSPORT_SECTION_FILE')
-    if TRANSPORT_SECTION_FILE == None: print 'The TRANSPORT_SECTION_FILE environement variable is no set'; sys.exit(0)    
-    print '  Using TRANSPORT_SECTION_FILE = '+TRANSPORT_SECTION_FILE
+    if TRANSPORT_SECTION_FILE == None: raise ValueError('The TRANSPORT_SECTION_FILE environement variable is no set')
+    print('  Using TRANSPORT_SECTION_FILE = '+TRANSPORT_SECTION_FILE)
     list_sections = bo.get_sections_names_from_file(TRANSPORT_SECTION_FILE)
-    print 'List of sections to treat: ', list_sections
+    print('List of sections to treat: ', list_sections)
 
 
 
@@ -180,7 +182,7 @@ elif cdiag == 'seaice':
 
 
 else:
-    print 'ERROR: plot_time_series.py => diagnostic '+cdiag+' unknown!'; sys.exit(0)
+    raise ValueError('ERROR: plot_time_series.py => diagnostic '+cdiag+' unknown!')
 
 
 
@@ -203,7 +205,7 @@ if fig_id == 'simple':
 
     # Monthly data:
     XM = bt.read_ascii_column(SUPA_FILE_m, [0, 1]) ; [ n0, nbm ] = XM.shape
-    if nbm%12 != 0: print 'ERROR: plot_time_series.py => '+cdiag+', numberof records not a multiple of 12!', sys.exit(0)
+    if nbm%12 != 0: raise ValueError('ERROR: plot_time_series.py => '+cdiag+', numberof records not a multiple of 12!')
 
     # Annual data
     VY, FY = bt.monthly_2_annual(XM[0,:], XM[1,:])
@@ -233,7 +235,7 @@ if fig_id == 'ts3d':
         XM = bt.read_ascii_column(SUPA_FILE_m, [0, 1, 2, 3, 4]) # has 3 depth range!
         if joce == 0:
             [ n0, nbm ] = XM.shape
-            if nbm%12 != 0: print 'ERROR: plot_time_series.py => '+cdiag+', numberof records not a multiple of 12!', sys.exit(0)
+            if nbm%12 != 0: raise ValueError('ERROR: plot_time_series.py => '+cdiag+', numberof records not a multiple of 12!')
             FM = nmp.zeros(nbm*4*nb_oce) ; FM.shape = [ nb_oce, 4, nbm ]
         FM[joce,:,:] = XM[1:,:]
 
@@ -281,7 +283,7 @@ if fig_id == 'amoc':
 
     # 45N:
     XM = bt.read_ascii_column(SUPA_FILE_m, [0, ic45]) ; [ n0, nbm ] = XM.shape
-    if nbm%12 != 0: print 'ERROR: plot_time_series.py => '+cdiag+', numberof records not a multiple of 12!', sys.exit(0)
+    if nbm%12 != 0: raise ValueError('ERROR: plot_time_series.py => '+cdiag+', numberof records not a multiple of 12!')
     VY, FY = bt.monthly_2_annual(XM[0,:], XM[1,:])
 
     ittic = bt.iaxe_tick(nbm/12)
@@ -296,7 +298,7 @@ if fig_id == 'amoc':
     vlab = [ r'20$^{\circ}$N' , r'30$^{\circ}$N' , r'40$^{\circ}$N' , r'50$^{\circ}$N' ]
     
     XM = bt.read_ascii_column(SUPA_FILE_m, [0, ic20, ic30, ic40, ic50]) ; [ n0, nbm ] = XM.shape
-    if nbm%12 != 0: print 'ERROR: plot_time_series.py => '+cdiag+', numberof records not a multiple of 12!', sys.exit(0)
+    if nbm%12 != 0: raise ValueError('ERROR: plot_time_series.py => '+cdiag+', numberof records not a multiple of 12!')
 
     # Annual:
     VY, FY  = bt.monthly_2_annual(XM[0,:], XM[1:,:])
@@ -320,7 +322,7 @@ if fig_id == 'ice':
     Xice = bt.read_ascii_column(SUPA_FILE, [0, 1, 2, 3, 4])
 
     [ n0, nbm ] = Xice.shape
-    if nbm%12 != 0: print 'ERROR: plot_time_series.py => '+cdiag+', numberof records not a multiple of 12!', sys.exit(0)
+    if nbm%12 != 0: raise ValueError('ERROR: plot_time_series.py => '+cdiag+', numberof records not a multiple of 12!')
     nby = nbm/12
     
     ittic = bt.iaxe_tick(nby)
@@ -350,12 +352,12 @@ if fig_id == 'transport':
 
     for csec in list_sections:
 
-        print ' * treating section '+csec
+        print(' * treating section '+csec)
 
         SUPA_FILE_m = 'transport_sections/transport_'+csec+'_'+CRUN+'.dat'
 
         XM = bt.read_ascii_column(SUPA_FILE_m, [0, 1, 2]) ; [ n0, nbm ] = XM.shape
-        if nbm%12 != 0: print 'ERROR: plot_time_series.py => '+cdiag+', numberof records not a multiple of 12!', sys.exit(0)
+        if nbm%12 != 0: raise ValueError('ERROR: plot_time_series.py => '+cdiag+', numberof records not a multiple of 12!')
 
         VY, FY  = bt.monthly_2_annual(XM[0,:], XM[1:,:])        
 
@@ -379,16 +381,16 @@ if fig_id == 'mld':
     for cbox in bo.cname_mld_boxes:
         SUPA_FILE_m = cdiag+'_'+CRUN+'_'+cbox+'.dat'
         if os.path.exists(SUPA_FILE_m):
-            print ' Opening '+SUPA_FILE_m
+            print(' Opening '+SUPA_FILE_m)
             XM = bt.read_ascii_column(SUPA_FILE_m, [0, 1]) ; [ n0, nbm ] = XM.shape ; # Monthly data:
-            if nbm%12 != 0: print 'ERROR: plot_time_series.py => '+cdiag+', numberof records not a multiple of 12!', sys.exit(0)
+            if nbm%12 != 0: raise ValueError('ERROR: plot_time_series.py => '+cdiag+', numberof records not a multiple of 12!')
             VY, FY = bt.monthly_2_annual(XM[0,:], XM[1,:]) ; # Annual data
             ittic = bt.iaxe_tick(nbm/12)
             bp.plot_1d_mon_ann(XM[0,:], VY, XM[1,:], FY, cfignm=cdiag+'_'+CRUN+'_'+cbox, dt_year=ittic, cyunit=cyu,
                                   ctitle = CRUN+': '+clnm+bo.clgnm_mld_boxes[jbox], ymin=ym, ymax=yp, plt_m03=True, plt_m09=True)
         else:
-            print 'WARNING: plot_time_series.py => MLD diag => '+SUPA_FILE_m+' not found!'
+            print('WARNING: plot_time_series.py => MLD diag => '+SUPA_FILE_m+' not found!')
         jbox = jbox+1
 
 
-print 'plot_time_series.py done...\n'
+print('plot_time_series.py done...\n')

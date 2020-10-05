@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 
-set -eu
+set -e
 export HERE=`pwd`
 
 export PYTHONPATH=${HERE}/scripts/barakuda_modules
+#export PATH=/galileo/home/userexternal/ffabiano/opts/miniconda3/envs/py2/bin:${PATH}
+echo 'monitor_atmo.sh'
+echo $PATH
 
 usage()
 {
@@ -93,8 +96,6 @@ if [ "${RUN}" = "" ]; then
     usage
     exit
 fi
-
-RWWWD=${WWW_DIR_ROOT}/time_series/${RUN}
 
 echo " Runs to be treated: ${RUN}"; echo
 
@@ -391,10 +392,9 @@ if [ ${IPREPHTML} -eq 1 ]; then
         echo "Preparing to export to remote host!"; echo
         cd ../
         tar cvf atmosphere.tar atmosphere
-        ssh ${RUSER}@${RHOST} "mkdir -p ${RWWWD}"
         echo "scp atmosphere.tar ${RUSER}@${RHOST}:${RWWWD}/"
-        scp atmosphere.tar ${RUSER}@${RHOST}:${RWWWD}/
-        ssh ${RUSER}@${RHOST} "cd ${RWWWD}/; rm -rf atmosphere; tar xf atmosphere.tar 2>/dev/null; rm atmosphere.tar"
+        scp -P $RPORT atmosphere.tar ${RUSER}@${RHOST}:${RWWWD}/
+        ssh -p $RPORT ${RUSER}@${RHOST} "cd ${RWWWD}/; mkdir -p $RUN; rm -rf $RUN/atmosphere; tar xf atmosphere.tar 2>/dev/null; mv atmosphere/ $RUN/;  rm atmosphere.tar"
         echo; echo
         echo "Diagnostic page installed on remote host ${RHOST} in ${RWWWD}/atmosphere!"
         echo "( Also browsable on local host in ${DIAG_D}/ )"

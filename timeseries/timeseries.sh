@@ -1,6 +1,9 @@
 #/bin/bash
 
-set -eu
+set -e
+#export PATH=/galileo/home/userexternal/ffabiano/opts/miniconda3/envs/py2/bin:${PATH}
+echo 'timeseries.sh'
+echo $PATH
 
 usage()
 {

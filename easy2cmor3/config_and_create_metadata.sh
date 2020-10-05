@@ -20,9 +20,14 @@ fi
 expname=$1
 generate=${2:-false}
 investigate=${3:-false}
-reference_revision=covid19-r8037
+#reference_revision=covid19-r8037
+reference_revision=r7870
 
 case $expname in
+	b025)   mip=LongRunMIP;		exptype=stabilization-ssp585-2025;   model=EC-EARTH-AOGCM; realization=1 ; table=BOTT ;;
+	b050)   mip=LongRunMIP;		exptype=stabilization-ssp585-2050;   model=EC-EARTH-AOGCM; realization=1 ; table=BOTT ;;
+	b100)   mip=LongRunMIP;		exptype=stabilization-ssp585-2100;   model=EC-EARTH-AOGCM; realization=1 ; table=BOTT ;;
+	bot0)   mip=CMIP; 		exptype=historical;   model=EC-EARTH-AOGCM; realization=4 ; table=BOTT ;;
 	chis)   mip=CMIP; 		exptype=historical;   model=EC-EARTH-AOGCM; realization=4 ; table=CMIP ;;
 	caaa)   mip=CMIP;               exptype=amip; 	      model=EC-EARTH-AOGCM; realization=4 ; table=CMIP;;
 	c4co)   mip=CMIP;               exptype=abrupt-4xCO2; model=EC-EARTH-AOGCM; realization=8 ; table=CMIP;;
@@ -171,10 +176,16 @@ if [[ $generate == true ]] ; then
 	done
 fi
 
+ECE3DIR=$HOME/ec-earth
+
 # exporting values for ece2cmor runs
 # set varlist
 if [[ $table == "CMIP" ]] ; then
+<<<<<<< HEAD
 	VARLISTDIR=${CTRLDIR}/$model/cmip6-experiment-$mip-$exptype
+=======
+	VARLISTDIR=$ECE3DIR/revisions/${reference_revision}/runtime/classic/ctrl/cmip6-output-control-files/$mip/$model/cmip6-experiment-$mip-$exptype
+>>>>>>> 202b1df61ede01346754cebdc6f66cef5b190c6b
 	if [[ $investigate == false ]] ; then
 		VARLIST=$VARLISTDIR/cmip6-data-request-varlist-$mip-$exptype-$model.json
 	else 
@@ -185,6 +196,10 @@ elif [[ $table == "CovidMIP" ]] ; then
 elif [[ $table == "RFRG" ]]  ; then
 		VARLIST=$EASYDIR/varlist/reforge-varlist.json
 		TABDIR=$PERM/ecearth3/cmorization/reforge-cmor-tables/Tables
+		tabdir="--tabledir $TABDIR"
+elif [[ $table == "BOTT" ]]  ; then
+		VARLIST=$EASYDIR/varlist/bottino-varlist.json
+		TABDIR=$HOME/post/cmorization/bottino_tables/Tables
 		tabdir="--tabledir $TABDIR"
 elif [[ $table == "SPPT" ]]  ; then
                 VARLIST=$EASYDIR/varlist/sppt-varlist.json
