@@ -14,7 +14,7 @@ usage()
 
 expname=$1
 year=$2
-missing=$3
+missing=1
 
 if [ $# -lt 2 ]; then
    usage
@@ -69,7 +69,7 @@ for t in $(seq 0 $((${#s0[@]}-1))) ; do
 	nvars="$nvars $ll"
 done
 
-if [[ $missing == true ]] ; then
+if [[ $missing -eq 1 ]] ; then
 missingfile=missing_vars_${expname}_${year}
 rm -f $missingfile
 for t in $(seq 0 $((${#s0[@]}-1))) ; do

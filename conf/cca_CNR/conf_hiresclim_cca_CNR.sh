@@ -88,7 +88,7 @@ cdftools301=0
 
 
 # Set to 0 for not to rebuild 3D relative humidity
-rh_build=1
+rh_build=0
 
 #extension for IFS files, default ""
 [[ -z ${GRB_EXT:-} ]] && GRB_EXT="" #".grb"

@@ -46,14 +46,16 @@ do_clean=false # make clean: not working
 # Interrogation can be done with svn log https://svn.ec-earth.org/ecearth3/tags/3.3.2.1 -v --stop-on-copy
 
 # user configuration
-revision="7802" #which revision do you want?
+revision="8037" #which revision do you want?
+#version=trunk
+version=branches/development/2020/r7925-covid19-experiments
 platform_src=ecmwf-cca-intel-mpi # src architecture
 platform_run=ecmwf-cca-intel # runtime architecture
 do_lpjg=false # do want lpjg?
 nemo_config=ORCA1L75_LIM3 #which nemo configuration do you want?
+rxxxx="covid19-r$revision"
 
 # hard coded option
-rxxxx="r$revision"
 SRCDIR=$PERM/ecearth3/revisions/$rxxxx/sources
 RUNDIR=$PERM/ecearth3/revisions/$rxxxx/runtime/classic
 ecconfexe=$SRCDIR/util/ec-conf/ec-conf
@@ -72,7 +74,7 @@ function_replacer () {
 
 # SVN checkout of the required revision
 if [[ $do_svn == true ]] ; then
-	svn checkout -r $revision  https://svn.ec-earth.org/ecearth3/trunk $PERM/ecearth3/revisions/$rxxxx
+	svn checkout -r $revision  https://svn.ec-earth.org/ecearth3/$version $PERM/ecearth3/revisions/$rxxxx
 fi
 
 # go to target directory

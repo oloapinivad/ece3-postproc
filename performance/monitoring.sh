@@ -4,13 +4,13 @@ export PATH=/usr/local/bin:$PATH
 . ~/.profile
 . ~/.bashrc
 
-explist="s4co mmp1 mln1"
+explist="hhn1 hln1"
 mastermind="CNR-ISAC"
 transfer="ectrans"
 host="wilma"
 
 # default
-DIR=/home/ms/it/ccpd/post/various
+DIR=$ECE3_POSTPROC_TOPDIR/performance
 
 for exp in $explist ; do
 
@@ -36,6 +36,8 @@ for exp in $explist ; do
                 "mmn1") start_year=1999; end_year=2030; exp_info="REFORGE T511 rfrg-ctrl-noparam"; userexp=ccpd ; project=REFORGE ;;
 		"mmp1") start_year=1999; end_year=2030; exp_info="REFORGE T511 rfrg-ctrl-param"; userexp=ccpd ; project=REFORGE ;;
 		"mln1") start_year=1999; end_year=2030; exp_info="REFORGE T511 rfrg-ctrl-orog255"; userexp=ccpd ; project=REFORGE ;;
+		"hln1") start_year=1999; end_year=2020; exp_info="REFORGE T799 rfrg-orog255-noparam"; userexp=ccpd ; project=REFORGE ;;
+                "hhn1") start_year=1999; end_year=2020; exp_info="REFORGE T799 rfrg-ctrl-noparam"; userexp=ccpd ; project=REFORGE ;;
 	
         esac
 
