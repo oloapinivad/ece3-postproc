@@ -181,11 +181,7 @@ ECE3DIR=$HOME/ec-earth
 # exporting values for ece2cmor runs
 # set varlist
 if [[ $table == "CMIP" ]] ; then
-<<<<<<< HEAD
 	VARLISTDIR=${CTRLDIR}/$model/cmip6-experiment-$mip-$exptype
-=======
-	VARLISTDIR=$ECE3DIR/revisions/${reference_revision}/runtime/classic/ctrl/cmip6-output-control-files/$mip/$model/cmip6-experiment-$mip-$exptype
->>>>>>> 202b1df61ede01346754cebdc6f66cef5b190c6b
 	if [[ $investigate == false ]] ; then
 		VARLIST=$VARLISTDIR/cmip6-data-request-varlist-$mip-$exptype-$model.json
 	else 
