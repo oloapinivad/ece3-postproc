@@ -7,7 +7,8 @@ export PATH=/usr/local/bin:$PATH
 explist="hhn1 hln1"
 #explist="b025 b050 b100"
 mastermind="CNR-ISAC"
-host="federico@wilma.to.isac.cnr.it"
+#host="federico@wilma.to.isac.cnr.it"
+host="wilma"
 port=10133
 
 DIR=$ECE3_POSTPROC_TOPDIR/performance
@@ -56,6 +57,12 @@ for exp in $explist ; do
 		"b025") start_year=2025; end_year=2525; exp_info="BOTTINO Stabilization year 2025"; userexp=ffabiano ; project=BOTTINO ;;
 		"b050") start_year=2050; end_year=2550; exp_info="BOTTINO Stabilization year 2050"; userexp=ffabiano ; project=BOTTINO ;;
 		"b100") start_year=2100; end_year=2600; exp_info="BOTTINO Stabilization year 2100"; userexp=ffabiano ; project=BOTTINO ;;
+		"k1ct") start_year=2015; end_year=2051; exp_info="CovidMIP SSP2-4.5 Baseline"; userexp=ccpd ; project=REFORGE ;;
+		"k2bl") start_year=2020; end_year=2025; exp_info="CovidMIP SSP2-4.5 Covid Two Year Blip"; userexp=ccpd ; project=REFORGE ;;
+		"k2ff") start_year=2020; end_year=2051; exp_info="CovidMIP SSP2-4.5 Fossil Fuel"; userexp=ccpd ; project=REFORGE ;;
+		"k2mg") start_year=2020; end_year=2051; exp_info="CovidMIP SSP2-4.5 Moderate Green"; userexp=ccpd ; project=REFORGE ;;
+		"k2sg") start_year=2020; end_year=2051; exp_info="CovidMIP SSP2-4.5 Strong Green"; userexp=ccpd ; project=REFORGE ;;
+		
 	
         esac
 
@@ -169,7 +176,6 @@ for exp in $explist ; do
 
 	# if ectrans is set, transfer the data
 	if [[ $transfer == "ectrans" ]] ; then
-		host=wilma
 		ectrans -remote $host -source $HTML -verbose -overwrite
 		ectrans -remote $host -source $figure -verbose -overwrite
 		ectrans -remote $host -source $infocmor -verbose -overwrite
