@@ -17,8 +17,8 @@
     "forcing_index":                "2",
     "variant_info":                 "This experiment belongs to the set of CovidMIP experiments which use specific forcings for GHG, aerosols (MACv2-SP) and ozone, which are available at https://zenodo.org/record/3957826 and https://zenodo.org/record/4021333",
 
-    "parent_activity_id":           "DAMIP",
-    "parent_experiment_id":         "ssp245-baseline",
+    "parent_activity_id":           "ScenarioMIP",
+    "parent_experiment_id":         "ssp245",
     "parent_source_id":             "EC-Earth3",
     "parent_variant_label":         "r2i1p1f2",
     "parent_time_units":            "days since 1850-01-01",

@@ -91,7 +91,7 @@ done
 nval=$(cat  ${BASETMPDIR}/tmp_log_${expname}_${year}.txt | wc -l )
 rm -f ${BASETMPDIR}/tmp_log_${expname}_${year}.txt
 
-echo $nvar $nfile $expected_nfile $LOGPREPARE
+echo $nfile $expected_nfile $LOGPREPARE
 if [[ $nfile -eq ${expected_nfile} ]] ; then
 	echo "... year $year, Succesfully validated $nval / $nfile files!!!" >> $LOGPREPARE
 fi
