@@ -18,6 +18,7 @@ set -e
 # this are the compiling environment needed
 
 # ECMWF - CCA-intel - Sep 2019
+module unload PrgEnv-cray # clean all first
 module load PrgEnv-intel
 module unload cray-netcdf-hdf5parallel cray-hdf5-parallel eccodes netcdf4 grib_api
 #module load cray-hdf5-parallel/1.10.0.1
@@ -36,7 +37,7 @@ module load netcdf4/4.6.2
 
 
 # script to compile EC-Earth with a single command
-do_svn=true # checkout
+do_svn=false # checkout
 do_compile=true # compilation
 do_runconfig=true # configuration
 do_clean=false # make clean: not working
@@ -46,14 +47,14 @@ do_clean=false # make clean: not working
 # Interrogation can be done with svn log https://svn.ec-earth.org/ecearth3/tags/3.3.2.1 -v --stop-on-copy
 
 # user configuration
-revision="8037" #which revision do you want?
+revision="r8095" #"r7055" #which revision do you want?
 #version=trunk
 version=branches/development/2020/r7925-covid19-experiments
 platform_src=ecmwf-cca-intel-mpi # src architecture
 platform_run=ecmwf-cca-intel # runtime architecture
 do_lpjg=false # do want lpjg?
 nemo_config=ORCA1L75_LIM3 #which nemo configuration do you want?
-rxxxx="covid19-r$revision"
+rxxxx="$revision"
 
 # hard coded option
 SRCDIR=$PERM/ecearth3/revisions/$rxxxx/sources
@@ -75,6 +76,7 @@ function_replacer () {
 # SVN checkout of the required revision
 if [[ $do_svn == true ]] ; then
 	svn checkout -r $revision  https://svn.ec-earth.org/ecearth3/$version $PERM/ecearth3/revisions/$rxxxx
+        #svn checkout --revision=7055 https://svn.ec-earth.org/ecearth3/trunk r7055/
 fi
 
 # go to target directory
@@ -101,6 +103,12 @@ if [[ $do_compile == true ]] ; then
 
 	# ecconf
 	$ecconfexe -p ${platform_src} $SRCDIR/config-build.xml
+ 
+        # Optional. build table 126
+        # https://dev.ec-earth.org/projects/ecearth3/wiki/Using_the_EC-Earth_3_dedicated_grib_table     
+        cd ${SRCDIR}/util/grib_table_126
+        ./define_table_126.sh
+        cd -
 
 	# oasis
 	cd oasis3-mct/util/make_dir
