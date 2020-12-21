@@ -7,7 +7,8 @@
 
 # Location of cmorization tool
 #SRCDIR=${PERM}/ecearth3/cmorization
-SRCDIR=/perm/ms/it/ccpd/ecearth3/cmorization
+#SRCDIR=/perm/ms/it/ccpd/ecearth3/cmorization
+SRCDIR=/perm/ms/it/cc1f/ecearth3/cmorization/ # DynVar
 
 #source code of ece2cmor3
 ECE2CMOR3DIR=${SRCDIR}/ece2cmor3/ece2cmor3
@@ -25,7 +26,8 @@ EASYDIR=${ECE3_POSTPROC_TOPDIR}/easy2cmor3
 
 #anaconda location
 #CONDADIR=${PERM}/anaconda2/bin
-CONDADIR=/scratch/ms/it/ccpd/PRIMAVERA/anaconda2/bin
+#CONDADIR=/scratch/ms/it/ccpd/PRIMAVERA/anaconda2/bin
+CONDADIR=/perm/ms/it/cc1f/miniconda2/bin
 
 # storage information directory
 INFODIR=${PERM}/ecearth3/infodir/cmorized
