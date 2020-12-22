@@ -1,6 +1,6 @@
 {
     "activity_id":                  "DAMIP",
-    "experiment_id":                "ssp245-covid",
+    "experiment_id":                "ssp245-cov-strgreen",
     "source_id":                    "EC-Earth3",
     "source":                       "EC-Earth3 (2019)",
     "source_type":                  "AOGCM",

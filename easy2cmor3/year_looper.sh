@@ -5,13 +5,13 @@
 
 #rough scheme for looping on years, it produces up to 15 jobs for each year so beware
 
-EXP=k1ct
-YEAR1=2015
-YEAR2=2015
-ATM=1
+EXP=hln1
+YEAR1=2010
+YEAR2=2014
+ATM=0
 OCE=0
 VEG=0
-PREPARE=0
+PREPARE=1
 QADKRZ=0
 NCTIME=0
 CORRECT=0

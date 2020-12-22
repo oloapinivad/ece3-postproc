@@ -20,8 +20,8 @@ fi
 expname=$1
 generate=${2:-false}
 investigate=${3:-false}
-#reference_revision=covid19-r8037
-reference_revision=r7870
+reference_revision=covid19-r8037
+#reference_revision=r7870
 
 case $expname in
 	b025)   mip=LongRunMIP;		exptype=stabilization-ssp585-2025;   model=EC-EARTH-AOGCM; realization=1 ; table=BOTT ;;
@@ -43,7 +43,14 @@ case $expname in
 	v370)   mip=ScenarioMIP;        exptype=ssp370;     model=EC-EARTH-Veg  ; realization=4 ; table=CMIP ;;
 	v585)   mip=ScenarioMIP;        exptype=ssp585;     model=EC-EARTH-Veg  ; realization=4 ; table=CMIP ;;
 	k1ct)   mip=CovidMIP;           exptype=ssp245-baseline;     model=EC-EARTH-AOGCM  ; realization=2 ; source_realization=4 ; table=CovidMIP ;;
-	k1bl)   mip=CovidMIP;           exptype=ssp245-covid;     model=EC-EARTH-AOGCM  ; realization=2 ; source_realization=4 ; table=CovidMIP ;;
+	k1bl)   mip=CovidMIP;           exptype=ssp245-covid;     model=EC-EARTH-AOGCM  ; realization=2 ; source_realization=2 ; table=CovidMIP ;;
+	k2bl)   mip=CovidMIP;           exptype=ssp245-covid;     model=EC-EARTH-AOGCM  ; realization=2 ; source_realization=2 ; table=CovidMIP ;;
+	k1ff)   mip=CovidMIP;           exptype=ssp245-cov-fossil;     model=EC-EARTH-AOGCM  ; realization=2 ; source_realization=2 ; table=CovidMIP ;;
+	k2ff)   mip=CovidMIP;           exptype=ssp245-cov-fossil;     model=EC-EARTH-AOGCM  ; realization=2 ; source_realization=2 ; table=CovidMIP ;;
+	k1sg)   mip=CovidMIP;           exptype=ssp245-cov-strgreen;     model=EC-EARTH-AOGCM  ; realization=2 ; source_realization=2 ; table=CovidMIP ;;
+	k2sg)   mip=CovidMIP;           exptype=ssp245-cov-strgreen;     model=EC-EARTH-AOGCM  ; realization=2 ; source_realization=2 ; table=CovidMIP ;;
+	k1mg)   mip=CovidMIP;           exptype=ssp245-cov-modgreen;     model=EC-EARTH-AOGCM  ; realization=2 ; source_realization=2 ; table=CovidMIP ;;
+	k2mg)   mip=CovidMIP;           exptype=ssp245-cov-modgreen;     model=EC-EARTH-AOGCM  ; realization=2 ; source_realization=2 ; table=CovidMIP ;;
         llp0)   mip=REFORGE;            exptype=rfrg-ctrl-param; model=EC-EARTH-AOGCM; realization=1 ; table=RFRG ;;
 	lln0)   mip=REFORGE;            exptype=rfrg-ctrl-noparam; model=EC-EARTH-AOGCM; realization=1 ; table=RFRG ;;
 	lln1)   mip=REFORGE;            exptype=rfrg-ctrl-noparam; model=EC-EARTH-AOGCM; realization=2 ; table=RFRG ;;
@@ -117,9 +124,15 @@ elif [[ $model == "EC-EARTH-Veg" ]] ; then
 elif [[ $model == "EC-EARTH-SPPT" ]] ; then
     expected_nfile_nofx=177
     expected_nfile=184
-elif [[ $mip == "REFORGE" ]] ; then 
+
+fi
+
+if [[ $mip == "REFORGE" ]] ; then 
     expected_nfile_nofx=104
-    expected_nfile=104
+    expected_nfile=106
+elif [[ $mip == "CovidMIP" ]] ; then
+    expected_nfile_nofx=168
+    expected_nfile=174
 fi
 
 echo "Config file for $expname"
@@ -164,11 +177,10 @@ if [[ $generate == true ]] ; then
 
 		filein=${FILEINDIR}/metadata-cmip6-$mip-$exptype-$model-$realm-template.json
 		fileout=${METADATADIR}/metadata-cmip6-$mip-$exptype-$model-$realm-$expname.json
-		echo $filein
 
 		if [[ -f $filein ]] ;  then 
-			echo "mv  $filein $fileout"
-			mv  $filein $fileout
+			echo "cp  $filein $fileout"
+			cp  $filein $fileout
 			sed -i "/realization_index/s/1/${realization}/"  $fileout
 			sed -i "/parent_variant_label/s/r1i1p1f2/${parent_realization}/"  $fileout
 			sed -i "/parent_variant_label/s/r1i1p1f1/${parent_realization}/"  $fileout

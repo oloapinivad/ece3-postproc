@@ -1,11 +1,11 @@
 {
     "activity_id":                  "DAMIP",
-    "experiment_id":                "ssp245-covid",
+    "experiment_id":                "ssp245-cov-fossil",
     "source_id":                    "EC-Earth3",
     "source":                       "EC-Earth3 (2019)",
     "source_type":                  "AOGCM",
-    "grid":                         "T255L91",
-    "grid_label":                   "gr",
+    "grid":                         "ORCA1L75",
+    "grid_label":                   "gn",
     "nominal_resolution":           "100 km",
 
     "sub_experiment":               "none",

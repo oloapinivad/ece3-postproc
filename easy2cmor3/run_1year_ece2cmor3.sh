@@ -28,7 +28,7 @@ year=1850
 
 #---DEFAULT INPUT ARGUMENT----#
 RESO=T255 # resolition, to set accorindgly machine dependent requirements
-USERexp=${USERexp:-ffabiano}  #extra: allows analysis of experiment owned by different user
+USERexp=${USERexp:-$USER}  #extra: allows analysis of experiment owned by different user
 ATM=1
 OCE=0
 VEG=0

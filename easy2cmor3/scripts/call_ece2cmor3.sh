@@ -41,6 +41,7 @@ echo "Temporary directory is: $TMPDIR"
 
 # bathymetry path for NEMO: use relative path of the experiment
 export ECE2CMOR3_NEMO_BATHY_METER=$NEMORESULTS/../../../run/bathy_meter.nc
+export ECE2CMOR3_NEMO_SUBBASINS=$NEMORESULTS/../../../run/subbasins.nc
 
 #---------user configuration ---------#
 
