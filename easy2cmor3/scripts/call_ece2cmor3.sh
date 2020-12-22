@@ -110,7 +110,7 @@ function runece2cmor_ifs {
     CONFIGFILE=$FLDDIR/metadata-${expname}-year${year}.json
     cp $METADATAFILEATM $CONFIGFILE
 
-    # Launching ece2cmor3
+    # Launching ece2cmor3. NOTE: check skip_alevel for DynVar
     echo "================================================================"
     echo "  Processing and CMORizing filtered IFS data with ece2cmor3"
     echo "================================================================" 
