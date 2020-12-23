@@ -110,9 +110,9 @@ if [[ $model == "EC-EARTH-AOGCM" ]] ; then
 	elif [[ $exptype == "abrupt-4xCO2-dynvar" ]] ; then # FIXME
 	    expected_nfile_nofx=170
             expected_nfile=175
-	elif [[ $exptype == "1pctCO2-dynvar" ]] ; then # FIXME
-	    expected_nfile_nofx=170
-            expected_nfile=175
+	elif [[ $exptype == "1pctCO2-dynvar" ]] ; then # FIXME - not counting those from tem-diag
+	    expected_nfile_nofx=229
+            expected_nfile=234
 	elif [[ $exptype == "amip-dynvar" ]] ; then # FIXME
 	    expected_nfile_nofx=170
             expected_nfile=175
