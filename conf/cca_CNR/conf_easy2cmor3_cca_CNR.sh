@@ -75,10 +75,10 @@ if [[ $RESO == T511 ]] ; then
         TLIMIT="03:59:00"
         TCHECK="07:59:00"
 elif [[ $RESO == T255 ]] ; then
-        MEMORY=20GB
+        MEMORY=50GB
         MEMORY2=${MEMORY}
-        TLIMIT="02:59:00"
-        TCHECK="02:59:00"
+        TLIMIT="03:59:00"
+        TCHECK="07:59:00"
 elif [[ $RESO == T799 ]] ; then
         MEMORY=80GB
         MEMORY2=${MEMORY}
