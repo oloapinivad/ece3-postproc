@@ -20,8 +20,9 @@ fi
 expname=$1
 generate=${2:-false}
 investigate=${3:-false}
-reference_revision=covid19-r8037
+#reference_revision=covid19-r8037
 #reference_revision=r7870
+reference_revision=r8095
 
 case $expname in
 	b025)   mip=LongRunMIP;		exptype=stabilization-ssp585-2025;   model=EC-EARTH-AOGCM; realization=1 ; table=BOTT ;;
@@ -68,11 +69,14 @@ case $expname in
         hln1)   mip=REFORGE;            exptype=rfrg-orog255-noparam; model=EC-EARTH-TL799; realization=2 ; table=RFRG ;;
 	sspn)   mip=CMIP;   		exptype=piControl-spinup ; model=EC-EARTH-SPPT; realization=1 ; table=SPPT ;;
 	sctl)   mip=CMIP;               exptype=piControl ; model=EC-EARTH-SPPT; realization=1 ; table=SPPT ;;
-	s4co)   mip=CMIP;               exptype=abrupt-4xCO2 ; model=EC-EARTH-SPPT; realization=1 ; table=SPPT ;
+	s4co)   mip=CMIP;               exptype=abrupt-4xCO2 ; model=EC-EARTH-SPPT; realization=1 ; table=SPPT ;;
+	t4cv)   mip=CMIP;               exptype=1pctCO2-dynvar ; model=EC-EARTH-AOGCM; realization=5 ; table=CMIP ; cfsuff=-pextra ;;
+	XYZW)   mip=CMIP;               exptype=abrupt-4xCO2-dynvar ; model=EC-EARTH-AOGCM; realization=5 ; table=CMIP ; cfsuff=-pextra ;; # TODO
+	XYZW)   mip=CMIP;               exptype=amip-dynvar ; model=EC-EARTH-AOGCM; realization=999 ; table=CMIP ; cfsuff=-pextra ; # TODO
 esac
 
 # ctrl file dir
-CTRLDIR=$PERM/ecearth3/revisions/${reference_revision}/runtime/classic/ctrl/cmip6-output-control-files/${table}
+CTRLDIR=$PERM/ecearth3/revisions/${reference_revision}/runtime/classic/ctrl/cmip6-output-control-files${cfsuff}/${table}
 
 # autotuning of parent label
 if [[ $mip == ScenarioMIP ]] ; then
@@ -101,6 +105,15 @@ if [[ $model == "EC-EARTH-AOGCM" ]] ; then
 	    expected_nfile_nofx=134
             expected_nfile=134
 	elif [[ $exptype == "abrupt-4xCO2" ]] ; then
+	    expected_nfile_nofx=170
+            expected_nfile=175
+	elif [[ $exptype == "abrupt-4xCO2-dynvar" ]] ; then # FIXME
+	    expected_nfile_nofx=170
+            expected_nfile=175
+	elif [[ $exptype == "1pctCO2-dynvar" ]] ; then # FIXME
+	    expected_nfile_nofx=170
+            expected_nfile=175
+	elif [[ $exptype == "amip-dynvar" ]] ; then # FIXME
 	    expected_nfile_nofx=170
             expected_nfile=175
 	fi
@@ -188,7 +201,8 @@ if [[ $generate == true ]] ; then
 	done
 fi
 
-ECE3DIR=$HOME/ec-earth
+#ECE3DIR=$HOME/ec-earth
+ECE3DIR=$HOME/ecearth3 # cca
 
 # exporting values for ece2cmor runs
 # set varlist
@@ -222,3 +236,6 @@ METADATAFILEATM=${METADATADIR}/metadata-cmip6-$mip-$exptype-$model-ifs-${expname
 METADATAFILEOCE=${METADATADIR}/metadata-cmip6-$mip-$exptype-$model-nemo-${expname}.json
 METADATAFILEVEG=${METADATADIR}/metadata-cmip6-$mip-$exptype-$model-lpjg-${expname}.json
 
+if [ $cfsuff == '-pextra' ]; then
+   echo '***WARNING***: please check the metadata contents, as they may need revision (e.g., remove the -dynvar suffix)'
+fi
