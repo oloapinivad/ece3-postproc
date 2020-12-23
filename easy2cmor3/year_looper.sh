@@ -5,9 +5,9 @@
 
 #rough scheme for looping on years, it produces up to 15 jobs for each year so beware
 
-EXP=t4cv
-YEAR1=1850
-YEAR2=1850
+EXP=hln1
+YEAR1=2010
+YEAR2=2014
 ATM=0
 OCE=0
 VEG=0
